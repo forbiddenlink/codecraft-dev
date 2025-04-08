@@ -1,10 +1,9 @@
 // File: /src/components/game/world/GameWorldClient.tsx
 'use client';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
+import { OrbitControls, Html, RoundedBox, Plane, Capsule, Sphere } from '@react-three/drei';
 import { useAppSelector } from '@/hooks/reduxHooks';
 import { parseHtmlToGameObjects } from '@/utils/parseHtmlToGameObjects';
-import { Box } from '@react-three/drei';
 import React, { useState, useEffect } from 'react';
 import { validateCode } from '@/utils/validateCode';
 import { challenges } from '@/data/challenges';
@@ -56,6 +55,41 @@ export default function GameWorldClient() {
   const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
   const handleNext = () => setChallengeIndex((i) => (i < challenges.length - 1 ? i + 1 : i));
 
+  function renderShape(tag: string, index: number, position: [number, number, number], scale: [number, number, number], rotation: [number, number, number], color: string, opacity: number) {
+    switch (tag) {
+      case 'header':
+        return (
+          <RoundedBox key={index} position={position} scale={scale} rotation={rotation} radius={0.2} smoothness={4}>
+            <meshStandardMaterial color={color} transparent opacity={opacity} />
+          </RoundedBox>
+        );
+      case 'section':
+        return (
+          <Capsule key={index} position={position} scale={scale} rotation={rotation}>
+            <meshStandardMaterial color={color} transparent opacity={opacity} />
+          </Capsule>
+        );
+      case 'footer':
+        return (
+          <Plane key={index} position={position} scale={scale} rotation={rotation}>
+            <meshStandardMaterial color={color} transparent opacity={opacity} />
+          </Plane>
+        );
+      case 'article':
+        return (
+          <Sphere key={index} position={position} scale={scale} rotation={rotation}>
+            <meshStandardMaterial color={color} transparent opacity={opacity} />
+          </Sphere>
+        );
+      default:
+        return (
+          <RoundedBox key={index} position={position} scale={scale} rotation={rotation} radius={0.1}>
+            <meshStandardMaterial color={color} transparent opacity={opacity} />
+          </RoundedBox>
+        );
+    }
+  }
+
   return (
     <Canvas camera={{ position: [0, 2, 5], fov: 60 }}>
       <ambientLight intensity={0.5} />
@@ -72,16 +106,7 @@ export default function GameWorldClient() {
         const opacity = el.opacity ?? 1;
         const color = el.color || 'royalblue';
 
-        return (
-          <Box
-            key={index}
-            position={position}
-            scale={scale}
-            rotation={rotation}
-          >
-            <meshStandardMaterial color={color} transparent opacity={opacity} />
-          </Box>
-        );
+        return renderShape(el.tag, index, position, scale, rotation, color, opacity);
       })}
 
       <OrbitControls />
