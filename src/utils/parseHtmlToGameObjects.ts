@@ -1,3 +1,5 @@
+'use client';
+
 // File: /src/utils/parseHtmlToGameObjects.ts
 interface StyleObject {
   'background-color'?: string;
@@ -13,9 +15,9 @@ interface StyleObject {
 }
 
 export function parseHtmlToGameObjects(code: string) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(code, 'text/html');
-  const body = doc.body;
+  // Create a temporary div to parse HTML
+  const div = document.createElement('div');
+  div.innerHTML = code;
 
   const elements: {
     tag: string;
@@ -31,6 +33,8 @@ export function parseHtmlToGameObjects(code: string) {
 
   function parseInlineStyle(styleString: string): StyleObject {
     const style: StyleObject = {};
+    if (!styleString) return style;
+    
     styleString.split(';').forEach((rule) => {
       const [key, value] = rule.split(':').map((s) => s.trim());
       if (key && value) {
@@ -88,6 +92,7 @@ export function parseHtmlToGameObjects(code: string) {
       div: 'royalblue',
       section: 'purple',
       header: 'gold',
+      h1: '#4CAF50',  // bright green for h1
       footer: 'gray',
       article: 'orange',
     };
@@ -114,7 +119,7 @@ export function parseHtmlToGameObjects(code: string) {
     Array.from(node.children).forEach((child) => walk(child as HTMLElement));
   }
 
-  Array.from(body.children).forEach((child) => walk(child as HTMLElement));
+  Array.from(div.children).forEach((child) => walk(child as HTMLElement));
 
   return elements;
 }
