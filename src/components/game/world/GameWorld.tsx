@@ -17,14 +17,23 @@ export default function GameWorld() {
       <directionalLight position={[5, 5, 5]} intensity={1} />
 
       {elements.map((el, index) => {
-        const posX = index * 2;
-        const scale: [number, number, number] = el.width && el.height 
-          ? [el.width / 50, el.height / 50, 1] 
+        const defaultScale: [number, number, number] = el.width && el.height
+          ? [el.width / 50, el.height / 50, 1]
           : [1, 1, 1];
 
+        const position = el.position || [index * 2, 0.5, 0];
+        const scale = el.scale || defaultScale;
+        const rotation = el.rotation || [0, 0, 0];
+        const opacity = el.opacity ?? 1;
+
         return (
-          <Box key={index} position={[posX, 0.5, 0]} scale={scale}>
-            <meshStandardMaterial color={el.color} />
+          <Box
+            key={index}
+            position={position}
+            scale={scale}
+            rotation={rotation}
+          >
+            <meshStandardMaterial color={el.color} transparent opacity={opacity} />
           </Box>
         );
       })}
