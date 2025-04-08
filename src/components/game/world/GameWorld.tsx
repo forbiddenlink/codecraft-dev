@@ -18,8 +18,12 @@ export default function GameWorld() {
 
       {elements.map((el, index) => {
         const posX = index * 2;
+        const scale: [number, number, number] = el.width && el.height 
+          ? [el.width / 50, el.height / 50, 1] 
+          : [1, 1, 1];
+
         return (
-          <Box key={index} position={[posX, 0.5, 0]}>
+          <Box key={index} position={[posX, 0.5, 0]} scale={scale}>
             <meshStandardMaterial color={el.color} />
           </Box>
         );
