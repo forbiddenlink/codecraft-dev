@@ -131,10 +131,21 @@ export default function GameWorldClient() {
   const handleNext = () =>
     setChallengeIndex((i) => (i < challenges.length - 1 ? i + 1 : i));
 
+  const handleObjectClick = (tag: string) => {
+    const tagMessages: Record<string, string> = {
+      header: "This looks like the command center!",
+      section: "Nice section! Maybe this is living quarters.",
+      footer: "Probably the space docking station!",
+      article: "An article orb? Looks knowledgey!",
+      default: "Huh? What even is this thing? 🤔",
+    };
+    setPixelMessage(tagMessages[tag] || tagMessages.default);
+  };
+
   function renderObject(el: GameObject, key: number): JSX.Element {
     const {
       tag,
-      position = [0, 0, 0],
+      position = [0, 0.6, 0],
       scale = [1, 1, 1],
       rotation = [0, 0, 0],
       color,
@@ -209,7 +220,7 @@ export default function GameWorldClient() {
     })();
 
     return (
-      <group key={key}>
+      <group key={key} onClick={() => handleObjectClick(tag)}>
         {shape}
         {children.map((child, i) => renderObject(child, i + key * 10))}
       </group>
@@ -229,7 +240,21 @@ export default function GameWorldClient() {
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <group position={[0, -1, 0]}>
+          <Plane
+            args={[100, 100]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, 0, 0]}
+            receiveShadow
+          >
+            <meshStandardMaterial
+              color="#1a1a1a"
+              roughness={0.8}
+              metalness={0.3}
+            />
+          </Plane>
+
           {elements.map((el, index) => renderObject(el, index))}
+
           <Pixel />
           <PixelDialog message={pixelMessage} mood={mood} />
           <OrbitControls />
