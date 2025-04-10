@@ -9,6 +9,7 @@ import { validateCode } from '@/utils/validateCode';
 import { challenges } from '@/data/challenges';
 import Pixel from '@/components/game/pixel/Pixel';
 import PixelDialog from '@/components/game/pixel/PixelDialog';
+import useChallengeProgress from '@/hooks/useChallengeProgress';
 
 function HUDOverlay({ currentChallenge, challengePassed, onPrev, onNext, index }: {
   currentChallenge: typeof challenges[0],
@@ -34,7 +35,7 @@ function HUDOverlay({ currentChallenge, challengePassed, onPrev, onNext, index }
       fontSize: '12px',
       zIndex: 10
     }}>
-      <p><strong>Challenge {index + 1}:</strong><br />{currentChallenge.title}</p>
+      <p><strong>{challengePassed ? '✅ ' : ''}Challenge {index + 1}:</strong><br />{currentChallenge.title}</p>
       <p>{currentChallenge.description}</p>
       <p>Status: {challengePassed ? '✅ Complete' : '🕐 In Progress'}</p>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
@@ -53,11 +54,14 @@ export default function GameWorldClient() {
   const [challengePassed, setChallengePassed] = useState(false);
   const [pixelMessage, setPixelMessage] = useState("Welcome to CodeCraft! Let's start building.");
 
+  const { markComplete } = useChallengeProgress();
+
   useEffect(() => {
     const result = validateCode(code, currentChallenge);
     setChallengePassed(result);
+    if (result) markComplete(currentChallenge.id);
     setPixelMessage(result ? '🎉 Great job! You passed the challenge.' : 'Keep going, you got this!');
-  }, [code, currentChallenge]);
+  }, [code, currentChallenge, markComplete]);
 
   const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
   const handleNext = () => setChallengeIndex((i) => (i < challenges.length - 1 ? i + 1 : i));
@@ -107,16 +111,10 @@ export default function GameWorldClient() {
         index={challengeIndex}
       />
       <Canvas 
-        camera={{ 
-          position: [0, 3, 8],
-          fov: 50,
-          near: 0.1,
-          far: 1000
-        }}
+        camera={{ position: [0, 3, 8], fov: 50, near: 0.1, far: 1000 }}
       >
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
-
         <group position={[0, -1, 0]}>
           {elements.map((el, index) => {
             const defaultScale: [number, number, number] = el.width && el.height
