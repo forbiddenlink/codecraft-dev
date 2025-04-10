@@ -22,6 +22,8 @@ import useChallengeProgress from "@/hooks/useChallengeProgress";
 import usePixelMood from "@/hooks/usePixelMood";
 import useChallengeCode from "@/hooks/useChallengeCode";
 import usePixelMemory from "@/hooks/usePixelMemory";
+import { villagers } from "@/data/villagers";
+import Villager from "@/components/game/villager/Villager";
 
 function HUDOverlay({
   currentChallenge,
@@ -250,6 +252,11 @@ export default function GameWorldClient() {
           </Plane>
 
           {elements.map((el, index) => renderObject(el, index))}
+
+          {/* 🧑‍🚀 Space Villagers */}
+          {villagers.map((v) => (
+            <Villager key={v.id} villager={v} position={v.position} />
+          ))}
 
           <Pixel />
           <PixelDialog message={pixelMessage} mood={mood} />
