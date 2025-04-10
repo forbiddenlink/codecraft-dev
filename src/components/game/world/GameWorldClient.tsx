@@ -1,16 +1,9 @@
 "use client";
 import { Canvas } from "@react-three/fiber";
-import {
-  OrbitControls,
-  RoundedBox,
-  Plane,
-  Capsule,
-  Sphere,
-} from "@react-three/drei";
+import { OrbitControls, Plane } from "@react-three/drei";
 import { useAppSelector } from "@/hooks/reduxHooks";
 import {
   parseHtmlToGameObjects,
-  GameObject,
 } from "@/utils/parseHtmlToGameObjects";
 import React, { useState, useEffect } from "react";
 import { validateCode } from "@/utils/validateCode";
@@ -23,6 +16,7 @@ import useChallengeCode from "@/hooks/useChallengeCode";
 import usePixelMemory from "@/hooks/usePixelMemory";
 import { villagers } from "@/data/villagers";
 import Villager from "@/components/game/villager/Villager";
+import GameObjectMesh from "@/components/game/world/GameObjectMesh"; // 👈 NEW
 
 function HUDOverlay({
   currentChallenge,
@@ -117,7 +111,6 @@ export default function GameWorldClient() {
 
   const { markComplete, completed: completedArray } = useChallengeProgress();
   const completed = new Set(completedArray);
-
   const mood = usePixelMood(challengePassed);
   const { remember } = usePixelMemory();
 
@@ -140,91 +133,6 @@ export default function GameWorldClient() {
     const memoryMessage = remember(tag);
     setPixelMessage(memoryMessage);
   };
-
-  function renderObject(el: GameObject, key: number): JSX.Element {
-    const {
-      tag,
-      position = [0, 0.6, 0],
-      scale = [1, 1, 1],
-      rotation = [0, 0, 0],
-      color,
-      opacity = 1,
-      children = [],
-    } = el;
-
-    const shape = (() => {
-      switch (tag) {
-        case "header":
-          return (
-            <RoundedBox
-              position={position}
-              scale={scale}
-              rotation={rotation}
-              radius={0.2}
-              smoothness={4}
-            >
-              <meshStandardMaterial
-                color={color}
-                transparent
-                opacity={opacity}
-              />
-            </RoundedBox>
-          );
-        case "section":
-          return (
-            <Capsule position={position} scale={scale} rotation={rotation}>
-              <meshStandardMaterial
-                color={color}
-                transparent
-                opacity={opacity}
-              />
-            </Capsule>
-          );
-        case "footer":
-          return (
-            <Plane position={position} scale={scale} rotation={rotation}>
-              <meshStandardMaterial
-                color={color}
-                transparent
-                opacity={opacity}
-              />
-            </Plane>
-          );
-        case "article":
-          return (
-            <Sphere position={position} scale={scale} rotation={rotation}>
-              <meshStandardMaterial
-                color={color}
-                transparent
-                opacity={opacity}
-              />
-            </Sphere>
-          );
-        default:
-          return (
-            <RoundedBox
-              position={position}
-              scale={scale}
-              rotation={rotation}
-              radius={0.1}
-            >
-              <meshStandardMaterial
-                color={color}
-                transparent
-                opacity={opacity}
-              />
-            </RoundedBox>
-          );
-      }
-    })();
-
-    return (
-      <group key={key} onClick={() => handleObjectClick(tag)}>
-        {shape}
-        {children.map((child, i) => renderObject(child, i + key * 10))}
-      </group>
-    );
-  }
 
   return (
     <>
@@ -252,9 +160,17 @@ export default function GameWorldClient() {
             />
           </Plane>
 
-          {elements.map((el, index) => renderObject(el, index))}
+          {/* Render floating, animated game objects */}
+          {elements.map((el, index) => (
+            <GameObjectMesh
+              key={index}
+              el={el}
+              objectKey={index}
+              onClick={handleObjectClick}
+            />
+          ))}
 
-          {/* 🧑‍🚀 Space Villagers (conditionally rendered) */}
+          {/* 🧑‍🚀 Space Villagers */}
           {villagers
             .filter((v) => completed.has(v.unlockAfterChallengeId))
             .map((v) => (
