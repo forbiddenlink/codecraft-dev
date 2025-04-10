@@ -10,6 +10,7 @@ import { challenges } from '@/data/challenges';
 import Pixel from '@/components/game/pixel/Pixel';
 import PixelDialog from '@/components/game/pixel/PixelDialog';
 import useChallengeProgress from '@/hooks/useChallengeProgress';
+import usePixelMood from '@/hooks/usePixelMood';
 
 function HUDOverlay({ currentChallenge, challengePassed, onPrev, onNext, index }: {
   currentChallenge: typeof challenges[0],
@@ -55,12 +56,13 @@ export default function GameWorldClient() {
   const [pixelMessage, setPixelMessage] = useState("Welcome to CodeCraft! Let's start building.");
 
   const { markComplete } = useChallengeProgress();
+  const mood = usePixelMood(challengePassed);
 
   useEffect(() => {
     const result = validateCode(code, currentChallenge);
     setChallengePassed(result);
     if (result) markComplete(currentChallenge.id);
-    setPixelMessage(result ? '🎉 Great job! You passed the challenge.' : 'Keep going, you got this!');
+    setPixelMessage(result ? '🎉 Great job! You passed the challenge.' : 'Hmm, not quite right. Try again!');
   }, [code, currentChallenge, markComplete]);
 
   const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
@@ -131,7 +133,7 @@ export default function GameWorldClient() {
           })}
 
           <Pixel />
-          <PixelDialog message={pixelMessage} />
+          <PixelDialog message={pixelMessage} mood={mood} />
           <OrbitControls />
         </group>
       </Canvas>
