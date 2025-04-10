@@ -21,6 +21,7 @@ import PixelDialog from "@/components/game/pixel/PixelDialog";
 import useChallengeProgress from "@/hooks/useChallengeProgress";
 import usePixelMood from "@/hooks/usePixelMood";
 import useChallengeCode from "@/hooks/useChallengeCode";
+import usePixelMemory from "@/hooks/usePixelMemory";
 
 function HUDOverlay({
   currentChallenge,
@@ -115,6 +116,7 @@ export default function GameWorldClient() {
 
   const { markComplete } = useChallengeProgress();
   const mood = usePixelMood(challengePassed);
+  const { remember } = usePixelMemory();
 
   useEffect(() => {
     const result = validateCode(code, currentChallenge);
@@ -132,14 +134,8 @@ export default function GameWorldClient() {
     setChallengeIndex((i) => (i < challenges.length - 1 ? i + 1 : i));
 
   const handleObjectClick = (tag: string) => {
-    const tagMessages: Record<string, string> = {
-      header: "This looks like the command center!",
-      section: "Nice section! Maybe this is living quarters.",
-      footer: "Probably the space docking station!",
-      article: "An article orb? Looks knowledgey!",
-      default: "Huh? What even is this thing? 🤔",
-    };
-    setPixelMessage(tagMessages[tag] || tagMessages.default);
+    const memoryMessage = remember(tag);
+    setPixelMessage(memoryMessage);
   };
 
   function renderObject(el: GameObject, key: number): JSX.Element {
