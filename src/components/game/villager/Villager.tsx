@@ -2,6 +2,7 @@
 import { Html, Capsule, Sphere, RoundedBox } from "@react-three/drei";
 import { useState } from "react";
 import { Villager } from "@/data/villagers";
+import usePixelFloat from "@/hooks/usePixelFloat"; // ref-based animation
 
 interface Props {
   villager: Villager;
@@ -10,6 +11,8 @@ interface Props {
 
 export default function VillagerMesh({ villager, position }: Props) {
   const [dialogIndex, setDialogIndex] = useState(0);
+  const ref = usePixelFloat(); // 👈 This returns a ref, not a spring
+
   const handleClick = () =>
     setDialogIndex((prev) => (prev + 1) % villager.dialog.length);
 
@@ -28,7 +31,7 @@ export default function VillagerMesh({ villager, position }: Props) {
 
   return (
     <group position={position} onClick={handleClick}>
-      <Model args={[0.4, 1]} position={[0, 0.5, 0]}>
+      <Model ref={ref} args={[0.4, 1]} position={[0, 0.5, 0]}>
         <meshStandardMaterial color={villager.color} />
       </Model>
       <Html position={[0, 1.4, 0]} center>

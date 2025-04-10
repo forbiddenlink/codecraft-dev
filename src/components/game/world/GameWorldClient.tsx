@@ -1,4 +1,3 @@
-// File: /src/components/game/world/GameWorldClient.tsx
 "use client";
 import { Canvas } from "@react-three/fiber";
 import {
@@ -116,7 +115,7 @@ export default function GameWorldClient() {
     "Welcome to CodeCraft! Let's start building."
   );
 
-  const { markComplete } = useChallengeProgress();
+  const { markComplete, completed } = useChallengeProgress(); // ⬅️ added `completed`
   const mood = usePixelMood(challengePassed);
   const { remember } = usePixelMemory();
 
@@ -254,9 +253,11 @@ export default function GameWorldClient() {
           {elements.map((el, index) => renderObject(el, index))}
 
           {/* 🧑‍🚀 Space Villagers */}
-          {villagers.map((v) => (
-            <Villager key={v.id} villager={v} position={v.position} />
-          ))}
+          {villagers
+            .filter((v) => completed.has(v.unlockAfterChallengeId))
+            .map((v) => (
+              <Villager key={v.id} villager={v} position={v.position} />
+            ))}
 
           <Pixel />
           <PixelDialog message={pixelMessage} mood={mood} />
