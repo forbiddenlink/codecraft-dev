@@ -2,9 +2,7 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Plane } from "@react-three/drei";
 import { useAppSelector } from "@/hooks/reduxHooks";
-import {
-  parseHtmlToGameObjects,
-} from "@/utils/parseHtmlToGameObjects";
+import { parseHtmlToGameObjects } from "@/utils/parseHtmlToGameObjects";
 import React, { useState, useEffect } from "react";
 import { validateCode } from "@/utils/validateCode";
 import { challenges } from "@/data/challenges";
@@ -16,7 +14,7 @@ import useChallengeCode from "@/hooks/useChallengeCode";
 import usePixelMemory from "@/hooks/usePixelMemory";
 import { villagers } from "@/data/villagers";
 import Villager from "@/components/game/villager/Villager";
-import GameObjectMesh from "@/components/game/world/GameObjectMesh"; // 👈 NEW
+import GameObjectMesh from "@/components/game/world/GameObjectMesh";
 
 function HUDOverlay({
   currentChallenge,
@@ -147,6 +145,7 @@ export default function GameWorldClient() {
         <ambientLight intensity={0.5} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <group position={[0, -1, 0]}>
+          {/* Ground plane */}
           <Plane
             args={[100, 100]}
             rotation={[-Math.PI / 2, 0, 0]}
@@ -160,17 +159,18 @@ export default function GameWorldClient() {
             />
           </Plane>
 
-          {/* Render floating, animated game objects */}
+          {/* Render animated challenge objects */}
           {elements.map((el, index) => (
             <GameObjectMesh
               key={index}
               el={el}
               objectKey={index}
               onClick={handleObjectClick}
+              completed={completed}
             />
           ))}
 
-          {/* 🧑‍🚀 Space Villagers */}
+          {/* Space villagers */}
           {villagers
             .filter((v) => completed.has(v.unlockAfterChallengeId))
             .map((v) => (
