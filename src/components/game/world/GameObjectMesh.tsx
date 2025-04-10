@@ -3,6 +3,7 @@ import { RoundedBox, Capsule, Sphere, Plane } from "@react-three/drei";
 import { GameObject } from "@/utils/parseHtmlToGameObjects";
 import { animated, useSpring } from "@react-spring/three";
 import { useState } from "react";
+import { useAppSelector } from "@/hooks/reduxHooks";
 
 export default function GameObjectMesh({
   el,
@@ -23,9 +24,13 @@ export default function GameObjectMesh({
     children = [],
   } = el;
 
+  const isEditorVisible = useAppSelector(state => state.editor.isVisible);
   const [hovered, setHovered] = useState(false);
-  const { scale: animatedScale } = useSpring({
+  
+  // Animate scale and opacity based on hover and editor state
+  const { scale: animatedScale, opacity: animatedOpacity } = useSpring({
     scale: hovered ? 1.15 : 1,
+    opacity: isEditorVisible ? 1 : 0.8,
     config: { tension: 170, friction: 12 },
   });
 
@@ -35,7 +40,13 @@ export default function GameObjectMesh({
       scale,
       rotation,
       children: (
-        <meshStandardMaterial color={color} transparent opacity={opacity} />
+        <meshStandardMaterial 
+          color={color} 
+          transparent 
+          opacity={opacity}
+          emissive={hovered ? color : undefined}
+          emissiveIntensity={hovered ? 0.5 : 0}
+        />
       ),
     };
 
@@ -61,7 +72,9 @@ export default function GameObjectMesh({
       onPointerOut={() => setHovered(false)}
       onClick={() => onClick(tag)}
     >
-      {shape}
+      <animated.mesh opacity={animatedOpacity}>
+        {shape}
+      </animated.mesh>
       {children.map((child, i) => (
         <GameObjectMesh
           el={child}

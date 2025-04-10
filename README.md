@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeCraft: Galactic Developer
 
-## Getting Started
+An educational coding game that combines real programming with engaging space colony gameplay. Build, code, and explore in a unique learning environment where your code shapes an entire galactic civilization.
 
-First, run the development server:
+## 🚀 Game Vision
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+CodeCraft: Galactic Developer is an immersive educational experience where players:
+- Write real code that has immediate visual impact on their space colony
+- Explore a mysterious narrative about ancient "CodeCraft" technology
+- Interact with NPC developers and potentially other players
+- Progress through structured learning from basic HTML to advanced full-stack development
+- Enjoy coding in a relaxed, non-threatening environment
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🎯 Target Audience
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Beginner programmers (13+ years old) looking for an engaging way to learn coding
+- Intermediate developers wanting to reinforce their skills in a fun environment
+- Casual gamers interested in learning practical skills
+- Educators seeking interactive teaching tools for web development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Core Features
 
-## Learn More
+### Code-Driven Colony Building
+- Real-time code editing using Monaco Editor
+- Immediate visual feedback in the 3D colony
+- Structured challenges teaching specific coding concepts
+- Error handling visualized through colony systems
 
-To learn more about Next.js, take a look at the following resources:
+### Story-Driven Progression
+- Mysterious narrative about ancient technology
+- Progressive difficulty curve
+- Interactive tutorials and challenges
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 Technical Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Next.js 15.2
+- React 19
+- Three.js for 3D visualization
+- Monaco Editor for code editing
+- Redux for state management
+- TailwindCSS for styling
 
-## Deploy on Vercel
+## 🚀 Getting Started
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🤝 Contributing
+
+We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, please feel free to make a pull request.
+
+## 📝 License
+
+[License details to be added]

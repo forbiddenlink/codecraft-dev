@@ -4,11 +4,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface EditorState {
   currentCode: string;
   language: 'html' | 'css' | 'javascript';
+  isVisible: boolean;
 }
 
 const initialState: EditorState = {
   currentCode: '<div>Hello CodeCraft</div>',
   language: 'html',
+  isVisible: false,
 };
 
 export const editorSlice = createSlice({
@@ -21,8 +23,11 @@ export const editorSlice = createSlice({
     setLanguage: (state, action: PayloadAction<'html' | 'css' | 'javascript'>) => {
       state.language = action.payload;
     },
+    setEditorVisible: (state, action: PayloadAction<boolean>) => {
+      state.isVisible = action.payload;
+    },
   },
 });
 
-export const { setCode, setLanguage } = editorSlice.actions;
+export const { setCode, setLanguage, setEditorVisible } = editorSlice.actions;
 export default editorSlice.reducer;

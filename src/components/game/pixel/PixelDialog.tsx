@@ -1,86 +1,69 @@
 // File: /src/components/game/pixel/PixelDialog.tsx
 'use client';
 import { Html } from '@react-three/drei';
-import { PixelMood } from '@/hooks/usePixelMood';
-import { useSpring, animated, SpringValue } from '@react-spring/web';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
-interface DialogProps {
+interface PixelDialogProps {
   message: string;
-  mood?: PixelMood;
 }
 
-interface AnimatedDivProps {
-  style: {
-    scale: SpringValue<number>;
-    background: string;
-    color: string;
-    border: string;
-    padding: string;
-    borderRadius: string;
-    fontFamily: string;
-    fontSize: string;
-    maxWidth: string;
-    boxShadow: string;
-    transformOrigin: string;
-    display: string;
-  };
-  children: React.ReactNode;
-}
+export default function PixelDialog({ message }: PixelDialogProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState(message);
 
-export default function PixelDialog({ message, mood = 'neutral' }: DialogProps) {
-  let background = 'rgba(255,255,255,0.9)';
-  let color = '#333';
-  let border = 'none';
-
-  if (mood === 'happy') {
-    background = 'rgba(220, 255, 220, 0.95)';
-    color = '#207020';
-    border = '1px solid #66cc66';
-  }
-
-  if (mood === 'confused') {
-    background = 'rgba(255, 230, 230, 0.95)';
-    color = '#802020';
-    border = '1px solid #ff9999';
-  }
-
-  const animation = useSpring({
-    from: { scale: 1 },
-    to: async (next) => {
-      if (mood === 'happy') {
-        await next({ scale: 1.15 });
-        await next({ scale: 1 });
-      } else if (mood === 'confused') {
-        await next({ scale: 0.95 });
-        await next({ scale: 1 });
-      }
-    },
-    config: { tension: 200, friction: 12 },
-    reset: true,
-  });
-
-  const AnimatedDiv = animated.div as React.FC<AnimatedDivProps>;
+  // Animate message changes
+  useEffect(() => {
+    setIsVisible(false);
+    const timer = setTimeout(() => {
+      setCurrentMessage(message);
+      setIsVisible(true);
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [message]);
 
   return (
-    <Html position={[-2.5, 2.5, 0]} center distanceFactor={12}>
-      <AnimatedDiv
-        style={{
-          ...animation,
-          background,
-          color,
-          border,
-          padding: '0.6rem',
-          borderRadius: '0.5rem',
-          fontFamily: 'monospace',
-          fontSize: '12px',
-          maxWidth: '180px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-          transformOrigin: 'center',
-          display: 'inline-block'
-        }}
-      >
-        {message}
-      </AnimatedDiv>
+    <Html position={[-1.2, 1.8, 0]} center>
+      <AnimatePresence>
+        {isVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg text-white relative min-w-[240px] max-w-[320px]"
+          >
+            <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
+              {currentMessage}
+            </div>
+            {/* Improved triangle pointer with gradient */}
+            <div
+              className="absolute w-0 h-0"
+              style={{
+                bottom: '-12px',
+                left: '20%',
+                borderLeft: '12px solid transparent',
+                borderRight: '12px solid transparent',
+                borderTop: '12px solid rgba(17, 24, 39, 0.9)',
+                filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.2))',
+              }}
+            />
+            {/* Subtle pulsing indicator */}
+            <motion.div
+              className="absolute right-3 bottom-3 w-2 h-2 bg-blue-400 rounded-full"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Html>
   );
 }
