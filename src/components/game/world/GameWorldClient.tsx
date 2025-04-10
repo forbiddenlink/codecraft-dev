@@ -115,7 +115,9 @@ export default function GameWorldClient() {
     "Welcome to CodeCraft! Let's start building."
   );
 
-  const { markComplete, completed } = useChallengeProgress(); // ⬅️ added `completed`
+  const { markComplete, completed: completedArray } = useChallengeProgress();
+  const completed = new Set(completedArray);
+
   const mood = usePixelMood(challengePassed);
   const { remember } = usePixelMemory();
 
@@ -252,7 +254,7 @@ export default function GameWorldClient() {
 
           {elements.map((el, index) => renderObject(el, index))}
 
-          {/* 🧑‍🚀 Space Villagers */}
+          {/* 🧑‍🚀 Space Villagers (conditionally rendered) */}
           {villagers
             .filter((v) => completed.has(v.unlockAfterChallengeId))
             .map((v) => (
