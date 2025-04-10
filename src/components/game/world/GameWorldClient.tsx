@@ -11,6 +11,8 @@ import Pixel from '@/components/game/pixel/Pixel';
 import PixelDialog from '@/components/game/pixel/PixelDialog';
 import useChallengeProgress from '@/hooks/useChallengeProgress';
 import usePixelMood from '@/hooks/usePixelMood';
+import useChallengeCode from '@/hooks/useChallengeCode';
+
 
 function HUDOverlay({ currentChallenge, challengePassed, onPrev, onNext, index }: {
   currentChallenge: typeof challenges[0],
@@ -52,6 +54,8 @@ export default function GameWorldClient() {
   const elements = parseHtmlToGameObjects(code);
   const [challengeIndex, setChallengeIndex] = useState(0);
   const currentChallenge = challenges[challengeIndex];
+  useChallengeCode(currentChallenge.id);
+
   const [challengePassed, setChallengePassed] = useState(false);
   const [pixelMessage, setPixelMessage] = useState("Welcome to CodeCraft! Let's start building.");
 
