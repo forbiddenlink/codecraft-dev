@@ -1,28 +1,64 @@
 // File: /src/hooks/useChallengeProgress.ts
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAppDispatch } from '@/store/hooks';
+import { getChallengeById } from '@/data/challenges';
+import { addResources } from '@/store/slices/resourceSlice';
+import { unlockBuilding } from '@/store/slices/buildingSlice';
+import { unlockVillager } from '@/store/slices/villagerSlice';
 
-const STORAGE_KEY = 'codecraft:completedChallenges';
-
-export default function useChallengeProgress() {
-  const [completed, setCompleted] = useState<string[]>([]);
+export function useChallengeProgress() {
+  const dispatch = useAppDispatch();
+  const [completed, setCompleted] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('completed-challenges');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setCompleted(JSON.parse(stored));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('completed-challenges', JSON.stringify(completed));
     }
-  }, []);
+  }, [completed]);
 
-  const markComplete = (id: string) => {
-    setCompleted((prev) => {
-      if (prev.includes(id)) return prev;
-      const updated = [...prev, id];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      return updated;
+  const completeChallenge = (challengeId: string) => {
+    if (completed.includes(challengeId)) return;
+
+    const challenge = getChallengeById(challengeId);
+    if (!challenge) return;
+
+    // Check if all required challenges are completed
+    if (!challenge.requiredChallenges.every(req => completed.includes(req))) {
+      console.warn('Cannot complete challenge - prerequisites not met');
+      return;
+    }
+
+    // Grant rewards
+    challenge.rewards.forEach(reward => {
+      switch (reward.type) {
+        case 'resource':
+          if (reward.amount) {
+            dispatch(addResources({ type: reward.id, amount: reward.amount }));
+          }
+          break;
+        case 'building':
+          dispatch(unlockBuilding(reward.id));
+          break;
+        case 'villager':
+          dispatch(unlockVillager(reward.id));
+          break;
+        case 'ability':
+          // TODO: Implement ability unlocking
+          break;
+      }
     });
+
+    setCompleted(prev => [...prev, challengeId]);
   };
 
-  const isComplete = (id: string) => completed.includes(id);
-
-  return { completed, markComplete, isComplete };
+  return {
+    completed,
+    completeChallenge,
+  };
 }

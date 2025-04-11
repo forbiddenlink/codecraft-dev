@@ -1,216 +1,144 @@
 'use client';
-import { useRef, useState, useMemo } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Sphere, Html } from '@react-three/drei';
-import { useAppDispatch } from '@/hooks/reduxHooks';
-import { updateResource } from '@/store/slices/resourceSlice';
-import { Resource } from '@/store/slices/resourceSlice';
-import * as THREE from 'three';
+import { Trail, Html, Sphere } from '@react-three/drei';
+import { Group, Vector3, MeshStandardMaterial } from 'three';
+import { animated, useSpring } from '@react-spring/three';
+import { Resource } from '@/types/resources';
 
 interface ResourceCollectorProps {
   resource: Resource;
   position: [number, number, number];
-  collectionRadius?: number;
-  collectionAmount?: number;
-  pulseSpeed?: number;
+  collectionRadius: number;
+  collectionAmount: number;
 }
+
+const AnimatedSphere = animated(Sphere);
 
 export default function ResourceCollector({
   resource,
   position,
-  collectionRadius = 3,
-  collectionAmount = 5,
-  pulseSpeed = 1
+  collectionRadius,
+  collectionAmount,
 }: ResourceCollectorProps) {
-  const dispatch = useAppDispatch();
-  const [hovered, setHovered] = useState(false);
-  const [active, setActive] = useState(false);
-  const [collecting, setCollecting] = useState(false);
-  const sphereRef = useRef<THREE.Mesh>(null);
-  const pulseRef = useRef<THREE.Mesh>(null);
-  const particlesRef = useRef<THREE.Points>(null);
-  const lastCollectionTime = useRef(0);
-  const collectionCooldown = 1000; // 1 second cooldown
+  const collectorRef = useRef<Group>(null);
+  const materialRef = useRef<MeshStandardMaterial>(null);
+  const particlesRef = useRef<Group>(null);
+  const collectionTime = useRef(0);
+  const particles = useRef<Vector3[]>([]);
 
-  // Create particle system
-  const particles = useMemo(() => {
-    const geometry = new THREE.BufferGeometry();
-    const particleCount = 20;
-    const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount * 3);
-    
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 0.5;
-      positions[i3 + 1] = (Math.random() - 0.5) * 0.5;
-      positions[i3 + 2] = (Math.random() - 0.5) * 0.5;
-      
-      velocities[i3] = (Math.random() - 0.5) * 0.02;
-      velocities[i3 + 1] = Math.random() * 0.02;
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.02;
-    }
-    
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
-    
-    return geometry;
-  }, []);
-
-  useFrame((state) => {
-    if (!sphereRef.current || !pulseRef.current || !particlesRef.current) return;
-
-    // Floating animation
-    sphereRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime) * 0.1;
-
-    // Pulse effect
-    const scale = 1 + Math.sin(state.clock.elapsedTime * pulseSpeed) * 0.1;
-    sphereRef.current.scale.set(scale, scale, scale);
-
-    // Outer pulse ring
-    pulseRef.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * pulseSpeed * 0.5) * 0.2);
-    pulseRef.current.material.opacity = (1 + Math.sin(state.clock.elapsedTime * pulseSpeed)) * 0.2;
-
-    // Update particles
-    if (collecting) {
-      const positions = particles.attributes.position.array as Float32Array;
-      const velocities = particles.attributes.velocity.array as Float32Array;
-      
-      for (let i = 0; i < positions.length; i += 3) {
-        positions[i] += velocities[i];
-        positions[i + 1] += velocities[i + 1];
-        positions[i + 2] += velocities[i + 2];
-        
-        // Reset particles that go too far
-        if (Math.abs(positions[i + 1]) > 2) {
-          positions[i] = (Math.random() - 0.5) * 0.5;
-          positions[i + 1] = -0.5;
-          positions[i + 2] = (Math.random() - 0.5) * 0.5;
-        }
-      }
-      
-      particles.attributes.position.needsUpdate = true;
-    }
-
-    // Check player distance and collect resources
-    if (active) {
-      const now = Date.now();
-      if (now - lastCollectionTime.current >= collectionCooldown) {
-        dispatch(updateResource({ id: resource.id, amount: collectionAmount }));
-        setCollecting(true);
-        setTimeout(() => setCollecting(false), 200);
-        lastCollectionTime.current = now;
-        
-        // Play collection sound
-        const audio = new Audio('/sounds/collect.mp3');
-        audio.volume = 0.3;
-        audio.play().catch(() => {}); // Ignore autoplay restrictions
-      }
-    }
+  // Animation springs
+  const { scale } = useSpring({
+    scale: 1,
+    config: { tension: 170, friction: 26 },
   });
 
-  const cooldownProgress = Math.min(
-    (Date.now() - lastCollectionTime.current) / collectionCooldown,
-    1
-  );
+  useFrame((state, delta) => {
+    if (!collectorRef.current || !particlesRef.current) return;
+
+    // Rotate collector
+    collectorRef.current.rotation.y += delta * 0.5;
+
+    // Pulse effect
+    if (materialRef.current) {
+      const time = state.clock.getElapsedTime();
+      materialRef.current.emissiveIntensity = 0.5 + Math.sin(time * 2) * 0.2;
+    }
+
+    // Update collection particles
+    collectionTime.current += delta;
+    if (collectionTime.current >= 0.5) {
+      collectionTime.current = 0;
+      // Add new particle
+      particles.current.push(
+        new Vector3(
+          Math.random() * collectionRadius * 2 - collectionRadius,
+          Math.random() * 2 + 1,
+          Math.random() * collectionRadius * 2 - collectionRadius
+        )
+      );
+    }
+
+    // Animate particles
+    particles.current.forEach((particle, i) => {
+      // Move particle towards collector
+      particle.lerp(new Vector3(0, 1, 0), 0.1);
+      // Remove particle if too close
+      if (particle.length() < 0.5) {
+        particles.current.splice(i, 1);
+      }
+    });
+  });
 
   return (
     <group position={position}>
-      {/* Main collector sphere */}
-      <Sphere ref={sphereRef} args={[0.5, 32, 32]}>
-        <meshStandardMaterial
-          color={resource.color}
-          emissive={resource.color}
-          emissiveIntensity={hovered ? 0.5 : 0.2}
-          transparent
-          opacity={0.8}
-        />
-      </Sphere>
+      {/* Collector base */}
+      <animated.group ref={collectorRef} scale={scale}>
+        <AnimatedSphere args={[0.5, 32, 32]}>
+          <meshStandardMaterial
+            ref={materialRef}
+            color={resource.color}
+            emissive={resource.color}
+            emissiveIntensity={0.5}
+            metalness={0.8}
+            roughness={0.2}
+          />
+        </AnimatedSphere>
+        
+        {/* Collection area indicator */}
+        <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[collectionRadius - 0.1, collectionRadius, 32]} />
+          <meshBasicMaterial 
+            color={resource.color} 
+            transparent 
+            opacity={0.2} 
+          />
+        </mesh>
 
-      {/* Outer pulse ring */}
-      <Sphere ref={pulseRef} args={[0.6, 32, 32]}>
-        <meshStandardMaterial
+        {/* Resource effect trail */}
+        <Trail
+          width={0.5}
+          length={5}
           color={resource.color}
-          transparent
-          opacity={0.2}
-          wireframe
-        />
-      </Sphere>
+          attenuation={(t) => t * t}
+        >
+          <mesh visible={false}>
+            <sphereGeometry args={[0.1]} />
+          </mesh>
+        </Trail>
+      </animated.group>
 
-      {/* Particle system */}
-      <points ref={particlesRef} geometry={particles}>
-        <pointsMaterial
-          size={0.1}
-          color={resource.color}
-          transparent
-          opacity={collecting ? 0.8 : 0}
-          blending={THREE.AdditiveBlending}
-        />
-      </points>
+      {/* Collection particles */}
+      <group ref={particlesRef}>
+        {particles.current.map((pos, i) => (
+          <mesh key={i} position={pos.toArray()}>
+            <sphereGeometry args={[0.05]} />
+            <meshBasicMaterial color={resource.color} transparent opacity={0.6} />
+          </mesh>
+        ))}
+      </group>
 
-      {/* Resource icon */}
+      {/* Resource info */}
       <Html
-        position={[0, 1.2, 0]}
+        position={[0, 2, 0]}
         center
         style={{
-          fontSize: '24px',
-          transition: 'transform 0.2s',
-          transform: hovered ? 'scale(1.2)' : 'scale(1)',
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          color: 'white',
+          fontSize: '12px',
+          pointerEvents: 'none',
         }}
       >
-        <div style={{ position: 'relative' }}>
-          {resource.icon}
-          {active && (
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '-20px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '30px',
-                height: '3px',
-                background: '#1a1a1a',
-                borderRadius: '2px',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  width: `${cooldownProgress * 100}%`,
-                  height: '100%',
-                  background: resource.color,
-                  transition: 'width 0.1s linear',
-                }}
-              />
-            </div>
-          )}
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{resource.icon}</span>
+          <div className="flex flex-col">
+            <span className="font-medium">{resource.name}</span>
+            <span className="text-sm text-green-400">+{collectionAmount}/s</span>
+          </div>
         </div>
       </Html>
-
-      {/* Interaction sphere (invisible) */}
-      <Sphere
-        args={[collectionRadius, 8, 8]}
-        onPointerEnter={() => setHovered(true)}
-        onPointerLeave={() => {
-          setHovered(false);
-          setActive(false);
-        }}
-        onPointerDown={() => setActive(true)}
-        onPointerUp={() => setActive(false)}
-      >
-        <meshBasicMaterial visible={false} />
-      </Sphere>
-
-      {/* Collection radius indicator (only visible when hovered) */}
-      {hovered && (
-        <Sphere args={[collectionRadius, 16, 16]}>
-          <meshBasicMaterial
-            color={resource.color}
-            transparent
-            opacity={0.1}
-            wireframe
-          />
-        </Sphere>
-      )}
     </group>
   );
 } 

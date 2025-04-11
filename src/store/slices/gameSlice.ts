@@ -12,9 +12,21 @@ interface GameState {
   isPlayerMoving: boolean;
   isPixelMoving: boolean;
   movementSpeed: number;
-  pixelMood: 'happy' | 'curious' | 'excited' | 'thinking';
+  pixelMood: 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking';
   pixelTarget?: Position; // Position Pixel is trying to reach
   playerInteractionRadius: number;
+  isEditorVisible: boolean;
+  editorErrors: Array<{ message: string }>;
+  tutorialActive: boolean;
+  tutorialStep?: {
+    pixelDialogue?: string;
+  };
+  colonyResources: {
+    energy: number;
+    minerals: number;
+    water: number;
+    food: number;
+  };
 }
 
 const initialState: GameState = {
@@ -24,7 +36,16 @@ const initialState: GameState = {
   isPixelMoving: false,
   movementSpeed: 0.1,
   pixelMood: 'curious',
-  playerInteractionRadius: 3
+  playerInteractionRadius: 3,
+  isEditorVisible: false,
+  editorErrors: [],
+  tutorialActive: false,
+  colonyResources: {
+    energy: 100,
+    minerals: 50,
+    water: 100,
+    food: 50
+  }
 };
 
 export const gameSlice = createSlice({
