@@ -1,144 +1,72 @@
 'use client';
 import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Trail, Html, Sphere } from '@react-three/drei';
 import { Group, Vector3, MeshStandardMaterial } from 'three';
-import { animated, useSpring } from '@react-spring/three';
-import { Resource } from '@/types/resources';
+import { Html } from '@react-three/drei';
+import { ResourceType } from '../../../types/resources';
 
 interface ResourceCollectorProps {
-  resource: Resource;
   position: [number, number, number];
+  resource: ResourceType;
   collectionRadius: number;
-  collectionAmount: number;
 }
 
-const AnimatedSphere = animated(Sphere);
-
-export default function ResourceCollector({
-  resource,
-  position,
-  collectionRadius,
-  collectionAmount,
-}: ResourceCollectorProps) {
+export function ResourceCollector({ position, resource, collectionRadius }: ResourceCollectorProps) {
   const collectorRef = useRef<Group>(null);
   const materialRef = useRef<MeshStandardMaterial>(null);
-  const particlesRef = useRef<Group>(null);
+  const particlesRef = useRef<Vector3[]>([]);
   const collectionTime = useRef(0);
   const particles = useRef<Vector3[]>([]);
 
-  // Animation springs
-  const { scale } = useSpring({
-    scale: 1,
-    config: { tension: 170, friction: 26 },
-  });
-
-  useFrame((state, delta) => {
-    if (!collectorRef.current || !particlesRef.current) return;
-
-    // Rotate collector
-    collectorRef.current.rotation.y += delta * 0.5;
-
-    // Pulse effect
-    if (materialRef.current) {
-      const time = state.clock.getElapsedTime();
-      materialRef.current.emissiveIntensity = 0.5 + Math.sin(time * 2) * 0.2;
-    }
-
-    // Update collection particles
-    collectionTime.current += delta;
-    if (collectionTime.current >= 0.5) {
-      collectionTime.current = 0;
-      // Add new particle
-      particles.current.push(
-        new Vector3(
-          Math.random() * collectionRadius * 2 - collectionRadius,
-          Math.random() * 2 + 1,
-          Math.random() * collectionRadius * 2 - collectionRadius
-        )
-      );
-    }
-
-    // Animate particles
-    particles.current.forEach((particle, i) => {
-      // Move particle towards collector
-      particle.lerp(new Vector3(0, 1, 0), 0.1);
-      // Remove particle if too close
-      if (particle.length() < 0.5) {
-        particles.current.splice(i, 1);
-      }
-    });
-  });
-
   return (
     <group position={position}>
-      {/* Collector base */}
-      <animated.group ref={collectorRef} scale={scale}>
-        <AnimatedSphere args={[0.5, 32, 32]}>
-          <meshStandardMaterial
-            ref={materialRef}
-            color={resource.color}
-            emissive={resource.color}
-            emissiveIntensity={0.5}
-            metalness={0.8}
-            roughness={0.2}
-          />
-        </AnimatedSphere>
-        
-        {/* Collection area indicator */}
-        <mesh position={[0, 0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[collectionRadius - 0.1, collectionRadius, 32]} />
-          <meshBasicMaterial 
-            color={resource.color} 
-            transparent 
-            opacity={0.2} 
-          />
-        </mesh>
+      {/* Collector sphere */}
+      <mesh>
+        <sphereGeometry args={[0.5, 32, 32]} />
+        <meshStandardMaterial color={resource.color} transparent opacity={0.8} />
+      </mesh>
 
-        {/* Resource effect trail */}
-        <Trail
-          width={0.5}
-          length={5}
-          color={resource.color}
-          attenuation={(t) => t * t}
-        >
-          <mesh visible={false}>
-            <sphereGeometry args={[0.1]} />
-          </mesh>
-        </Trail>
-      </animated.group>
+      {/* Collection area indicator */}
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[collectionRadius - 0.1, collectionRadius, 32]} />
+        <meshBasicMaterial color={resource.color} transparent opacity={0.2} />
+      </mesh>
 
-      {/* Collection particles */}
-      <group ref={particlesRef}>
-        {particles.current.map((pos, i) => (
-          <mesh key={i} position={pos.toArray()}>
-            <sphereGeometry args={[0.05]} />
-            <meshBasicMaterial color={resource.color} transparent opacity={0.6} />
-          </mesh>
-        ))}
-      </group>
-
-      {/* Resource info */}
+      {/* Resource info label */}
       <Html
-        position={[0, 2, 0]}
+        position={[0, 2 + Math.sin(Date.now() * 0.001) * 0.1, 0]}
         center
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          background: `rgba(0, 0, 0, 0.7)`,
           padding: '4px 8px',
           borderRadius: '4px',
+          border: `1px solid ${resource.color}`,
           color: 'white',
-          fontSize: '12px',
+          width: 'auto',
+          whiteSpace: 'nowrap',
+          textAlign: 'center',
+          backdropFilter: 'blur(4px)',
+          transform: 'scale(0.8)',
+          userSelect: 'none',
           pointerEvents: 'none',
+          textShadow: '0 0 2px rgba(0,0,0,0.5)',
+          boxShadow: '0 0 5px rgba(0,0,0,0.3)',
         }}
       >
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{resource.icon}</span>
-          <div className="flex flex-col">
-            <span className="font-medium">{resource.name}</span>
-            <span className="text-sm text-green-400">+{collectionAmount}/s</span>
-          </div>
+        <div style={{ fontSize: '1em', marginBottom: '2px' }}>
+          {resource.icon} {resource.name}
+        </div>
+        <div style={{ fontSize: '0.8em', opacity: 0.9 }}>
+          {Math.floor(resource.amount)} (+{resource.generationRate.toFixed(1)}/s)
         </div>
       </Html>
+
+      {/* Particle system for collection effect */}
+      {particles.current.map((particle, index) => (
+        <mesh key={index} position={particle.toArray()}>
+          <sphereGeometry args={[0.05]} />
+          <meshBasicMaterial color={resource.color} transparent opacity={0.6} />
+        </mesh>
+      ))}
     </group>
   );
 } 

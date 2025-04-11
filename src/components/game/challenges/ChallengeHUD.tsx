@@ -1,26 +1,59 @@
 import { motion } from 'framer-motion';
-import { Challenge } from '@/types/challenges';
-import { useState } from 'react';
+import { useChallengeSystem } from '@/hooks/useChallengeSystem';
+import { useAppDispatch } from '@/store/hooks';
+import { setEditorVisible, setCode } from '@/store/slices/editorSlice';
+import type { EditorLanguage } from '@/store/slices/editorSlice';
 
-interface ChallengeHUDProps {
-  challenge: Challenge;
-  isCompleted: boolean;
-  onPrev: () => void;
-  onNext: () => void;
-  index: number;
-  onStartCoding: () => void;
-}
-
-export default function ChallengeHUD({
-  challenge,
-  isCompleted,
-  onPrev,
-  onNext,
-  index,
-  onStartCoding,
-}: ChallengeHUDProps) {
-  const [showHints, setShowHints] = useState(false);
-
+export default function ChallengeHUD() {
+  const dispatch = useAppDispatch();
+  const {
+    currentChallenge,
+    currentIndex,
+    isCompleted,
+    validateChallenge,
+    validationResult,
+    isValidating,
+    navigateToNextChallenge,
+    navigateToPreviousChallenge,
+    availableChallenges
+  } = useChallengeSystem();
+  
+  // If no challenges are available
+  if (!currentChallenge) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg text-white"
+        style={{ width: '320px' }}
+      >
+        <h2 className="text-xl font-bold">No Challenges Available</h2>
+        <p className="text-gray-300 mt-2">
+          You&apos;ve completed all available challenges or need to unlock new ones.
+        </p>
+      </motion.div>
+    );
+  }
+  
+  // Handle starting the challenge coding
+  const handleStartCoding = () => {
+    // Open editor
+    dispatch(setEditorVisible(true));
+    
+    // Load challenge template code if available
+    if (currentChallenge.requirements?.code?.template) {
+      dispatch(setCode({
+        language: currentChallenge.requirements.code.language as EditorLanguage || 'javascript',
+        code: currentChallenge.requirements.code.template
+      }));
+    }
+  };
+  
+  // Check solution
+  const handleCheckSolution = () => {
+    validateChallenge();
+  };
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -32,101 +65,126 @@ export default function ChallengeHUD({
       <div className="mb-4">
         <div className="flex items-center gap-2">
           <span className="text-lg">
-            {isCompleted ? "✅ " : "🎯 "}Challenge {index + 1}:
+            {isCompleted ? "✅ " : "🎯 "}Challenge {currentIndex + 1} of {availableChallenges.length}
           </span>
           <span className={`px-2 py-0.5 rounded text-sm ${
-            challenge.difficulty === 1 ? 'bg-green-600' :
-            challenge.difficulty === 2 ? 'bg-yellow-600' :
+            currentChallenge.type === 'building' ? 'bg-green-600' :
+            currentChallenge.type === 'coding' ? 'bg-yellow-600' :
             'bg-red-600'
           }`}>
-            {challenge.difficulty === 1 ? 'Beginner' :
-             challenge.difficulty === 2 ? 'Intermediate' :
-             'Advanced'}
+            {currentChallenge.type}
           </span>
         </div>
-        <h2 className="text-xl font-bold mt-1">{challenge.title}</h2>
-        <p className="text-gray-300 mt-2">{challenge.description}</p>
+        <h2 className="text-xl font-bold mt-1">{currentChallenge.title}</h2>
+        <p className="text-gray-300 mt-2">{currentChallenge.description}</p>
       </div>
 
-      {/* Objectives */}
+      {/* Requirements */}
       <div className="mb-4">
-        <h3 className="font-semibold mb-2">Objectives:</h3>
+        <h3 className="font-semibold mb-2">Requirements:</h3>
         <ul className="space-y-1">
-          {challenge.objectives.map((objective, i) => (
+          {currentChallenge.requirements.buildings?.map((building, i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-blue-400">•</span>
-              <span>{objective}</span>
+              <span>Build a {building}</span>
+            </li>
+          ))}
+          {currentChallenge.requirements.resources && Object.entries(currentChallenge.requirements.resources).map(([resource, amount], i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="text-blue-400">•</span>
+              <span>Collect {amount} {resource}</span>
             </li>
           ))}
         </ul>
       </div>
+      
+      {/* Validation result */}
+      {validationResult && (
+        <div className={`mb-4 p-3 rounded ${
+          validationResult.success ? 'bg-green-900 bg-opacity-40' : 'bg-red-900 bg-opacity-40'
+        }`}>
+          <h3 className="font-semibold">
+            {validationResult.success ? '✅ Success!' : '❌ Not quite right'}
+          </h3>
+          <p>{validationResult.message}</p>
+          
+          {validationResult.details && validationResult.details.length > 0 && (
+            <ul className="mt-2 text-sm">
+              {validationResult.details.map((detail, i) => (
+                <li key={i}>{detail}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {/* Rewards */}
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Rewards:</h3>
         <div className="flex flex-wrap gap-2">
-          {challenge.rewards.map((reward, i) => (
+          <span className="px-2 py-1 bg-blue-900 rounded-full text-sm">
+            {currentChallenge.rewards.xp} XP
+          </span>
+          
+          {currentChallenge.rewards.resources && Object.entries(currentChallenge.rewards.resources).map(([resource, amount]) => (
+            amount && (
+              <span
+                key={resource}
+                className="px-2 py-1 bg-green-900 rounded-full text-sm flex items-center gap-1"
+              >
+                {amount} {resource}
+              </span>
+            )
+          ))}
+          
+          {currentChallenge.rewards.unlocks?.buildings?.map((building, i) => (
             <span
-              key={i}
-              className="px-2 py-1 bg-blue-900 rounded-full text-sm flex items-center gap-1"
+              key={`building-${i}`}
+              className="px-2 py-1 bg-purple-900 rounded-full text-sm"
             >
-              {reward.type === 'building' && '🏗️'}
-              {reward.type === 'resource' && '💎'}
-              {reward.type === 'villager' && '👤'}
-              {reward.type === 'ability' && '⭐'}
-              {reward.amount ? `${reward.amount} ` : ''}{reward.id}
+              🏗️ {building}
             </span>
           ))}
         </div>
       </div>
 
-      {/* Hints */}
-      <div className="mb-4">
-        <button
-          onClick={() => setShowHints(!showHints)}
-          className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
-        >
-          {showHints ? '📝 Hide Hints' : '💡 Show Hints'}
-        </button>
-        {showHints && (
-          <motion.ul
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="mt-2 space-y-1"
-          >
-            {challenge.hints.map((hint, i) => (
-              <li key={i} className="text-gray-300 flex items-start gap-2">
-                <span className="text-yellow-400">#{i + 1}</span>
-                <span>{hint}</span>
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </div>
-
       {/* Navigation */}
       <div className="flex justify-between gap-2">
         <button
-          onClick={onPrev}
+          onClick={navigateToPreviousChallenge}
           className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={index === 0}
+          disabled={currentIndex === 0}
         >
           ⟵ Prev
         </button>
+        
+        <div className="flex gap-2">
+          <button
+            onClick={handleStartCoding}
+            className={`px-4 py-1 rounded transition-colors flex-grow text-center ${
+              isCompleted
+                ? 'bg-gray-700 hover:bg-gray-600'
+                : 'bg-green-600 hover:bg-green-500'
+            }`}
+          >
+            {isCompleted ? "Edit Code" : "Start Coding"}
+          </button>
+          
+          {!isCompleted && (
+            <button
+              onClick={handleCheckSolution}
+              className="px-4 py-1 bg-blue-600 hover:bg-blue-500 rounded transition-colors disabled:opacity-50"
+              disabled={isValidating}
+            >
+              {isValidating ? "Checking..." : "Check Solution"}
+            </button>
+          )}
+        </div>
+        
         <button
-          onClick={onStartCoding}
-          className={`px-4 py-1 rounded transition-colors flex-grow text-center ${
-            isCompleted
-              ? 'bg-gray-700 hover:bg-gray-600'
-              : 'bg-green-600 hover:bg-green-500'
-          }`}
-        >
-          {isCompleted ? "Edit Code" : "Start Coding"}
-        </button>
-        <button
-          onClick={onNext}
+          onClick={navigateToNextChallenge}
           className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={index === 2} // Update this based on total challenges
+          disabled={currentIndex === availableChallenges.length - 1}
         >
           Next ⟶
         </button>

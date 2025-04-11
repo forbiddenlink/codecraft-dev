@@ -42,11 +42,12 @@ export default function BuildingGrid({ width, height, cellSize, showGridLines }:
         <Line
           key={index}
           points={points}
-          color="#4a5568"
-          lineWidth={1}
-          dashed={false}
+          color="#64748b"
+          lineWidth={1.5}
+          dashed
+          dashScale={2}
           transparent
-          opacity={0.3}
+          opacity={0.5}
         />
       ))}
     </group>

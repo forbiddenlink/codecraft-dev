@@ -2,10 +2,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ValidationError } from '@/utils/codeValidation';
 
+export type EditorLanguage = 'html' | 'css' | 'javascript';
+
+interface CodeFiles {
+  html: string;
+  css: string;
+  javascript: string;
+}
+
 interface EditorState {
   isVisible: boolean;
-  currentCode: string;
-  language: 'html' | 'css' | 'javascript';
+  code: CodeFiles;
+  language: EditorLanguage;
   errors: ValidationError[];
   isExecuting: boolean;
   lastExecutionSuccess: boolean | null;
@@ -13,7 +21,11 @@ interface EditorState {
 
 const initialState: EditorState = {
   isVisible: false,
-  currentCode: '',
+  code: {
+    html: '',
+    css: '',
+    javascript: ''
+  },
   language: 'html',
   errors: [],
   isExecuting: false,
@@ -27,10 +39,10 @@ export const editorSlice = createSlice({
     setEditorVisible: (state, action: PayloadAction<boolean>) => {
       state.isVisible = action.payload;
     },
-    setCode: (state, action: PayloadAction<string>) => {
-      state.currentCode = action.payload;
+    setCode: (state, action: PayloadAction<{ language: EditorLanguage; code: string }>) => {
+      state.code[action.payload.language] = action.payload.code;
     },
-    setLanguage: (state, action: PayloadAction<EditorState['language']>) => {
+    setLanguage: (state, action: PayloadAction<EditorLanguage>) => {
       state.language = action.payload;
     },
     setEditorErrors: (state, action: PayloadAction<ValidationError[]>) => {
@@ -43,7 +55,11 @@ export const editorSlice = createSlice({
       state.lastExecutionSuccess = action.payload;
     },
     clearEditorState: (state) => {
-      state.currentCode = '';
+      state.code = {
+        html: '',
+        css: '',
+        javascript: ''
+      };
       state.errors = [];
       state.lastExecutionSuccess = null;
     }

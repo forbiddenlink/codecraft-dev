@@ -1,15 +1,14 @@
 "use client";
-import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Stars, Sky } from '@react-three/drei';
+import React, { Suspense, useRef, useState, useMemo } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { OrbitControls, Stars, Sky, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setEditorVisible } from "@/store/slices/editorSlice";
 import { setTargetPosition } from "@/store/slices/playerSlice";
-import Player from "@/components/game/player/Player";
-import Pixel from "@/components/game/pixel/Pixel";
-import PixelDialog from "@/components/game/pixel/PixelDialog";
+import type { OrbitControlsImpl } from 'three-stdlib';
+import { RootState } from "@/store/store";
+import { parseCSSRule } from "@/utils/cssParser";
 import ResourceCollectors from "@/components/game/resources/ResourceCollectors";
 import ResourceFlowSystem from "@/components/game/resources/ResourceFlowSystem";
 import ResourceGenerators from "@/components/game/resources/ResourceGenerators";
@@ -29,154 +28,355 @@ import { getAvailableChallenges } from '@/data/challenges';
 import Ground from "@/components/game/ground/Ground";
 import { useChallengeProgress } from "@/hooks/useChallengeProgress";
 import { parseHtmlToStructure } from "@/utils/htmlParser";
-import { applyStyles } from "@/utils/cssParser";
+import type { Challenge } from '@/types/challenge';
+import type { HtmlNode } from '@/types/html';
+import { GameState } from '@/types/gameState';
+import { ThreeEvent } from '@react-three/fiber';
+import Player from '@/components/game/player/Player';
+import Pixel from '@/components/game/pixel/Pixel';
+import * as THREE from 'three';
 
 // Environment settings
 const ENVIRONMENT_CONFIG = {
   stars: {
-    radius: 100,
-    depth: 50,
-    count: 3000,
-    factor: 4,
-    saturation: 0
+    radius: 300,
+    depth: 150,
+    count: 5000,
+    factor: 7,
+    saturation: 1,
+    fade: true
+  },
+  sky: {
+    distance: 450000,
+    sunPosition: [0, -1, 0] as [number, number, number],
+    inclination: 0.1,
+    azimuth: 0.25,
+    mieCoefficient: 0.001,
+    mieDirectionalG: 0.85,
+    rayleigh: 0.3,
+    turbidity: 2
   },
   fog: {
-    color: '#080e1a',
-    near: 50,
-    far: 150
+    color: '#0f172a',
+    near: 150,
+    far: 500
   },
   grid: {
-    width: 50,
-    height: 50,
+    width: 200,
+    height: 200,
     cellSize: 5
+  },
+  scene: {
+    background: '#0f172a',
+    groundColor: '#1e293b'
+  },
+  camera: {
+    position: [20, 25, 35] as [number, number, number],
+    fov: 45,
+    near: 0.1,
+    far: 1000,
+    minDistance: 5,
+    maxDistance: 50
   }
 };
 
 // Helper function to determine sun position based on time of day
-function getSunPosition(timeOfDay) {
-  // Convert time (0-24) to radians (0-2π)
+function getSunPosition(timeOfDay: number): [number, number, number] {
   const angleRad = ((timeOfDay / 24) * Math.PI * 2) - Math.PI/2;
-  
-  // Calculate position on a circular path
-  const radius = 20;
+  const radius = 100;
   const x = Math.cos(angleRad) * radius;
   const y = Math.sin(angleRad) * radius;
-  
-  // During "night" move the sun below the horizon
-  const adjustedY = y < 0 ? y * 3 : y;
-  
+  const adjustedY = y < -20 ? -20 : y;
   return [x, adjustedY, 0];
 }
 
 // Helper to determine pixel's mood based on context
-function determinePixelMood(challenge, isEditorVisible, errors) {
+function determinePixelMood(
+  challenge: Challenge | undefined,
+  isEditorVisible: boolean,
+  errors: Array<{ message: string }> | null
+): 'concerned' | 'curious' | 'happy' | 'neutral' {
   if (errors && errors.length > 0) return 'concerned';
-  if (isEditorVisible) return 'curious';
-  if (challenge) return 'happy';
-  return 'neutral';
+  if (isEditorVisible && challenge) return 'curious';
+  return 'happy';
 }
 
 // Helper to generate contextual tips
-function generateContextualTip(challenge, playerProgress, colony) {
-  if (!challenge) return null;
+function generateContextualTip(
+  challenge: Challenge | undefined,
+  playerProgress: Record<string, unknown>,
+  resources: Record<string, number>
+): string {
+  if (challenge?.description) return challenge.description;
   
-  if (colony && colony.resources.energy < 20) {
-    return "I notice your colony's energy is running low. You might want to build some solar collectors.";
+  const resourceArray = Object.entries(resources).map(([resourceId, amount]) => ({
+    resourceId,
+    amount
+  }));
+  
+  if (resourceArray.some(r => r.amount < 20)) {
+    return 'Try building more resource collectors!';
   }
-  
-  if (playerProgress.justUnlocked.length > 0) {
-    return `You've unlocked new building types! Check them out in the building menu.`;
-  }
-  
-  return null;
+  return 'Explore and build your colony!';
 }
+
+// Component Props
+type HtmlStructureVisualizationProps = React.ComponentProps<typeof HtmlStructureVisualization>;
+type BuildingPreviewProps = React.ComponentProps<typeof BuildingPreview>;
+type ErrorVisualizationProps = React.ComponentProps<typeof ErrorVisualization>;
+type ChallengeHUDProps = React.ComponentProps<typeof ChallengeHUD>;
+type CodeExecutionVisualizerProps = React.ComponentProps<typeof CodeExecutionVisualizer>;
+
+interface PixelProps {
+  mood: 'concerned' | 'curious' | 'happy' | 'neutral';
+  contextualTip: string;
+}
+
+interface ValidationError {
+  lineNumber: number;
+  column: number;
+  message: string;
+  severity: 'error' | 'warning' | 'info';
+}
+
+interface ResourceGenerator {
+  id: string;
+  position: [number, number, number];
+  isActive: boolean;
+  type: string;
+  rotation: [number, number, number];
+  outputRate: number;
+  resourceType: 'energy' | 'minerals' | 'water' | 'food';
+  status: 'active' | 'inactive';
+  efficiency: number;
+  lastCollection: number;
+  customizations: Record<string, unknown>;
+  resources: Array<{ resourceId: string; amount: number }>;
+}
+
+interface ResourceFlow {
+  from: [number, number, number];
+  to: [number, number, number];
+  resource: string;
+  amount: number;
+}
+
+interface GameExecutionData {
+  variables: Record<string, string | number | boolean | null | undefined>;
+  callStack: string[];
+  output: string[];
+}
+
+interface ParsedHtmlNode {
+  type: string;
+  attributes?: Record<string, string>;
+  level?: number;
+  index?: number;
+  children?: ParsedHtmlNode[];
+  styles?: Record<string, string>;
+}
+
+interface ResourceGeneratorsProps {
+  generators: ResourceGenerator[];
+  showProductionEffects: boolean;
+}
+
+interface ResourceFlowSystemProps {
+  flows: ResourceFlow[];
+}
+
+// Define building state interface
+interface BuildingState {
+  buildMode: boolean;
+  selectedTemplateId: string | null;
+}
+
+// Define game state interface
+interface TutorialStep {
+  focusArea?: string;
+  content?: string;
+  position?: [number, number, number];
+}
+
+interface GameStatePartial {
+  colonyResources?: Record<string, number>;
+  cssRules?: string[];
+  jsExecutionContext?: Record<string, unknown>;
+  tutorialActive?: boolean;
+  tutorialStep?: number;
+  tutorialState?: {
+    active: boolean;
+    step: number;
+    steps: TutorialStep[];
+  };
+  building?: BuildingState;
+  generators?: ResourceGenerator[];
+}
+
+const DarkBackground = () => (
+  <mesh position={[0, 0, -100]} scale={[200, 200, 1]}>
+    <planeGeometry />
+    <meshBasicMaterial color={ENVIRONMENT_CONFIG.scene.background} depthTest={false} side={2} transparent opacity={1} />
+  </mesh>
+);
+
+const SceneContent = () => {
+  const { gl, scene } = useThree();
+  
+  React.useEffect(() => {
+    if (gl && scene) {
+      scene.fog = new THREE.Fog(
+        ENVIRONMENT_CONFIG.fog.color,
+        ENVIRONMENT_CONFIG.fog.near,
+        ENVIRONMENT_CONFIG.fog.far
+      );
+    }
+  }, [gl, scene]);
+
+  return (
+    <group>
+      <ambientLight intensity={0.4} />
+      <hemisphereLight
+        intensity={0.6}
+        color="#ffffff"
+        groundColor={ENVIRONMENT_CONFIG.scene.groundColor}
+      />
+    </group>
+  );
+};
 
 export default function GameWorldClient() {
   const dispatch = useAppDispatch();
   const [challengeIndex, setChallengeIndex] = useState(0);
   const { completed } = useChallengeProgress();
-  const controlsRef = useRef();
+  const controlsRef = useRef<OrbitControlsImpl>(null);
   
-  // Game state selectors
-  const isEditorVisible = useAppSelector((state) => state.editor.isVisible);
-  const editorContent = useAppSelector((state) => state.editor.currentCode);
-  const editorLanguage = useAppSelector((state) => state.editor.language);
-  const editorErrors = useAppSelector((state) => state.editor.validationErrors);
-  const colony = useAppSelector((state) => state.game.colony);
-  const cssRules = useAppSelector((state) => state.game.cssRules);
-  const jsExecutionContext = useAppSelector((state) => state.game.jsExecutionContext);
-  const isBuildModeActive = useAppSelector((state) => state.building.buildMode);
-  const selectedBuildingTemplateId = useAppSelector((state) => state.building.selectedTemplateId);
-  const tutorialState = useAppSelector((state) => state.tutorial);
-  const playerProgress = useAppSelector((state) => state.user.progress);
-  const resourceGenerators = useAppSelector((state) => state.resource.generators);
+  // Game state selectors with safe defaults
+  const isEditorVisible = useAppSelector((state: RootState) => state.editor.isVisible);
+  const code = useAppSelector((state: RootState) => state.editor.code);
+  const language = useAppSelector((state: RootState) => state.editor.language);
+  const errors = useAppSelector((state: RootState) => state.editor.errors);
+  const gameState = useAppSelector((state: RootState) => state.game) as GameStatePartial;
+
+  // Safely destructure gameState with defaults
+  const {
+    colonyResources = {},
+    cssRules = [],
+    jsExecutionContext = {},
+    tutorialActive = false,
+    tutorialStep = 0,
+    tutorialState = { active: false, step: 0, steps: [] },
+    building = { buildMode: false, selectedTemplateId: null },
+    generators = []
+  } = gameState;
+
+  const isBuildModeActive = building.buildMode;
+  const selectedBuildingTemplateId = building.selectedTemplateId;
+  const resourceGenerators = generators as ResourceGenerator[];
   
   // Environment state
-  const [timeOfDay, setTimeOfDay] = useState(12); // 0-24 hour scale
-  const [weather, setWeather] = useState('clear');
-  const [weatherIntensity, setWeatherIntensity] = useState(0.5);
+  const [timeOfDay, setTimeOfDay] = useState<number>(12);
+  const [weather, setWeather] = useState<'clear' | 'cloudy' | 'stormy' | 'foggy'>('clear');
+  const [weatherIntensity, setWeatherIntensity] = useState<number>(0.5);
   
   // Building preview state
-  const [previewPosition, setPreviewPosition] = useState([0, 0, 0]);
-  const [isValidPlacement, setIsValidPlacement] = useState(true);
+  const [, setPreviewPosition] = useState<[number, number, number]>([0, 0, 0]);
+  const [, setIsValidPlacement] = useState(true);
   
   // Get available challenges based on completed ones
   const availableChallenges = useMemo(() => getAvailableChallenges(completed), [completed]);
   const currentChallenge = availableChallenges[challengeIndex];
   
-  // Parsed HTML structure from code editor
+  // Fix the HTML structure parsing
   const parsedStructure = useMemo(() => {
-    if (editorLanguage === 'html' && editorContent) {
-      const structure = parseHtmlToStructure(editorContent);
-      return applyStyles(structure, cssRules);
+    if (language === 'html' && code.html) {
+      try {
+        const structure = parseHtmlToStructure(code.html) as ParsedHtmlNode[];
+        const cssRulesParsed = cssRules
+          .map(parseCSSRule)
+          .filter((rule): rule is NonNullable<ReturnType<typeof parseCSSRule>> => rule !== null);
+        
+        // Convert to HtmlNode format with proper typing
+        const convertNode = (node: ParsedHtmlNode): HtmlNode => ({
+          elementType: node.type || 'div',
+          attributes: node.attributes || {},
+          level: node.level || 0,
+          index: node.index || 0,
+          children: Array.isArray(node.children) ? node.children.map(convertNode) : [],
+          styles: typeof node.styles === 'object' ? 
+            Object.entries(node.styles || {}).reduce((acc, [key, value]) => {
+              acc[key] = String(value);
+              return acc;
+            }, {} as Record<string, string>) : {}
+        });
+
+        const convertedStructure = Array.isArray(structure) ? structure.map(convertNode) : [];
+        
+        // Apply CSS rules to the converted structure
+        const styledStructure = convertedStructure.map(node => ({
+          ...node,
+          styles: {
+            ...node.styles,
+            ...cssRulesParsed.reduce((acc, rule) => {
+              // Safely handle CSS rule declarations
+              const declarations = rule && typeof rule === 'object' ? 
+                Object.entries(rule).reduce((styles, [key, value]) => {
+                  if (typeof value === 'string' || typeof value === 'number') {
+                    styles[key] = String(value);
+                  }
+                  return styles;
+                }, {} as Record<string, string>) : {};
+              return { ...acc, ...declarations };
+            }, {})
+          }
+        }));
+
+        return styledStructure;
+      } catch (error) {
+        console.error('Error parsing HTML structure:', error);
+        return [];
+      }
     }
     return [];
-  }, [editorContent, editorLanguage, cssRules]);
+  }, [code.html, language, cssRules]);
 
-  const [pixelMessage, setPixelMessage] = useState(
+  const [, setPixelMessage] = useState(
     "Welcome to CodeCraft! I'm Pixel, and I'll be your guide on this adventure."
   );
 
   // Day/night cycle
-  useEffect(() => {
+  React.useEffect(() => {
     const timeInterval = setInterval(() => {
       setTimeOfDay((time) => (time + 0.1) % 24);
-    }, 3000); // Slower cycle for better gameplay
-    
+    }, 3000);
     return () => clearInterval(timeInterval);
   }, []);
   
   // Weather system
-  useEffect(() => {
+  React.useEffect(() => {
     const weatherInterval = setInterval(() => {
-      // 20% chance to change weather every 2 minutes
       if (Math.random() < 0.2) {
-        const weatherTypes = ['clear', 'cloudy', 'stormy', 'foggy'];
+        const weatherTypes: Array<'clear' | 'cloudy' | 'stormy' | 'foggy'> = ['clear', 'cloudy', 'stormy', 'foggy'];
         const newWeather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
         setWeather(newWeather);
         setWeatherIntensity(0.3 + Math.random() * 0.7);
       }
     }, 120000);
-    
     return () => clearInterval(weatherInterval);
   }, []);
 
-  // Handle ground click for player movement and building placement
-  const handleGroundClick = useCallback((event) => {
+  // Type-safe event handlers
+  const handleGroundClick = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     if (event.object.name === 'ground') {
       const point = event.point;
       
       if (isBuildModeActive && selectedBuildingTemplateId) {
-        // Snap to grid
         const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
         const snappedX = Math.round(point.x / gridSize) * gridSize;
         const snappedZ = Math.round(point.z / gridSize) * gridSize;
-        
-        // Place building code here
         console.log(`Placing building at ${snappedX}, ${snappedZ}`);
       } else {
-        // Move player
         dispatch(setTargetPosition({
           x: point.x,
           y: 0.5,
@@ -185,26 +385,22 @@ export default function GameWorldClient() {
       }
     }
   }, [dispatch, isBuildModeActive, selectedBuildingTemplateId]);
-  
-  // Update preview position on mouse move when in build mode
-  const handleGroundHover = useCallback((event) => {
+
+  const handleGroundHover = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {
       const point = event.point;
       const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
-      const snappedX = Math.round(point.x / gridSize) * gridSize;
-      const snappedZ = Math.round(point.z / gridSize) * gridSize;
-      
-      setPreviewPosition([snappedX, 0, snappedZ]);
-      
-      // Check if placement is valid (example logic)
-      const isValid = checkValidPlacement(snappedX, snappedZ);
-      setIsValidPlacement(isValid);
+      setPreviewPosition([
+        Math.round(point.x / gridSize) * gridSize,
+        0,
+        Math.round(point.z / gridSize) * gridSize
+      ]);
+      setIsValidPlacement(checkValidPlacement(point.x, point.z));
     }
   }, [isBuildModeActive, selectedBuildingTemplateId]);
   
   // Placeholder for checking valid placement
-  const checkValidPlacement = (x, z) => {
-    // Simple check - would be more complex in real implementation
+  const checkValidPlacement = (x: number, z: number): boolean => {
     return x >= -ENVIRONMENT_CONFIG.grid.width/2 && 
            x <= ENVIRONMENT_CONFIG.grid.width/2 &&
            z >= -ENVIRONMENT_CONFIG.grid.height/2 &&
@@ -212,17 +408,17 @@ export default function GameWorldClient() {
   };
 
   // Update Pixel's message based on challenge context
-  useEffect(() => {
+  React.useEffect(() => {
     if (isEditorVisible && currentChallenge) {
       setPixelMessage(`Let's work on ${currentChallenge.title}! ${currentChallenge.description}`);
-    } else if (editorErrors && editorErrors.length > 0) {
+    } else if (errors && errors.length > 0) {
       setPixelMessage(`Hmm, there seems to be an issue with your code. Let's fix it together!`);
-    } else if (colony && colony.resources.energy < 20) {
+    } else if (colonyResources && colonyResources.energy < 20) {
       setPixelMessage(`Your colony's energy levels are getting low. We should build more collectors!`);
     } else {
       setPixelMessage("Welcome to CodeCraft! I'm Pixel, and I'll be your guide on this adventure.");
     }
-  }, [isEditorVisible, currentChallenge, editorErrors, colony]);
+  }, [isEditorVisible, currentChallenge, errors, colonyResources]);
 
   const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
   const handleNext = () =>
@@ -232,180 +428,364 @@ export default function GameWorldClient() {
     dispatch(setEditorVisible(true));
   };
   
-  const handleTutorialStepComplete = useCallback(() => {
+  const handleTutorialStepComplete = React.useCallback(() => {
     // Tutorial step completion logic would go here
     console.log("Tutorial step completed");
   }, []);
 
-  // Set camera limits
-  useEffect(() => {
+  // Set camera limits and initial position
+  React.useEffect(() => {
     if (controlsRef.current) {
-      controlsRef.current.minDistance = 5;
-      controlsRef.current.maxDistance = 50;
+      controlsRef.current.minDistance = ENVIRONMENT_CONFIG.camera.minDistance;
+      controlsRef.current.maxDistance = ENVIRONMENT_CONFIG.camera.maxDistance;
       controlsRef.current.maxPolarAngle = Math.PI / 2.1;
-      controlsRef.current.minPolarAngle = 0;
+      controlsRef.current.minPolarAngle = Math.PI / 4;
+      
+      // Set initial position for a better view of the resources
+      controlsRef.current.object.position.set(20, 25, 35);
+      controlsRef.current.target.set(0, 0, -15);
+      
+      controlsRef.current.enableDamping = true;
+      controlsRef.current.dampingFactor = 0.05;
+      controlsRef.current.rotateSpeed = 0.5;
+      controlsRef.current.zoomSpeed = 0.8;
+      
+      controlsRef.current.update();
     }
   }, []);
 
+  // Transform resource generators into correct format
+  const formattedResourceGenerators = useMemo(() => 
+    resourceGenerators.map(g => ({
+      ...g,
+      type: 'default',
+      rotation: [0, 0, 0] as [number, number, number],
+      outputRate: 1,
+      resourceType: 'energy' as const,
+      status: g.isActive ? 'active' as const : 'inactive' as const,
+      efficiency: 1,
+      lastCollection: Date.now(),
+      customizations: {}
+    })) as ResourceGenerator[],
+    [resourceGenerators]
+  );
+
+  // Transform resource flows
+  const resourceFlows = useMemo(() => 
+    formattedResourceGenerators
+      .filter(g => g.status === 'active')
+      .map(g => ({
+        from: g.position,
+        to: [0, 5, 0] as [number, number, number],
+        resource: g.resourceType,
+        amount: g.outputRate * g.efficiency
+      })) as ResourceFlow[],
+    [formattedResourceGenerators]
+  );
+
+  const executionData: GameExecutionData = {
+    variables: {},
+    callStack: [],
+    output: []
+  };
+
+  // Use the mood determination function
+  const pixelMood = useMemo(() => 
+    determinePixelMood(currentChallenge, isEditorVisible, errors),
+    [currentChallenge, isEditorVisible, errors]
+  );
+
+  // Use the contextual tip function
+  const contextualTip = useMemo(() => 
+    generateContextualTip(currentChallenge, {}, colonyResources),
+    [currentChallenge, colonyResources]
+  );
+
+  // Type-safe component props
+  const htmlStructureProps: HtmlStructureVisualizationProps = {
+    htmlStructure: parsedStructure,
+    cssRules,
+    onBuildingSelect: (node: HtmlNode) => {
+      console.log('Selected building:', node);
+    }
+  };
+
+  const buildingPreviewProps: BuildingPreviewProps = {
+    gridSnap: true
+  };
+
+  const errorVisualizationProps: ErrorVisualizationProps = {
+    position: [0, 5, 0]
+  };
+
+  const codeExecutionVisualizerProps: CodeExecutionVisualizerProps = {
+    executionData,
+    position: [5, 2, 5]
+  };
+
   return (
-    <div className="w-full h-full relative">
-      {/* Left Side UI */}
-      <div className="fixed left-4 top-4 bottom-4 z-50 flex flex-col gap-4 w-[300px]">
-        {currentChallenge && (
-          <ChallengeHUD
-            challenge={currentChallenge}
-            isCompleted={completed.includes(currentChallenge.id)}
-            onPrev={handlePrev}
-            onNext={handleNext}
-            index={challengeIndex}
-            onStartCoding={handleEditorOpen}
-          />
-        )}
-      </div>
-
-      {/* Right Side UI */}
-      <div className="fixed right-4 top-4 bottom-4 z-50 flex flex-col gap-4 w-[300px]">
-        <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg">
-          <ResourceHUD />
-        </div>
-        <div className="mt-auto">
-          <BuildingMenu />
-        </div>
-      </div>
+    <>
+      <style jsx global>{`
+        body, html, #__next {
+          margin: 0;
+          padding: 0;
+          overflow: hidden;
+          height: 100vh;
+          width: 100vw;
+          background-color: black;
+        }
+      `}</style>
       
-      {/* Tutorial Overlay */}
-      {tutorialState?.isActive && (
-        <TutorialOverlay
-          currentStep={tutorialState.currentStepIndex}
-          focusArea={tutorialState.steps[tutorialState.currentStepIndex]?.focusArea}
-          onComplete={handleTutorialStepComplete}
-        />
-      )}
-
-      {/* 3D Game World */}
-      <Canvas shadows camera={{ position: [20, 20, 20], fov: 50 }}>
-        {/* Lighting */}
-        <ambientLight intensity={timeOfDay > 6 && timeOfDay < 18 ? 0.4 : 0.1} />
-        <directionalLight
-          castShadow
-          position={getSunPosition(timeOfDay)}
-          intensity={timeOfDay > 6 && timeOfDay < 18 ? 1 : 0.2}
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-far={50}
-          shadow-camera-left={-20}
-          shadow-camera-right={20}
-          shadow-camera-top={20}
-          shadow-camera-bottom={-20}
-        />
-        
-        {/* Environment */}
-        <Stars {...ENVIRONMENT_CONFIG.stars} />
-        <Sky 
-          distance={450000}
-          sunPosition={getSunPosition(timeOfDay)}
-          inclination={0.49}
-          azimuth={0.25}
-        />
-        <fog attach="fog" args={[ENVIRONMENT_CONFIG.fog.color, ENVIRONMENT_CONFIG.fog.near, ENVIRONMENT_CONFIG.fog.far]} />
-        <Ground onClick={handleGroundClick} onPointerMove={handleGroundHover} />
-        <BuildingGrid 
-          width={ENVIRONMENT_CONFIG.grid.width}
-          height={ENVIRONMENT_CONFIG.grid.height}
-          cellSize={ENVIRONMENT_CONFIG.grid.cellSize}
-          showGridLines={isBuildModeActive}
-        />
-        
-        {/* Weather */}
-        <WeatherSystem
-          currentWeather={weather}
-          intensity={weatherIntensity}
-        />
-        
-        {/* Colony Structure following HTML mapping */}
-        <group name="colony-root">
-          {/* Dynamic HTML structure visualization */}
-          <HtmlStructureVisualization 
-            htmlStructure={parsedStructure}
-            cssRules={cssRules}
-          />
-          
-          {/* Main colony center */}
-          <group name="main" position={[0, 0, 0]}>
-            {/* Colony entrance and player area */}
-            <group name="header" position={[0, 0, -10]}>
-              <Player />
-              <Pixel 
-                mood={determinePixelMood(currentChallenge, isEditorVisible, editorErrors)}
-                contextualTip={generateContextualTip(currentChallenge, playerProgress, colony)}
-              />
-              <PixelDialog message={pixelMessage} />
-            </group>
+      {/* Main Game Container */}
+      <div className="fixed inset-0 overflow-hidden">
+        {/* Game Canvas Container */}
+        <div className="absolute inset-0 z-0">
+          <Canvas
+            shadows
+            gl={{ 
+              alpha: false, 
+              antialias: true,
+              powerPreference: "high-performance",
+              stencil: false,
+              logarithmicDepthBuffer: true,
+              toneMapping: THREE.NoToneMapping,
+              outputColorSpace: THREE.SRGBColorSpace
+            }}
+            camera={{
+              position: ENVIRONMENT_CONFIG.camera.position,
+              fov: ENVIRONMENT_CONFIG.camera.fov,
+              near: ENVIRONMENT_CONFIG.camera.near,
+              far: ENVIRONMENT_CONFIG.camera.far
+            }}
+            style={{ 
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%'
+            }}
+            dpr={[1, 2]}
+            linear
+          >
+            {/* Scene setup */}
+            <color attach="background" args={[ENVIRONMENT_CONFIG.scene.background]} />
+            <fog
+              attach="fog"
+              args={[
+                ENVIRONMENT_CONFIG.fog.color,
+                ENVIRONMENT_CONFIG.fog.near,
+                ENVIRONMENT_CONFIG.fog.far
+              ]}
+            />
             
-            {/* Primary resource area */}
-            <group name="section-resources" position={[10, 0, 0]}>
-              <ResourceCollectors />
-              <ResourceGenerators
-                generators={resourceGenerators}
-                showProductionEffects={true}
-              />
-              <ResourceFlowSystem
-                flows={resourceGenerators.filter(g => g.isActive).map(g => ({
-                  from: g.position,
-                  to: [0, 5, 0], // Storage location
-                  resource: g.resources[0].resourceId,
-                  amount: g.resources[0].amount
-                }))}
-              />
-            </group>
+            {/* Sky and environment first */}
+            <Sky
+              distance={ENVIRONMENT_CONFIG.sky.distance}
+              sunPosition={ENVIRONMENT_CONFIG.sky.sunPosition}
+              inclination={ENVIRONMENT_CONFIG.sky.inclination}
+              azimuth={ENVIRONMENT_CONFIG.sky.azimuth}
+              mieCoefficient={ENVIRONMENT_CONFIG.sky.mieCoefficient}
+              mieDirectionalG={ENVIRONMENT_CONFIG.sky.mieDirectionalG}
+              rayleigh={ENVIRONMENT_CONFIG.sky.rayleigh}
+              turbidity={ENVIRONMENT_CONFIG.sky.turbidity}
+            />
+            <Stars
+              radius={ENVIRONMENT_CONFIG.stars.radius}
+              depth={ENVIRONMENT_CONFIG.stars.depth}
+              count={ENVIRONMENT_CONFIG.stars.count}
+              factor={ENVIRONMENT_CONFIG.stars.factor}
+              saturation={ENVIRONMENT_CONFIG.stars.saturation}
+              fade={ENVIRONMENT_CONFIG.stars.fade}
+            />
             
-            {/* Colony buildings area */}
-            <group name="section-buildings" position={[-10, 0, 0]}>
-              <PlacedBuildings />
-              {isBuildModeActive && selectedBuildingTemplateId && (
-                <BuildingPreview
-                  templateId={selectedBuildingTemplateId}
-                  position={previewPosition}
-                  isValid={isValidPlacement}
-                  gridSnap={true}
+            {/* Rest of scene content */}
+            <Suspense fallback={null}>
+              <SceneContent />
+              
+              {/* Scene Content */}
+              <group>
+                <Ground
+                  onClick={handleGroundClick}
+                  onPointerMove={handleGroundHover}
+                  color={ENVIRONMENT_CONFIG.scene.groundColor}
                 />
-              )}
-            </group>
-            
-            {/* Villager district */}
-            <group name="section-villagers" position={[0, 0, 10]}>
-              <UnlockedVillagers />
-            </group>
-          </group>
-        </group>
-        
-        {/* Error visualization */}
-        {editorErrors && editorErrors.length > 0 && (
-          <ErrorVisualization
-            errors={editorErrors}
-            position={[0, 5, 0]}
-          />
-        )}
-        
-        {/* Code execution visualization */}
-        {jsExecutionContext && Object.keys(jsExecutionContext).length > 0 && (
-          <CodeExecutionVisualizer
-            executionData={jsExecutionContext}
-            position={[0, 10, 0]}
-          />
-        )}
+                
+                <BuildingGrid 
+                  width={ENVIRONMENT_CONFIG.grid.width}
+                  height={ENVIRONMENT_CONFIG.grid.height}
+                  cellSize={ENVIRONMENT_CONFIG.grid.cellSize}
+                  showGridLines={isBuildModeActive}
+                />
+                
+                {/* Weather */}
+                <WeatherSystem
+                  currentWeather={weather}
+                  intensity={weatherIntensity}
+                />
+                
+                {/* Colony Structure */}
+                <group name="colony-root">
+                  <HtmlStructureVisualization {...htmlStructureProps} />
+                  
+                  {/* Resource section spread out in a wider area */}
+                  <group name="section-resources">
+                    <group position={[-20, 0, -20]}>
+                      <ResourceCollectors />
+                    </group>
+                    <group position={[0, 0, -15]}>
+                      <ResourceGenerators
+                        generators={formattedResourceGenerators.map((gen, index) => ({
+                          ...gen,
+                          position: [
+                            (index - formattedResourceGenerators.length / 2) * 15,
+                            0,
+                            index % 2 === 0 ? -5 : 5
+                          ]
+                        }))}
+                        showProductionEffects={true}
+                      />
+                    </group>
+                    <ResourceFlowSystem 
+                      flows={resourceFlows.map(flow => ({
+                        ...flow,
+                        from: [flow.from[0], flow.from[1], flow.from[2] - 15],
+                        to: [0, 5, 0]
+                      }))}
+                    />
+                  </group>
+                  
+                  <group name="section-buildings" position={[-10, 0, 0]}>
+                    <PlacedBuildings />
+                    {isBuildModeActive && selectedBuildingTemplateId && (
+                      <BuildingPreview {...buildingPreviewProps} />
+                    )}
+                  </group>
+                  
+                  <group name="section-villagers" position={[0, 0, 10]}>
+                    <UnlockedVillagers />
+                  </group>
 
-        {/* Camera and controls */}
-        <OrbitControls
-          ref={controlsRef}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI / 2.1}
-          minDistance={5}
-          maxDistance={50}
-        />
-        <EffectComposer>
-          <Bloom intensity={0.5} luminanceThreshold={0.9} />
-        </EffectComposer>
-      </Canvas>
-    </div>
+                  <Player />
+                  <Pixel 
+                    mood={pixelMood}
+                    contextualTip={contextualTip}
+                  />
+                </group>
+
+                <Environment
+                  preset="sunset"
+                  background={false}
+                  blur={0.8}
+                />
+
+                <directionalLight
+                  position={[50, 50, 25]}
+                  intensity={0.4}
+                  castShadow
+                  shadow-mapSize={[2048, 2048]}
+                  shadow-camera-left={-50}
+                  shadow-camera-right={50}
+                  shadow-camera-top={50}
+                  shadow-camera-bottom={-50}
+                />
+              </group>
+            </Suspense>
+
+            <OrbitControls
+              ref={controlsRef}
+              makeDefault
+              minDistance={ENVIRONMENT_CONFIG.camera.minDistance}
+              maxDistance={ENVIRONMENT_CONFIG.camera.maxDistance}
+              maxPolarAngle={Math.PI / 2.1}
+              minPolarAngle={Math.PI / 4}
+              screenSpacePanning={false}
+              enableDamping={true}
+              dampingFactor={0.05}
+              rotateSpeed={0.5}
+              zoomSpeed={0.8}
+              // Set initial target to center of resources
+              target={[0, 0, -15]}
+            />
+            
+            <EffectComposer>
+              <Bloom intensity={0.5} luminanceThreshold={0.9} />
+            </EffectComposer>
+          </Canvas>
+        </div>
+
+        {/* UI Layer */}
+        <div className="fixed inset-0 pointer-events-none">
+          {/* Challenge UI - Left Side */}
+          <div className="absolute left-4 top-4 z-50 pointer-events-auto">
+            {currentChallenge && (
+              <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
+                <h2 className="text-white text-xl font-bold mb-4">{currentChallenge.title}</h2>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={handlePrev}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Previous
+                    </button>
+                    <button 
+                      onClick={handleNext}
+                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
+                  <button 
+                    onClick={handleEditorOpen}
+                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                  >
+                    Start Coding
+                  </button>
+                </div>
+                {completed.includes(currentChallenge.id) && (
+                  <div className="mt-2 text-center text-green-400">Completed</div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Pixel Dialog - Bottom Left */}
+          <div className="absolute left-4 bottom-4 z-50 pointer-events-auto">
+            <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
+              <div className="text-white">
+                <h3 className="text-lg font-bold mb-2">Pixel</h3>
+                <p className="text-sm opacity-80">{contextualTip}</p>
+                <div className="mt-2 text-xs opacity-60">Current mood: {pixelMood}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Resource HUD - Top Right */}
+          <div className="absolute right-4 top-4 z-50 pointer-events-auto">
+            <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg">
+              <ResourceHUD />
+            </div>
+          </div>
+
+          {/* Building Menu - Bottom Right */}
+          <div className="absolute right-4 bottom-4 z-50 pointer-events-auto">
+            <div className="bg-gray-900 bg-opacity-90 rounded-lg shadow-lg">
+              <BuildingMenu />
+            </div>
+          </div>
+          
+          {/* Tutorial Overlay */}
+          {tutorialActive && (
+            <div className="pointer-events-auto">
+              <TutorialOverlay
+                currentStep={tutorialStep}
+                focusArea={tutorialState.steps[tutorialStep]?.focusArea || ''}
+                onComplete={handleTutorialStepComplete}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

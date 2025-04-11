@@ -22,8 +22,8 @@ export default function BuildingMenu() {
   const dispatch = useAppDispatch();
   const selectedTemplateId = useAppSelector(state => state.building.selectedTemplateId);
   const isBuildModeActive = useAppSelector(state => state.building.buildMode);
-  const playerLevel = useAppSelector(state => state.user.level);
-  const completedChallenges = useAppSelector(state => state.user.completedChallenges);
+  const playerLevel = useAppSelector(state => state.user.progress.level);
+  const completedChallenges = useAppSelector(state => state.user.progress.completedChallenges);
   
   const [activeCategory, setActiveCategory] = useState('habitat');
   
@@ -69,7 +69,7 @@ export default function BuildingMenu() {
     if (template) {
       // Set HTML editor and insert template code
       dispatch(setLanguage('html'));
-      dispatch(setCode(template.defaultHtml));
+      dispatch(setCode({ language: 'html', code: template.defaultHtml }));
     }
   };
 
@@ -89,7 +89,7 @@ export default function BuildingMenu() {
         {CATEGORIES.map(category => (
           <button
             key={category.id}
-            className={`px-3 py-2 rounded-lg transition-colors flex items-center gap-1 text-sm ${
+            className={`flex-1 min-w-[90px] px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 text-sm ${
               activeCategory === category.id
                 ? 'bg-blue-700'
                 : 'bg-gray-700 hover:bg-gray-600'
@@ -97,7 +97,7 @@ export default function BuildingMenu() {
             onClick={() => setActiveCategory(category.id)}
           >
             <span>{category.icon}</span>
-            <span>{category.name}</span>
+            <span className="whitespace-nowrap">{category.name}</span>
           </button>
         ))}
       </div>

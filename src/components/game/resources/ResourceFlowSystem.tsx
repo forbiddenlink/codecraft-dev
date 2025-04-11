@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber';
 import { Trail } from '@react-three/drei';
 import { Vector3 } from 'three';
 
-interface ResourceFlow {
+export interface ResourceFlow {
   from: [number, number, number];
   to: [number, number, number];
   resource: string;

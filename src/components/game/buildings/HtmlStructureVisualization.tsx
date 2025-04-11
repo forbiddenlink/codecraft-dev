@@ -3,21 +3,11 @@ import { useMemo } from 'react';
 import BuildingModel, { BuildingModelType } from './BuildingModel';
 import { Html, Line } from '@react-three/drei';
 import { useAppSelector } from '@/hooks/reduxHooks';
-
-interface HtmlNode {
-  elementType: string;
-  attributes: Record<string, string>;
-  children: HtmlNode[];
-  styles: Record<string, string | number>;
-  textContent?: string;
-  position?: [number, number, number];
-  level: number;
-  index: number;
-  lineNumber?: number;
-}
+import type { HtmlNode } from '@/types/html';
 
 interface HtmlStructureVisualizationProps {
   htmlStructure: HtmlNode[];
+  cssRules?: string[];
   onBuildingSelect?: (node: HtmlNode) => void;
   selectedNodeId?: string | null;
 }
@@ -28,6 +18,7 @@ const BASE_HEIGHT = 0;
 
 export default function HtmlStructureVisualization({ 
   htmlStructure, 
+  cssRules,
   onBuildingSelect,
   selectedNodeId 
 }: HtmlStructureVisualizationProps) {

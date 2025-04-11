@@ -4,8 +4,12 @@ import { Sphere, Billboard, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updatePixelPosition, setIsPixelMoving, setPixelMood } from '@/store/slices/gameSlice';
-import { Vector3 } from 'three';
+import { Vector3, Mesh, Object3D } from 'three';
 import PixelEmissiveParticles from './PixelEmissiveParticles';
+import React from 'react';
+
+type PixelMood = 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking';
+type ContextType = 'error' | 'tutorial' | 'lowResources' | 'default';
 
 const FOLLOW_DISTANCE = 2; // How far Pixel stays from player
 const MOVE_THRESHOLD = 4; // Distance at which Pixel starts following
@@ -15,23 +19,77 @@ const HOVER_AMPLITUDE = 0.1; // How much to bob up and down
 const HOVER_FREQUENCY = 1.5; // Speed of bobbing
 
 // Helper to get color based on mood
-function getMoodColor(mood) {
+function getMoodColor(mood: PixelMood): string {
   switch(mood) {
     case 'happy':
-      return '#10B981'; // Terraforming Green
+      return '#10B981'; // Success Green
     case 'curious':
       return '#3B82F6'; // Interface Blue
     case 'excited':
       return '#FBBF24'; // Energy Yellow
     case 'concerned':
-      return '#EF4444'; // Mars Red
+      return '#EF4444'; // Alert Red
+    case 'thinking':
+      return '#8B5CF6'; // Lighter purple for thinking state
     default:
-      return '#7C3AED'; // Nebula Purple
+      return '#7C3AED'; // Nebula Purple for neutral
   }
 }
 
+// Animation parameters based on mood
+const MOOD_ANIMATION_PARAMS: Record<PixelMood, {
+  hoverFrequency: number;
+  hoverAmplitude: number;
+  particleCount: number;
+  emissiveIntensity: number;
+  pulseSpeed: number;
+}> = {
+  happy: {
+    hoverFrequency: 2.0,
+    hoverAmplitude: 0.15,
+    particleCount: 25,
+    emissiveIntensity: 1.0,
+    pulseSpeed: 1.5
+  },
+  curious: {
+    hoverFrequency: 1.8,
+    hoverAmplitude: 0.12,
+    particleCount: 20,
+    emissiveIntensity: 0.8,
+    pulseSpeed: 1.2
+  },
+  excited: {
+    hoverFrequency: 2.5,
+    hoverAmplitude: 0.18,
+    particleCount: 30,
+    emissiveIntensity: 1.2,
+    pulseSpeed: 2.0
+  },
+  concerned: {
+    hoverFrequency: 1.2,
+    hoverAmplitude: 0.08,
+    particleCount: 15,
+    emissiveIntensity: 0.6,
+    pulseSpeed: 0.8
+  },
+  thinking: {
+    hoverFrequency: 1.0,
+    hoverAmplitude: 0.1,
+    particleCount: 18,
+    emissiveIntensity: 0.7,
+    pulseSpeed: 1.0
+  },
+  neutral: {
+    hoverFrequency: 1.5,
+    hoverAmplitude: 0.1,
+    particleCount: 20,
+    emissiveIntensity: 0.8,
+    pulseSpeed: 1.0
+  }
+};
+
 // Helper to get dialogue based on context and mood
-function getContextualDialogue(contextType, mood) {
+function getContextualDialogue(contextType: ContextType, mood: PixelMood): string {
   // This would connect to a more sophisticated dialogue system in production
   if (contextType === 'error') {
     return "I see there's an issue with your code. Let me help you fix it!";
@@ -48,9 +106,14 @@ function getContextualDialogue(contextType, mood) {
   return "I'm Pixel, your AI companion. Let me know if you need anything!";
 }
 
-export default function Pixel() {
-  const pixelRef = useRef();
-  const coreRef = useRef();
+export interface PixelProps {
+  mood: PixelMood;
+  contextualTip: string;
+}
+
+export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) {
+  const pixelRef = useRef<Object3D>();
+  const coreRef = useRef<Mesh>();
   const dispatch = useAppDispatch();
   const { camera } = useThree();
   
@@ -66,11 +129,24 @@ export default function Pixel() {
     tutorialActive
   } = useAppSelector((state) => state.game);
   
+  const [currentMood, setCurrentMood] = useState<PixelMood>(initialMood);
   const [hovering, setHovering] = useState(false);
   const [showDialogue, setShowDialogue] = useState(false);
   const [dialogueText, setDialogueText] = useState('');
   const lastMoodUpdate = useRef(Date.now());
   const lastDialogueUpdate = useRef(Date.now());
+
+  // Update mood when prop changes
+  useEffect(() => {
+    setCurrentMood(initialMood);
+  }, [initialMood]);
+
+  // Use contextual tip for dialogue
+  useEffect(() => {
+    if (contextualTip) {
+      setDialogueText(contextualTip);
+    }
+  }, [contextualTip]);
 
   // Determine contextual dialogue
   useEffect(() => {
@@ -87,14 +163,35 @@ export default function Pixel() {
     
     // Update dialogue
     if (Date.now() - lastDialogueUpdate.current > 5000) {
-      setDialogueText(getContextualDialogue(contextType, pixelMood));
+      setDialogueText(getContextualDialogue(contextType, currentMood));
       lastDialogueUpdate.current = Date.now();
     }
-  }, [pixelMood, editorErrors, tutorialActive, colonyResources]);
+  }, [currentMood, editorErrors, tutorialActive, colonyResources]);
 
   // Handle animation and movement logic
   useFrame((state) => {
     if (!pixelRef.current) return;
+    
+    const animParams = MOOD_ANIMATION_PARAMS[currentMood];
+    const time = state.clock.getElapsedTime();
+    
+    // Hover animation with mood-based parameters
+    const hoverY = HOVER_HEIGHT + 
+      Math.sin(time * animParams.hoverFrequency) * 
+      animParams.hoverAmplitude;
+    
+    // Update position with hover
+    if (pixelRef.current) {
+      pixelRef.current.position.y = hoverY;
+      pixelRef.current.lookAt(camera.position);
+    }
+    
+    // Update core rotation and pulse
+    if (coreRef.current) {
+      coreRef.current.rotation.y += 0.01;
+      const pulseScale = 1 + Math.sin(time * animParams.pulseSpeed) * 0.05;
+      coreRef.current.scale.set(pulseScale, pulseScale, pulseScale);
+    }
     
     // Create fresh Vector3 objects to avoid mutation issues
     const pixelVec = new Vector3(pixelPosition.x, pixelPosition.y, pixelPosition.z);
@@ -143,21 +240,6 @@ export default function Pixel() {
     } else {
       dispatch(setIsPixelMoving(false));
     }
-    
-    // Apply hover animation
-    const time = state.clock.getElapsedTime();
-    const hoverY = HOVER_HEIGHT + Math.sin(time * HOVER_FREQUENCY) * HOVER_AMPLITUDE;
-    
-    // Update position with hover
-    if (pixelRef.current) {
-      pixelRef.current.position.y = hoverY;
-      pixelRef.current.lookAt(camera.position);
-    }
-    
-    // Update core rotation
-    if (coreRef.current) {
-      coreRef.current.rotation.y += 0.01;
-    }
   });
 
   // Handle interaction with Pixel
@@ -168,7 +250,7 @@ export default function Pixel() {
     setDialogueText(getContextualDialogue(
       editorErrors && editorErrors.length > 0 ? 'error' : 
       tutorialActive ? 'tutorial' : 'default',
-      pixelMood
+      currentMood
     ));
   };
 
@@ -186,9 +268,9 @@ export default function Pixel() {
         args={[0.3, 32, 32]}
       >
         <meshStandardMaterial 
-          color={getMoodColor(pixelMood)} 
-          emissive={getMoodColor(pixelMood)} 
-          emissiveIntensity={0.8} 
+          color={getMoodColor(currentMood)} 
+          emissive={getMoodColor(currentMood)} 
+          emissiveIntensity={MOOD_ANIMATION_PARAMS[currentMood].emissiveIntensity} 
           transparent
           opacity={0.9}
         />
@@ -196,16 +278,16 @@ export default function Pixel() {
       
       {/* Inner glow */}
       <pointLight
-        color={getMoodColor(pixelMood)}
-        intensity={1.5}
+        color={getMoodColor(currentMood)}
+        intensity={MOOD_ANIMATION_PARAMS[currentMood].emissiveIntensity * 1.5}
         distance={3}
       />
       
       {/* Particle effects */}
       <PixelEmissiveParticles 
-        count={20}
-        color={getMoodColor(pixelMood)}
-        mood={pixelMood}
+        count={MOOD_ANIMATION_PARAMS[currentMood].particleCount}
+        color={getMoodColor(currentMood)}
+        mood={currentMood}
         isMoving={isPlayerMoving}
       />
       

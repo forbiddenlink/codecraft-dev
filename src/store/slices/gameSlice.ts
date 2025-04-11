@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { GameStructureNode } from '@/utils/htmlParser';
 
 interface Position {
   x: number;
@@ -27,6 +28,7 @@ interface GameState {
     water: number;
     food: number;
   };
+  htmlStructure: GameStructureNode[];
 }
 
 const initialState: GameState = {
@@ -45,7 +47,8 @@ const initialState: GameState = {
     minerals: 50,
     water: 100,
     food: 50
-  }
+  },
+  htmlStructure: []
 };
 
 export const gameSlice = createSlice({
@@ -81,6 +84,9 @@ export const gameSlice = createSlice({
         ...state.pixelPosition,
         ...action.payload
       };
+    },
+    updateHtmlStructure: (state, action: PayloadAction<GameStructureNode[]>) => {
+      state.htmlStructure = action.payload;
     }
   }
 });
@@ -93,7 +99,8 @@ export const {
   setIsPixelMoving,
   setPixelMood,
   updatePlayerPosition,
-  updatePixelPosition
+  updatePixelPosition,
+  updateHtmlStructure
 } = gameSlice.actions;
 
 export default gameSlice.reducer; 

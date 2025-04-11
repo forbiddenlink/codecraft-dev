@@ -1,91 +1,88 @@
 // File: /src/components/editor/MonacoEditor.tsx
 'use client';
-import { useEffect, useRef } from 'react';
-import Editor, { OnMount } from '@monaco-editor/react';
+import { useCallback } from 'react';
+import Editor, { loader } from '@monaco-editor/react';
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
 import { setCode, setEditorErrors } from '@/store/slices/editorSlice';
-import { validateHtml, validateCss, validateJs, ValidationError } from '@/utils/codeValidation';
-import { CodeExecutionEngine } from '@/utils/codeExecution';
-import { editor } from 'monaco-editor';
+import { validateHtml, validateCss, validateJs } from '@/utils/codeValidation';
+import { monacoEditorOptions } from '@/utils/monacoWorker';
+
+// Configure Monaco Editor loader
+loader.config({
+  paths: {
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs'
+  },
+  'vs/nls': {
+    availableLanguages: {}
+  }
+});
 
 export default function MonacoEditor() {
   const dispatch = useAppDispatch();
-  const code = useAppSelector(state => state.editor.currentCode);
   const language = useAppSelector(state => state.editor.language);
-  const executionEngine = useRef<CodeExecutionEngine | null>(null);
+  const code = useAppSelector(state => state.editor.code[language]);
 
-  useEffect(() => {
-    executionEngine.current = new CodeExecutionEngine();
-    return () => executionEngine.current?.destroy();
+  // Validation handler
+  const validateCode = useCallback((newCode: string, lang: string) => {
+    let validationResult;
+    switch (lang) {
+      case 'html':
+        validationResult = validateHtml(newCode);
+        break;
+      case 'css':
+        validationResult = validateCss(newCode);
+        break;
+      case 'javascript':
+        validationResult = validateJs(newCode);
+        break;
+    }
+
+    if (validationResult) {
+      // Update editor state
+      dispatch(setEditorErrors([...validationResult.errors, ...validationResult.warnings]));
+    }
+  }, [dispatch]);
+
+  // Handle code changes
+  const handleCodeChange = useCallback((value: string | undefined) => {
+    if (!value) return;
+    dispatch(setCode({ language, code: value }));
+    validateCode(value, language);
+  }, [dispatch, language, validateCode]);
+
+  // Handle editor mount
+  const handleEditorDidMount = useCallback(() => {
+    // Editor is ready
   }, []);
 
-  const handleEditorMount: OnMount = (editor) => {
-    // Set up validation markers
-    const updateMarkers = (errors: ValidationError[]) => {
-      const markers = errors.map(error => ({
-        startLineNumber: error.line,
-        startColumn: error.column,
-        endLineNumber: error.line,
-        endColumn: error.column + 1,
-        message: error.message,
-        severity: error.severity === 'error' 
-          ? monaco.MarkerSeverity.Error 
-          : monaco.MarkerSeverity.Warning
-      }));
-
-      monaco.editor.setModelMarkers(
-        editor.getModel()!,
-        'codecraft',
-        markers
-      );
-    };
-
-    // Set up validation on change
-    editor.onDidChangeModelContent(async () => {
-      const value = editor.getValue();
-      dispatch(setCode(value));
-
-      // Validate based on language
-      let validationResult;
-      switch (language) {
-        case 'html':
-          validationResult = validateHtml(value);
-          break;
-        case 'css':
-          validationResult = validateCss(value);
-          break;
-        case 'javascript':
-          validationResult = validateJs(value);
-          break;
-        default:
-          return;
-      }
-
-      // Update markers and store errors
-      const allErrors = [...validationResult.errors, ...validationResult.warnings];
-      updateMarkers(allErrors);
-      dispatch(setEditorErrors(allErrors));
-    });
-  };
+  // Loading component
+  const LoadingComponent = () => (
+    <div className="w-full h-full flex items-center justify-center bg-gray-900">
+      <div className="text-white">Loading editor...</div>
+    </div>
+  );
 
   return (
-    <Editor
-      height="100%"
-      defaultLanguage="html"
-      language={language}
-      value={code}
-      theme="vs-dark"
-      onChange={(value) => dispatch(setCode(value || ''))}
-      onMount={handleEditorMount}
-      options={{
-        minimap: { enabled: false },
-        fontSize: 14,
-        lineNumbers: 'on',
-        roundedSelection: false,
-        scrollBeyondLastLine: false,
-        automaticLayout: true,
-        wordWrap: 'on'
-      }}
-    />
+    <div className="w-full h-full" style={{ minHeight: '300px' }}>
+      <Editor
+        height="100%"
+        defaultLanguage={language}
+        language={language}
+        value={code}
+        onChange={handleCodeChange}
+        onMount={handleEditorDidMount}
+        loading={<LoadingComponent />}
+        theme="vs-dark"
+        options={{
+          ...monacoEditorOptions,
+          minimap: { enabled: false },
+          fontSize: 14,
+          lineNumbers: 'on',
+          scrollBeyondLastLine: false,
+          wordWrap: 'on',
+          automaticLayout: true,
+        }}
+      />
+    </div>
   );
 }
