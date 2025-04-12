@@ -1,10 +1,10 @@
 'use client';
 import { useRef, useState, useEffect } from 'react';
-import { Sphere, Billboard, Text } from '@react-three/drei';
+import { Sphere, Billboard, Text, Ring } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updatePixelPosition, setIsPixelMoving, setPixelMood } from '@/store/slices/gameSlice';
-import { Vector3, Mesh, Object3D } from 'three';
+import { Vector3, Mesh, Object3D, MeshBasicMaterial } from 'three';
 import PixelEmissiveParticles from './PixelEmissiveParticles';
 import React from 'react';
 
@@ -15,8 +15,30 @@ const FOLLOW_DISTANCE = 2; // How far Pixel stays from player
 const MOVE_THRESHOLD = 4; // Distance at which Pixel starts following
 const MOOD_UPDATE_INTERVAL = 3000; // How often Pixel's mood can change
 const HOVER_HEIGHT = 1.5; // Height above ground
-const HOVER_AMPLITUDE = 0.1; // How much to bob up and down
-const HOVER_FREQUENCY = 1.5; // Speed of bobbing
+
+// Educational feedback parameters
+const FEEDBACK_TYPES = {
+  success: {
+    color: '#10B981', // Success Green
+    icon: '✓',
+    sound: 'success.mp3'
+  },
+  hint: {
+    color: '#3B82F6', // Interface Blue
+    icon: '💡',
+    sound: 'hint.mp3'
+  },
+  warning: {
+    color: '#F59E0B', // Warning Amber
+    icon: '⚠️',
+    sound: 'warning.mp3'
+  },
+  error: {
+    color: '#EF4444', // Alert Red
+    icon: '❌',
+    sound: 'error.mp3'
+  }
+};
 
 // Helper to get color based on mood
 function getMoodColor(mood: PixelMood): string {
@@ -111,6 +133,50 @@ export interface PixelProps {
   contextualTip: string;
 }
 
+type LearningStyle = 'visual' | 'auditory' | 'kinesthetic' | 'reading';
+
+// Helper function to determine feedback type based on context
+function determineFeedbackType(
+  errors: Array<{ message: string }> | null,
+  isLearning: boolean,
+  progress: number
+): keyof typeof FEEDBACK_TYPES {
+  if (errors && errors.length > 0) return 'error';
+  if (isLearning) return progress < 0.5 ? 'hint' : 'success';
+  return 'hint';
+}
+
+// Helper function to adapt content based on learning style
+function adaptContent(
+  style: LearningStyle,
+  content: string,
+  visualAid?: string,
+  audioClip?: string
+): { message: string; extras: { visual?: string; audio?: string } } {
+  switch (style) {
+    case 'visual':
+      return {
+        message: content,
+        extras: { visual: visualAid }
+      };
+    case 'auditory':
+      return {
+        message: content,
+        extras: { audio: audioClip }
+      };
+    case 'kinesthetic':
+      return {
+        message: `Try this: ${content}`,
+        extras: { visual: visualAid }
+      };
+    case 'reading':
+      return {
+        message: `${content}\n\nTip: Check the documentation for more details.`,
+        extras: {}
+      };
+  }
+}
+
 export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) {
   const pixelRef = useRef<Object3D>();
   const coreRef = useRef<Mesh>();
@@ -123,7 +189,6 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
     movementSpeed,
     isPlayerMoving,
     playerInteractionRadius,
-    pixelMood,
     colonyResources,
     editorErrors,
     tutorialActive
@@ -135,6 +200,10 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
   const [dialogueText, setDialogueText] = useState('');
   const lastMoodUpdate = useRef(Date.now());
   const lastDialogueUpdate = useRef(Date.now());
+  const interactionRadiusRef = useRef<Mesh>();
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackType, setFeedbackType] = useState<keyof typeof FEEDBACK_TYPES>('hint');
+  const [learningStyle, setLearningStyle] = useState<LearningStyle>('visual');
 
   // Update mood when prop changes
   useEffect(() => {
@@ -167,6 +236,26 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
       lastDialogueUpdate.current = Date.now();
     }
   }, [currentMood, editorErrors, tutorialActive, colonyResources]);
+
+  // Update interaction radius visualization
+  useFrame((state) => {
+    if (!interactionRadiusRef.current) return;
+    
+    const time = state.clock.getElapsedTime();
+    const scale = 1 + Math.sin(time * 0.5) * 0.05; // Subtle breathing effect
+    const baseOpacity = 0.1 + Math.sin(time * 0.5) * 0.05;
+    
+    // Update radius material
+    const material = interactionRadiusRef.current.material as MeshBasicMaterial;
+    material.opacity = baseOpacity;
+    
+    // Scale the radius indicator
+    interactionRadiusRef.current.scale.set(
+      scale * playerInteractionRadius,
+      scale * playerInteractionRadius,
+      1
+    );
+  });
 
   // Handle animation and movement logic
   useFrame((state) => {
@@ -242,16 +331,79 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
     }
   });
 
+  // Update feedback based on context
+  useEffect(() => {
+    const newFeedbackType = determineFeedbackType(
+      editorErrors,
+      tutorialActive,
+      0.5 // Replace with actual progress
+    );
+    
+    if (newFeedbackType !== feedbackType) {
+      setFeedbackType(newFeedbackType);
+      setShowFeedback(true);
+      
+      // Hide feedback after a delay
+      const timer = setTimeout(() => {
+        setShowFeedback(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [editorErrors, tutorialActive, feedbackType]);
+
+  // Adapt content based on learning style
+  useEffect(() => {
+    if (!contextualTip) return;
+    
+    const adapted = adaptContent(
+      learningStyle,
+      contextualTip,
+      'example.gif', // Replace with actual visual aid
+      'explanation.mp3' // Replace with actual audio clip
+    );
+    
+    if (adapted) {
+      setDialogueText(adapted.message);
+      
+      // Handle extras based on learning style
+      if (adapted.extras.visual && learningStyle === 'visual') {
+        // Show visual aid
+      }
+      if (adapted.extras.audio && learningStyle === 'auditory') {
+        // Play audio clip
+      }
+    }
+  }, [contextualTip, learningStyle]);
+
   // Handle interaction with Pixel
   const handlePixelClick = () => {
     setShowDialogue(!showDialogue);
     
+    // Cycle through learning styles on interaction
+    setLearningStyle(current => {
+      switch (current) {
+        case 'visual': return 'auditory';
+        case 'auditory': return 'kinesthetic';
+        case 'kinesthetic': return 'reading';
+        default: return 'visual';
+      }
+    });
+    
     // Use contextual dialogue when clicked
-    setDialogueText(getContextualDialogue(
-      editorErrors && editorErrors.length > 0 ? 'error' : 
-      tutorialActive ? 'tutorial' : 'default',
-      currentMood
-    ));
+    const contextType: ContextType = editorErrors && editorErrors.length > 0 ? 'error' : 
+                                   tutorialActive ? 'tutorial' : 'default';
+    
+    const adapted = adaptContent(
+      learningStyle,
+      getContextualDialogue(contextType, currentMood),
+      'example.gif',
+      'explanation.mp3'
+    );
+    
+    if (adapted) {
+      setDialogueText(adapted.message);
+    }
   };
 
   return (
@@ -262,6 +414,36 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
       onPointerOver={() => setHovering(true)}
       onPointerOut={() => setHovering(false)}
     >
+      {/* Interaction radius indicator */}
+      <Ring
+        ref={interactionRadiusRef}
+        args={[playerInteractionRadius - 0.1, playerInteractionRadius, 32]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0.05, 0]}
+      >
+        <meshBasicMaterial 
+          color={getMoodColor(currentMood)}
+          transparent
+          opacity={0.1}
+          depthWrite={false}
+        />
+      </Ring>
+
+      {/* Educational feedback indicator */}
+      {showFeedback && (
+        <Billboard
+          position={[0, 1.8, 0]}
+          follow={true}
+        >
+          <Text
+            fontSize={0.2}
+            color={FEEDBACK_TYPES[feedbackType].color}
+          >
+            {FEEDBACK_TYPES[feedbackType].icon}
+          </Text>
+        </Billboard>
+      )}
+
       {/* Pixel's core sphere */}
       <Sphere 
         ref={coreRef} 
