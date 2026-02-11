@@ -2,7 +2,7 @@
 import { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useSpring, animated } from '@react-spring/three';
-import { Text, Sphere, Box, Cylinder, Cone } from '@react-three/drei';
+import { Text, Sphere, Box, Cylinder, Cone, Sparkles, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface BuildingModelProps {
@@ -459,6 +459,272 @@ function SmokeParticles({ position }: { position: [number, number, number] }) {
   );
 }
 
+// Orbiting Satellites (Level 5+)
+function OrbitingSatellites({ count = 3, radius = 4, speed = 0.5 }: {
+  count?: number;
+  radius?: number;
+  speed?: number;
+}) {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = clock.elapsedTime * speed;
+    }
+  });
+
+  return (
+    <group ref={groupRef}>
+      {Array.from({ length: count }, (_, i) => {
+        const angle = (i / count) * Math.PI * 2;
+        return (
+          <group
+            key={i}
+            position={[
+              Math.cos(angle) * radius,
+              2,
+              Math.sin(angle) * radius
+            ]}
+          >
+            {/* Satellite body */}
+            <Box args={[0.3, 0.1, 0.3]}>
+              <meshStandardMaterial
+                color="#60a5fa"
+                metalness={0.8}
+                emissive="#3b82f6"
+                emissiveIntensity={0.5}
+                toneMapped={false}
+              />
+            </Box>
+            {/* Solar panels */}
+            <Box args={[0.6, 0.02, 0.2]} position={[0.4, 0, 0]}>
+              <meshStandardMaterial color="#1e3a5f" metalness={0.3} />
+            </Box>
+            <Box args={[0.6, 0.02, 0.2]} position={[-0.4, 0, 0]}>
+              <meshStandardMaterial color="#1e3a5f" metalness={0.3} />
+            </Box>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+// Energy Shield (Level 3+)
+function EnergyShield({ radius = 3, color = '#60a5fa' }: {
+  radius?: number;
+  color?: string;
+}) {
+  const shieldRef = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (shieldRef.current && shieldRef.current.material instanceof THREE.ShaderMaterial) {
+      shieldRef.current.material.uniforms.time.value = clock.elapsedTime;
+    }
+  });
+
+  // Simple animated shield using standard material
+  const { opacity } = useSpring({
+    opacity: 0.15,
+    from: { opacity: 0.1 },
+    loop: { reverse: true },
+    config: { duration: 2000 }
+  });
+
+  return (
+    <animated.mesh ref={shieldRef}>
+      <sphereGeometry args={[radius, 32, 32]} />
+      <animated.meshStandardMaterial
+        color={color}
+        transparent
+        opacity={opacity}
+        emissive={color}
+        emissiveIntensity={0.3}
+        side={THREE.DoubleSide}
+        toneMapped={false}
+      />
+    </animated.mesh>
+  );
+}
+
+// Communication Antenna (Level 2+)
+function CommunicationAntenna({ height = 1.5, isActive = true }: {
+  height?: number;
+  isActive?: boolean;
+}) {
+  const tipRef = useRef<THREE.Mesh>(null);
+
+  useFrame(({ clock }) => {
+    if (tipRef.current) {
+      // Pulsing glow effect
+      const intensity = 0.5 + Math.sin(clock.elapsedTime * 3) * 0.3;
+      if (tipRef.current.material instanceof THREE.MeshStandardMaterial) {
+        tipRef.current.material.emissiveIntensity = isActive ? intensity : 0.2;
+      }
+    }
+  });
+
+  return (
+    <group position={[0, 3, 0]}>
+      {/* Antenna pole */}
+      <Cylinder args={[0.05, 0.05, height, 8]}>
+        <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.1} />
+      </Cylinder>
+      {/* Glowing tip */}
+      <Sphere ref={tipRef} args={[0.1, 16, 16]} position={[0, height / 2 + 0.1, 0]}>
+        <meshStandardMaterial
+          color="#60a5fa"
+          emissive="#60a5fa"
+          emissiveIntensity={isActive ? 1 : 0.2}
+          toneMapped={false}
+        />
+      </Sphere>
+      {/* Signal rings when active */}
+      {isActive && (
+        <SignalRings position={[0, height / 2 + 0.1, 0]} />
+      )}
+    </group>
+  );
+}
+
+// Signal Rings for antenna
+function SignalRings({ position }: { position: [number, number, number] }) {
+  const ringsRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    if (ringsRef.current) {
+      ringsRef.current.children.forEach((ring, i) => {
+        const scale = 0.5 + ((clock.elapsedTime * 0.5 + i * 0.3) % 1) * 1.5;
+        const opacity = 1 - ((clock.elapsedTime * 0.5 + i * 0.3) % 1);
+        ring.scale.set(scale, scale, scale);
+        if (ring instanceof THREE.Mesh && ring.material instanceof THREE.MeshStandardMaterial) {
+          ring.material.opacity = opacity * 0.5;
+        }
+      });
+    }
+  });
+
+  return (
+    <group ref={ringsRef} position={position}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.3, 0.02, 8, 32]} />
+          <meshStandardMaterial
+            color="#60a5fa"
+            transparent
+            opacity={0.5}
+            emissive="#60a5fa"
+            emissiveIntensity={0.5}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
+// Level Badge
+function LevelBadge({ level }: { level: number }) {
+  const colors = {
+    1: '#64748b',
+    2: '#3b82f6',
+    3: '#8b5cf6',
+    4: '#f59e0b',
+    5: '#ef4444',
+    6: '#fbbf24'
+  };
+
+  const color = colors[Math.min(level, 6) as keyof typeof colors] || colors[6];
+
+  return (
+    <Billboard position={[0, 4, 0]}>
+      <mesh>
+        <circleGeometry args={[0.4, 32]} />
+        <meshStandardMaterial
+          color={color}
+          emissive={color}
+          emissiveIntensity={level >= 4 ? 1 : 0.5}
+          toneMapped={false}
+        />
+      </mesh>
+      <Text
+        position={[0, 0, 0.01]}
+        fontSize={0.3}
+        color="#ffffff"
+        anchorX="center"
+        anchorY="middle"
+        font={undefined}
+      >
+        {level}
+      </Text>
+    </Billboard>
+  );
+}
+
+// Progressive Upgrade Visuals Component
+function BuildingUpgradeVisuals({ level, isActive = true }: {
+  level: number;
+  isActive?: boolean;
+}) {
+  const enhancements = useMemo(() => ({
+    hasAntenna: level >= 2,
+    hasShield: level >= 3,
+    hasParticles: level >= 4,
+    hasSatellites: level >= 5,
+    hasAura: level >= 6
+  }), [level]);
+
+  return (
+    <group>
+      {/* Level 2+: Communication antenna */}
+      {enhancements.hasAntenna && (
+        <CommunicationAntenna isActive={isActive} />
+      )}
+
+      {/* Level 3+: Energy shield */}
+      {enhancements.hasShield && (
+        <EnergyShield radius={3.5} />
+      )}
+
+      {/* Level 4+: Ambient particles */}
+      {enhancements.hasParticles && (
+        <Sparkles
+          count={30}
+          size={1}
+          speed={0.4}
+          opacity={0.6}
+          color="#60a5fa"
+          scale={[4, 4, 4]}
+        />
+      )}
+
+      {/* Level 5+: Orbiting satellites */}
+      {enhancements.hasSatellites && (
+        <OrbitingSatellites count={3} radius={4} speed={0.3} />
+      )}
+
+      {/* Level 6+: Legendary aura */}
+      {enhancements.hasAura && (
+        <>
+          <Sparkles
+            count={50}
+            size={2}
+            speed={0.6}
+            opacity={0.8}
+            color="#fbbf24"
+            scale={[5, 6, 5]}
+          />
+          <pointLight color="#fbbf24" intensity={2} distance={10} />
+        </>
+      )}
+
+      {/* Level indicator badge (level 2+) */}
+      {level >= 2 && (
+        <LevelBadge level={level} />
+      )}
+    </group>
+  );
+}
+
 // Main Building Model Component
 export default function EnhancedBuildingModel({
   type,
@@ -527,7 +793,10 @@ export default function EnhancedBuildingModel({
       onPointerOut={handlePointerOut}
     >
       {getBuildingModel()}
-      
+
+      {/* Progressive upgrade visuals based on level */}
+      <BuildingUpgradeVisuals level={level} isActive={isActive} />
+
       {/* Hover effect */}
       {hovered && (
         <mesh position={[0, -0.1, 0]}>
@@ -538,6 +807,7 @@ export default function EnhancedBuildingModel({
             opacity={0.3}
             emissive="#60a5fa"
             emissiveIntensity={0.5}
+            toneMapped={false}
           />
         </mesh>
       )}
