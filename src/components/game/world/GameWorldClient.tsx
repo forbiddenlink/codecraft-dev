@@ -7,6 +7,7 @@ import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive';
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setEditorVisible } from "@/store/slices/editorSlice";
 import { setTargetPosition } from "@/store/slices/playerSlice";
+import { selectBuilding } from "@/store/slices/buildingSlice";
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RootState } from "@/store/store";
 import { ParsedCSSRule, JSExecutionContext } from "@/store/slices/gameSlice";
@@ -39,6 +40,7 @@ import type { HtmlNode } from '@/types/html';
 import { ThreeEvent } from '@react-three/fiber';
 import Player from '@/components/game/player/Player';
 import Pixel from '@/components/game/pixel/Pixel';
+import CameraFocusManager from '@/components/game/camera/CameraFocusManager';
 import * as THREE from 'three';
 
 // Environment settings
@@ -360,12 +362,21 @@ export default function GameWorldClient() {
     return () => clearInterval(weatherInterval);
   }, []);
 
+  // Get selected building ID to enable deselection on ground click
+  const selectedBuildingId = useAppSelector((state: RootState) => state.building.selectedBuildingId);
+
   // Type-safe event handlers
   const handleGroundClick = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
     if (event.object.name === 'ground') {
       const point = event.point;
-      
+
+      // Deselect any selected building when clicking on ground
+      if (selectedBuildingId) {
+        dispatch(selectBuilding(null));
+        return;
+      }
+
       if (isBuildModeActive && selectedBuildingTemplateId) {
         const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
         const snappedX = Math.round(point.x / gridSize) * gridSize;
@@ -379,7 +390,7 @@ export default function GameWorldClient() {
         }));
       }
     }
-  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId]);
+  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId]);
 
   const handleGroundHover = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {
@@ -696,6 +707,16 @@ export default function GameWorldClient() {
               zoomSpeed={0.8}
               // Set initial target to center of resources
               target={[0, 0, -15]}
+            />
+
+            {/* Camera Focus Manager - handles smooth camera transitions when buildings are selected */}
+            <CameraFocusManager
+              controlsRef={controlsRef}
+              config={{
+                focusDistance: 10,
+                focusHeightOffset: 6,
+                animationDuration: 0.8,
+              }}
             />
 
             {/* Celebration Effects */}
