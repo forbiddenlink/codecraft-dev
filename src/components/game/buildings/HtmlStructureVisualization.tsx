@@ -1,6 +1,7 @@
 'use client';
 import { useMemo } from 'react';
 import BuildingModel, { BuildingModelType } from './BuildingModel';
+import DataFlowShader from './DataFlowShader';
 import { Html, Line } from '@react-three/drei';
 import { useAppSelector } from '@/hooks/reduxHooks';
 import { applyStyles } from '@/utils/cssParser';
@@ -206,6 +207,21 @@ export default function HtmlStructureVisualization({
               textContent={undefined}
               onClick={() => onBuildingSelect && onBuildingSelect(node)}
             />
+
+            {/* Data flow shader effect for code-generated buildings */}
+            <group position={node.position}>
+              <DataFlowShader
+                width={((node.styles?.width as number | undefined) || getDefaultWidth(node))}
+                height={((node.styles?.height as number | undefined) || getDefaultHeight(node))}
+                depth={((node.styles?.depth as number | undefined) || getDefaultDepth(node))}
+                color={getDataFlowColor(node.elementType)}
+                opacity={0.35}
+                speed={0.8}
+                density={8}
+                glowIntensity={1.2}
+                isActive={true}
+              />
+            </group>
             
             {/* Error message tooltip */}
             {hasError && (
@@ -302,5 +318,62 @@ function getDefaultHeight(node: HtmlNode): number {
       return 0.7;
     default:
       return 1.5;
+  }
+}
+
+// Get default depth based on node type
+function getDefaultDepth(node: HtmlNode): number {
+  switch (node.elementType.toLowerCase()) {
+    case 'section':
+    case 'main':
+      return 3;
+    case 'article':
+    case 'laboratory':
+      return 2;
+    case 'nav':
+    case 'dock':
+      return 1.5;
+    case 'header':
+    case 'footer':
+      return 3;
+    default:
+      return 2;
+  }
+}
+
+// Get data flow shader color based on element type
+function getDataFlowColor(elementType: string): string {
+  switch (elementType.toLowerCase()) {
+    // Layout elements - blue/cyan theme
+    case 'div':
+    case 'section':
+    case 'article':
+      return '#00aaff';
+    // Navigation - purple theme
+    case 'nav':
+    case 'header':
+    case 'footer':
+      return '#aa66ff';
+    // Main content - green theme
+    case 'main':
+    case 'aside':
+      return '#00ff88';
+    // Game-specific elements - special colors
+    case 'habitat':
+      return '#66ffcc';
+    case 'laboratory':
+      return '#ff66aa';
+    case 'greenhouse':
+      return '#88ff44';
+    case 'generator':
+      return '#ffaa00';
+    case 'dock':
+      return '#6699ff';
+    case 'command':
+      return '#ff6666';
+    case 'storage':
+      return '#aaaaff';
+    default:
+      return '#00ff88';
   }
 } 
