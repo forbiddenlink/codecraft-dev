@@ -92,9 +92,10 @@ export default function BuildingModel({
   }, [elementType, styles]);
   
   // Animation spring for hover/selection
+  // Higher emissive intensity values (>1) enable bloom effect
   const { hoverScale, emissiveIntensity } = useSpring({
     hoverScale: isHovered || isSelected ? 1.05 : 1,
-    emissiveIntensity: isHovered || isSelected ? 0.5 : isActive ? 0.2 : 0,
+    emissiveIntensity: isHovered ? 2.0 : isSelected ? 1.5 : isActive ? 0.4 : 0.1,
     config: { tension: 170, friction: 26 }
   });
   
@@ -131,18 +132,19 @@ export default function BuildingModel({
       case 'command':
         // Larger structure with rounded corners
         return (
-          <RoundedBox 
+          <RoundedBox
             args={[properties.width, properties.height, properties.depth]}
             radius={properties.borderRadius}
             smoothness={4}
           >
-            <animated.meshStandardMaterial 
+            <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
               emissiveIntensity={emissiveIntensity}
               metalness={0.3}
               roughness={0.7}
+              toneMapped={false}
             />
           </RoundedBox>
         );
@@ -152,17 +154,18 @@ export default function BuildingModel({
         // Scientific looking module
         return (
           <group>
-            <Box 
+            <Box
               args={[properties.width, properties.height * 0.8, properties.depth]}
               position={[0, 0, 0]}
             >
-              <animated.meshStandardMaterial 
+              <animated.meshStandardMaterial
                 ref={materialRef}
                 color={properties.color}
                 emissive={properties.color}
                 emissiveIntensity={emissiveIntensity}
                 metalness={0.6}
                 roughness={0.4}
+                toneMapped={false}
               />
             </Box>
             <Sphere
@@ -175,6 +178,7 @@ export default function BuildingModel({
                 emissiveIntensity={emissiveIntensity}
                 metalness={0.7}
                 roughness={0.3}
+                toneMapped={false}
               />
             </Sphere>
           </group>
@@ -184,16 +188,17 @@ export default function BuildingModel({
       case 'dock':
         // Corridor-like structure
         return (
-          <Box 
+          <Box
             args={[properties.width, properties.height * 0.5, properties.depth * 2]}
           >
-            <animated.meshStandardMaterial 
+            <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
               emissiveIntensity={emissiveIntensity}
               metalness={0.4}
               roughness={0.6}
+              toneMapped={false}
             />
           </Box>
         );
@@ -201,17 +206,18 @@ export default function BuildingModel({
       case 'header':
         // Top-heavy structure
         return (
-          <Box 
+          <Box
             args={[properties.width, properties.height * 0.7, properties.depth]}
             position={[0, properties.height * 0.15, 0]}
           >
-            <animated.meshStandardMaterial 
+            <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
               emissiveIntensity={emissiveIntensity}
               metalness={0.5}
               roughness={0.5}
+              toneMapped={false}
             />
           </Box>
         );
@@ -219,17 +225,18 @@ export default function BuildingModel({
       case 'footer':
         // Base/foundation structure
         return (
-          <Box 
+          <Box
             args={[properties.width * 1.2, properties.height * 0.4, properties.depth * 1.2]}
             position={[0, -properties.height * 0.3, 0]}
           >
-            <animated.meshStandardMaterial 
+            <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
               emissiveIntensity={emissiveIntensity}
               metalness={0.6}
               roughness={0.7}
+              toneMapped={false}
             />
           </Box>
         );
@@ -241,13 +248,14 @@ export default function BuildingModel({
             <Cylinder
               args={[properties.width * 0.4, properties.width * 0.6, properties.height, 16]}
             >
-              <animated.meshStandardMaterial 
+              <animated.meshStandardMaterial
                 ref={materialRef}
                 color={properties.color}
                 emissive={new Color(0xfbbf24)} // Energy Yellow
                 emissiveIntensity={emissiveIntensity}
                 metalness={0.7}
                 roughness={0.3}
+                toneMapped={false}
               />
             </Cylinder>
             <Box
@@ -271,15 +279,16 @@ export default function BuildingModel({
               args={[properties.width * 0.5, 16, 16, 0, Math.PI]}
               position={[0, properties.height * 0.2, 0]}
             >
-              <animated.meshStandardMaterial 
+              <animated.meshStandardMaterial
                 ref={materialRef}
                 color={new Color(0xc1d9e8)} // Light blue glass
                 emissive={properties.color}
-                emissiveIntensity={emissiveIntensity.to(v => v * 0.3)}
+                emissiveIntensity={emissiveIntensity.to(v => v * 0.5)}
                 metalness={0.1}
                 roughness={0.3}
                 transparent
                 opacity={0.7}
+                toneMapped={false}
               />
             </Sphere>
             <Cylinder
@@ -299,16 +308,17 @@ export default function BuildingModel({
         // Container-like structure
         return (
           <group>
-            <Box 
+            <Box
               args={[properties.width, properties.height, properties.depth]}
             >
-              <animated.meshStandardMaterial 
+              <animated.meshStandardMaterial
                 ref={materialRef}
                 color={properties.color}
                 emissive={properties.color}
                 emissiveIntensity={emissiveIntensity}
                 metalness={0.5}
                 roughness={0.5}
+                toneMapped={false}
               />
             </Box>
             <Box
@@ -327,16 +337,17 @@ export default function BuildingModel({
       // Default case - basic div building
       default:
         return (
-          <Box 
+          <Box
             args={[properties.width, properties.height, properties.depth]}
           >
-            <animated.meshStandardMaterial 
+            <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
               emissiveIntensity={emissiveIntensity}
               metalness={0.4}
               roughness={0.6}
+              toneMapped={false}
             />
           </Box>
         );

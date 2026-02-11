@@ -710,7 +710,12 @@ export default function GameWorldClient() {
             {/* Post-processing effects - disabled on mobile for performance */}
             {!isLowPowerDevice && (
               <EffectComposer>
-                <Bloom intensity={0.5} luminanceThreshold={0.9} />
+                <Bloom
+                  mipmapBlur
+                  intensity={0.8}
+                  luminanceThreshold={0.6}
+                  luminanceSmoothing={0.3}
+                />
               </EffectComposer>
             )}
           </Canvas>
