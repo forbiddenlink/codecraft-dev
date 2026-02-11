@@ -134,7 +134,7 @@ export interface CSSToGameMapping {
   gameProperty: {
     component: string;
     property: string;
-    converter: (value: string) => number | Color | boolean;
+    converter: (value: string) => number | Color | boolean | string;
   };
 }
 
@@ -187,14 +187,14 @@ export function applyCSSToGameObject(
     const mapping = CSS_MAPPINGS[property];
     if (mapping) {
       const convertedValue = mapping.gameProperty.converter(value);
-      if (mapping.gameProperty.component === 'material' && gameObject.material) {
-        (gameObject.material as Material)[mapping.gameProperty.property] = convertedValue;
+      if (mapping.gameProperty.component === 'material' && 'material' in gameObject) {
+        ((gameObject as any).material as any)[mapping.gameProperty.property] = convertedValue;
       } else if (mapping.gameProperty.component === 'transform') {
         const [prop, axis] = mapping.gameProperty.property.split('.');
         if (axis) {
-          gameObject[prop][axis] = convertedValue as number;
+          (gameObject as any)[prop][axis] = convertedValue as number;
         } else {
-          gameObject[prop] = convertedValue as number;
+          (gameObject as any)[prop] = convertedValue as number;
         }
       }
     }

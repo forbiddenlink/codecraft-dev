@@ -47,18 +47,6 @@ export default function PlacedBuildings() {
               ...template.defaultStyles,
               // Add any custom styling based on building status
               opacity: building.status === 'construction' ? 0.7 : 1,
-              // Add status-based colors
-              emissive: isSelected ? '#3b82f6' : // Blue for selected
-                      building.status === 'damaged' ? '#ef4444' : // Red for damaged
-                      building.status === 'inactive' ? '#6b7280' : // Gray for inactive
-                      building.status === 'construction' ? '#f59e0b' : // Orange for construction
-                      '#10b981', // Green for active
-              emissiveIntensity: isSelected ? 0.5 : 0.3,
-              // Add status-based effects
-              wireframe: building.status === 'construction',
-              transparent: building.status !== 'active',
-              metalness: building.status === 'active' ? 0.8 : 0.3,
-              roughness: building.status === 'damaged' ? 0.9 : 0.4
             }}
             position={[building.position.x, building.position.y, building.position.z]}
             rotation={[0, building.rotation, 0]}
@@ -69,21 +57,7 @@ export default function PlacedBuildings() {
             isError={building.status === 'damaged'}
             textContent={template.name}
             onClick={() => handleSelectBuilding(building.id)}
-          >
-            {/* Add status indicators */}
-            {building.status === 'construction' && (
-              <mesh position={[0, template.gridSize.height + 1, 0]}>
-                <sphereGeometry args={[0.3]} />
-                <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={0.5} />
-              </mesh>
-            )}
-            {building.status === 'damaged' && (
-              <mesh position={[0, template.gridSize.height + 1, 0]}>
-                <sphereGeometry args={[0.3]} />
-                <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={0.5} />
-              </mesh>
-            )}
-          </BuildingModel>
+          />
         );
       })}
       

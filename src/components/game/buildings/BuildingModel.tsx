@@ -1,7 +1,7 @@
 'use client';
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Box, Sphere, Cylinder, Text } from '@react-three/drei';
+import { Box, Sphere, Cylinder, Text, RoundedBox } from '@react-three/drei';
 import { Color, Group, MeshStandardMaterial } from 'three';
 import { animated, useSpring } from '@react-spring/three';
 
@@ -131,11 +131,12 @@ export default function BuildingModel({
       case 'command':
         // Larger structure with rounded corners
         return (
-          <Box 
+          <RoundedBox 
             args={[properties.width, properties.height, properties.depth]}
-            borderRadius={properties.borderRadius}
+            radius={properties.borderRadius}
+            smoothness={4}
           >
-            <meshStandardMaterial 
+            <animated.meshStandardMaterial 
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
@@ -143,7 +144,7 @@ export default function BuildingModel({
               metalness={0.3}
               roughness={0.7}
             />
-          </Box>
+          </RoundedBox>
         );
       
       case 'article':
@@ -155,7 +156,7 @@ export default function BuildingModel({
               args={[properties.width, properties.height * 0.8, properties.depth]}
               position={[0, 0, 0]}
             >
-              <meshStandardMaterial 
+              <animated.meshStandardMaterial 
                 ref={materialRef}
                 color={properties.color}
                 emissive={properties.color}
@@ -168,7 +169,7 @@ export default function BuildingModel({
               args={[properties.width * 0.3, 16, 16]}
               position={[0, properties.height * 0.5, 0]}
             >
-              <meshStandardMaterial
+              <animated.meshStandardMaterial
                 color={new Color().copy(properties.color).multiplyScalar(1.2)}
                 emissive={properties.color}
                 emissiveIntensity={emissiveIntensity}
@@ -186,7 +187,7 @@ export default function BuildingModel({
           <Box 
             args={[properties.width, properties.height * 0.5, properties.depth * 2]}
           >
-            <meshStandardMaterial 
+            <animated.meshStandardMaterial 
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
@@ -204,7 +205,7 @@ export default function BuildingModel({
             args={[properties.width, properties.height * 0.7, properties.depth]}
             position={[0, properties.height * 0.15, 0]}
           >
-            <meshStandardMaterial 
+            <animated.meshStandardMaterial 
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
@@ -222,7 +223,7 @@ export default function BuildingModel({
             args={[properties.width * 1.2, properties.height * 0.4, properties.depth * 1.2]}
             position={[0, -properties.height * 0.3, 0]}
           >
-            <meshStandardMaterial 
+            <animated.meshStandardMaterial 
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}
@@ -240,7 +241,7 @@ export default function BuildingModel({
             <Cylinder
               args={[properties.width * 0.4, properties.width * 0.6, properties.height, 16]}
             >
-              <meshStandardMaterial 
+              <animated.meshStandardMaterial 
                 ref={materialRef}
                 color={properties.color}
                 emissive={new Color(0xfbbf24)} // Energy Yellow
@@ -270,11 +271,11 @@ export default function BuildingModel({
               args={[properties.width * 0.5, 16, 16, 0, Math.PI]}
               position={[0, properties.height * 0.2, 0]}
             >
-              <meshStandardMaterial 
+              <animated.meshStandardMaterial 
                 ref={materialRef}
                 color={new Color(0xc1d9e8)} // Light blue glass
                 emissive={properties.color}
-                emissiveIntensity={emissiveIntensity * 0.3}
+                emissiveIntensity={emissiveIntensity.to(v => v * 0.3)}
                 metalness={0.1}
                 roughness={0.3}
                 transparent
@@ -301,7 +302,7 @@ export default function BuildingModel({
             <Box 
               args={[properties.width, properties.height, properties.depth]}
             >
-              <meshStandardMaterial 
+              <animated.meshStandardMaterial 
                 ref={materialRef}
                 color={properties.color}
                 emissive={properties.color}
@@ -329,7 +330,7 @@ export default function BuildingModel({
           <Box 
             args={[properties.width, properties.height, properties.depth]}
           >
-            <meshStandardMaterial 
+            <animated.meshStandardMaterial 
               ref={materialRef}
               color={properties.color}
               emissive={properties.color}

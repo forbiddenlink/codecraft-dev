@@ -6,7 +6,7 @@ import { useAppSelector } from "@/hooks/reduxHooks";
 
 export default function UnlockedVillagers() {
   const { completed } = useChallengeProgress();
-  const playerLevel = useAppSelector((state) => state.player.level);
+  const playerLevel = useAppSelector((state) => state.user.progress.level);
 
   // Get villagers that are unlocked based on player progress
   const availableVillagers = getAvailableVillagers(playerLevel, completed);

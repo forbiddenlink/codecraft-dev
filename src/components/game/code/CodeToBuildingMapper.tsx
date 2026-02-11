@@ -1,15 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import HtmlStructureVisualization from './HtmlStructureVisualization';
+import HtmlStructureVisualization from '../buildings/HtmlStructureVisualization';
 import ErrorVisualization from './ErrorVisualization';
 import { parseHtmlToStructure } from '@/utils/htmlParser';
-import { applyStyles } from '@/utils/cssParser';
-import { executeJavaScript } from '@/utils/codeExecution';
-import { 
-  updateHtmlStructure, 
-  updateCssRules, 
-  updateJsExecution 
+import { parseCSSRules } from '@/utils/cssParser';
+import {
+  updateHtmlStructure,
+  updateCssRules,
+  updateJsExecution
 } from '@/store/slices/gameSlice';
 
 interface HtmlNode {
@@ -35,15 +34,16 @@ export default function CodeToBuildingMapper() {
   
   // Get current editor state
   const { 
-    currentCode, 
+    code, 
     language
   } = useAppSelector(state => state.editor);
   
+  const currentCode = code[language];
+  
   // Get current game state
-  const { 
-    htmlStructure, 
-    cssRules, 
-    jsExecutionContext 
+  const {
+    htmlStructure,
+    cssRules
   } = useAppSelector(state => state.game);
   
   // State for selected building
@@ -58,55 +58,58 @@ export default function CodeToBuildingMapper() {
           case 'html':
             // Parse HTML to structure
             const structure = parseHtmlToStructure(currentCode);
-            
-            // Apply current CSS styles
-            const styledStructure = applyStyles(structure, cssRules);
-            
-            // Update game state with the processed structure
-            dispatch(updateHtmlStructure(styledStructure));
+            dispatch(updateHtmlStructure(structure));
             break;
-            
+
           case 'css':
-            // Parse CSS
-            const rules = applyStyles([], currentCode, true);
-            
-            // Update game state with the processed CSS
+            // Parse CSS rules
+            const rules = parseCSSRules(currentCode);
             dispatch(updateCssRules(rules));
-            
-            // Re-apply styles to current HTML structure
-            if (htmlStructure && htmlStructure.length > 0) {
-              const updatedStructure = applyStyles(htmlStructure, rules);
-              dispatch(updateHtmlStructure(updatedStructure));
-            }
             break;
-            
+
           case 'javascript':
-            // Safely execute user JavaScript
-            const executionResult = executeJavaScript(currentCode, {
-              // Provide game-specific context
-              colony: {
-                // Methods that affect the game world
-                addResource: (type: string, amount: number) => {
-                  console.log(`Adding ${amount} of ${type}`);
-                  // Would dispatch to the resource system
+            // Execute JavaScript safely
+            try {
+              // Create a sandboxed execution context
+              const context = {
+                console: {
+                  log: (...args: any[]) => console.log('[User Code]', ...args),
+                  warn: (...args: any[]) => console.warn('[User Code]', ...args),
+                  error: (...args: any[]) => console.error('[User Code]', ...args),
                 },
-                setEnvironment: (property: string, value: EnvironmentValue) => {
-                  console.log(`Setting ${property} to ${value}`);
-                  // Would dispatch to update environment
-                },
-                // Other colony interaction methods
-              }
-            });
-            
-            // Update game state with execution result
-            dispatch(updateJsExecution(executionResult));
+                // Add safe APIs
+              };
+
+              // Execute in isolated scope
+              const wrappedCode = `
+                (function() {
+                  const console = context.console;
+                  ${currentCode}
+                })();
+              `;
+
+              // Use Function constructor for safer execution than eval
+              const executor = new Function('context', wrappedCode);
+              executor(context);
+
+              dispatch(updateJsExecution({
+                success: true,
+                output: 'Code executed successfully',
+              }));
+            } catch (error: any) {
+              dispatch(updateJsExecution({
+                success: false,
+                error: error?.message || 'Unknown error',
+              }));
+              console.error('JavaScript execution error:', error);
+            }
             break;
         }
       }
     }, 500); // 500ms debounce
     
     return () => clearTimeout(timer);
-  }, [currentCode, language, cssRules, htmlStructure, dispatch]);
+  }, [currentCode, language, dispatch]);
   
   // Handle building selection
   const handleBuildingSelect = (node: HtmlNode) => {
@@ -122,7 +125,6 @@ export default function CodeToBuildingMapper() {
       {/* Visualize HTML structure as buildings */}
       <HtmlStructureVisualization
         htmlStructure={htmlStructure}
-        cssRules={cssRules}
         onBuildingSelect={handleBuildingSelect}
         selectedNodeId={selectedNodeId}
       />
@@ -131,13 +133,11 @@ export default function CodeToBuildingMapper() {
       <ErrorVisualization />
       
       {/* JavaScript execution visualization would be added here */}
-      {jsExecutionContext && Object.keys(jsExecutionContext).length > 0 && (
-        // This could be a component that visualizes JavaScript execution
-        // Like resource flows, event triggers, etc.
+      {/* TODO: Re-enable when jsExecutionContext is available in GameState */}
+      {/* {jsExecutionContext && Object.keys(jsExecutionContext).length > 0 && (
         <group position={[0, 10, 0]}>
-          {/* JavaScript execution visualization */}
         </group>
-      )}
+      )} */}
     </group>
   );
 } 

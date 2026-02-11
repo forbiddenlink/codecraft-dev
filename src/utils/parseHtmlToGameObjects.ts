@@ -11,6 +11,7 @@ interface StyleObject {
 export interface GameObject {
   tag: string;
   color: string;
+  className?: string;
   width?: number;
   height?: number;
   position?: [number, number, number];

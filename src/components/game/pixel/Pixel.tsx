@@ -178,8 +178,8 @@ function adaptContent(
 }
 
 export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) {
-  const pixelRef = useRef<Object3D>();
-  const coreRef = useRef<Mesh>();
+  const pixelRef = useRef<Object3D>(null);
+  const coreRef = useRef<Mesh>(null);
   const dispatch = useAppDispatch();
   const { camera } = useThree();
   
@@ -198,9 +198,9 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
   const [hovering, setHovering] = useState(false);
   const [showDialogue, setShowDialogue] = useState(false);
   const [dialogueText, setDialogueText] = useState('');
-  const lastMoodUpdate = useRef(Date.now());
-  const lastDialogueUpdate = useRef(Date.now());
-  const interactionRadiusRef = useRef<Mesh>();
+  const lastMoodUpdate = useRef<number>(Date.now());
+  const lastDialogueUpdate = useRef<number>(Date.now());
+  const interactionRadiusRef = useRef<Mesh>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackType, setFeedbackType] = useState<keyof typeof FEEDBACK_TYPES>('hint');
   const [learningStyle, setLearningStyle] = useState<LearningStyle>('visual');
@@ -219,7 +219,7 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
 
   // Determine contextual dialogue
   useEffect(() => {
-    let contextType = 'default';
+    let contextType: ContextType = 'default';
     
     // Prioritize contexts
     if (editorErrors && editorErrors.length > 0) {

@@ -19,7 +19,7 @@ interface ResourceGeneratorsProps {
   showProductionEffects?: boolean;
 }
 
-const RESOURCE_COLORS = {
+const RESOURCE_COLORS: Record<string, string> = {
   energy: '#FBBF24',
   minerals: '#3B82F6',
   water: '#1E3A8A',
@@ -27,7 +27,7 @@ const RESOURCE_COLORS = {
   default: '#F8FAFC'
 };
 
-const RESOURCE_ICONS = {
+const RESOURCE_ICONS: Record<string, string> = {
   energy: '⚡',
   minerals: '💎',
   water: '💧',
@@ -35,7 +35,7 @@ const RESOURCE_ICONS = {
   default: '📦'
 };
 
-const RESOURCE_NAMES = {
+const RESOURCE_NAMES: Record<string, string> = {
   energy: 'Energy',
   minerals: 'Minerals',
   water: 'Water',

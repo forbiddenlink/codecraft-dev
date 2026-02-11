@@ -9,7 +9,7 @@ export function useChallengeSystem() {
   const currentIndex = useAppSelector(state => state.challenges.currentIndex);
   const availableChallenges = useAppSelector(state => state.challenges.availableChallenges);
   const completedChallengeIds = useAppSelector(state => state.challenges.completed);
-  const editorCode = useAppSelector(state => state.editor.currentCode);
+  const editorCode = useAppSelector(state => state.editor.code.html);
   
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);

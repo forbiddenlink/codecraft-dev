@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import { Sphere, Box, Cylinder } from "@react-three/drei";
+import { Sphere, Box, Cylinder, RoundedBox } from "@react-three/drei";
 import { Villager } from "@/data/villagers";
 import { Vector3, Group } from "three";
 import { useAppSelector } from "@/hooks/reduxHooks";
@@ -227,9 +227,9 @@ export default function VillagerMesh({ villager, position }: Props) {
         </Sphere>
       )}
       {villager.model === "roundedBox" && (
-        <Box args={[0.4, 1, 0.4]} position={[0, 0.5, 0]} radius={0.1}>
+        <RoundedBox args={[0.4, 1, 0.4]} position={[0, 0.5, 0]} radius={0.1}>
           <meshStandardMaterial color={villager.color} />
-        </Box>
+        </RoundedBox>
       )}
     </group>
   );

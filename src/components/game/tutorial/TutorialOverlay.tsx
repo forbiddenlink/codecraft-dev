@@ -119,7 +119,7 @@ const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ currentStep, focusAre
           {showCompleteMessage ? (
             <div className="text-center">
               <h3 className="text-xl font-bold text-terraforming-green mb-2">Tutorial Complete!</h3>
-              <p className="text-stellar-white mb-4">You've completed this tutorial.</p>
+              <p className="text-stellar-white mb-4">You&apos;ve completed this tutorial.</p>
               <button 
                 onClick={() => setShowCompleteMessage(false)}
                 className="px-4 py-2 bg-cosmic-blue hover:bg-opacity-90 text-stellar-white rounded-md transition-all"

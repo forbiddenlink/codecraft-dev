@@ -83,8 +83,8 @@ export class CodeToGamePipeline {
       return {
         success: false,
         htmlStructure: [],
-        cssRules: {},
         buildings: [],
+        behaviors: {},
         errors: [
           ...htmlValidation.errors,
           ...cssValidation.errors,

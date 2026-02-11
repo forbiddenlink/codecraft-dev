@@ -63,8 +63,8 @@ export default function BuildingDetailsPanel({
   const dispatch = useAppDispatch();
   
   // Get the selected building
-  const building = useAppSelector(state => 
-    buildingId ? state.building.placedBuildings.find(b => b.id === buildingId) : null
+  const building = useAppSelector(state =>
+    buildingId ? state.building.placedBuildings.find((b: any) => b.id === buildingId) : null
   );
   
   // If no building or ID, don't render
@@ -90,11 +90,11 @@ export default function BuildingDetailsPanel({
   
   // Handle viewing the building's code
   const handleViewCode = () => {
-    // Set code editor to HTML
-    dispatch(setLanguage('html'));
-    
-    // Load the template's default HTML
-    dispatch(setCode(template.defaultHtml));
+    // Set code editor to HTML with the template's default code
+    dispatch(setCode({ 
+      language: 'html', 
+      code: template.defaultHtml 
+    }));
     
     // Close the panel
     onClose();
@@ -178,8 +178,8 @@ export default function BuildingDetailsPanel({
         <h3 className="font-semibold mb-2">Effects</h3>
         {building.effects && building.effects.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
-            {building.effects.map((effect, index) => {
-              const resourceMeta = RESOURCE_METADATA[effect.target];
+            {building.effects.map((effect: any, index: number) => {
+              const resourceMeta = (RESOURCE_METADATA as any)[effect.target];
               if (!resourceMeta) return null;
 
               return (

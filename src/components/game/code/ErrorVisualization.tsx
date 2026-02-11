@@ -6,19 +6,12 @@ import { useAppSelector } from '@/store/hooks';
 import { findNodeByLineNumber } from '@/utils/htmlStructureUtils';
 import * as THREE from 'three';
 
-interface ValidationError {
-  lineNumber: number;
-  column: number;
-  message: string;
-  severity: 'error' | 'warning' | 'info';
-}
-
 interface ErrorVisualizationProps {
   position?: [number, number, number];
 }
 
 export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisualizationProps) {
-  const errors = useAppSelector(state => state.editor.validationErrors);
+  const errors = useAppSelector(state => state.editor.errors);
   const htmlStructure = useAppSelector(state => state.game.htmlStructure);
   const visualizationRef = useRef<THREE.Group>(null);
   
@@ -34,9 +27,8 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
   if (!errors || errors.length === 0) return null;
   
   // Find distinct error messages by severity
-  const errorCount = errors.filter(e => e.severity === 'error').length;
-  const warningCount = errors.filter(e => e.severity === 'warning').length;
-  const infoCount = errors.filter(e => e.severity === 'info').length;
+  const errorCount = errors.filter((e: any) => e.severity === 'error').length;
+  const warningCount = errors.filter((e: any) => e.severity === 'warning').length;
   
   return (
     <group position={position} ref={visualizationRef}>
@@ -68,9 +60,6 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
               {warningCount > 0 && (
                 <div className="text-yellow-300">{warningCount} warning{warningCount !== 1 ? 's' : ''}</div>
               )}
-              {infoCount > 0 && (
-                <div className="text-blue-300">{infoCount} info message{infoCount !== 1 ? 's' : ''}</div>
-              )}
             </div>
             <div className="mt-2 text-sm">
               Check the editor for details
@@ -80,11 +69,10 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
       </group>
       
       {/* Error visualization on affected buildings */}
-      {errors.map((error, index) => {
-        // Find the affected node in the HTML structure
-        const affectedNode = findNodeByLineNumber(htmlStructure, error.lineNumber);
+      {/* TODO: Re-enable when GameStructureNode has lineNumber property */}
+      {/* {errors.map((error, index) => {
+        const affectedNode = findNodeByLineNumber(htmlStructure, error.line);
         
-        // If we can't find the node or it doesn't have a position, skip it
         if (!affectedNode || !affectedNode.position) return null;
         
         const errorColor = error.severity === 'error' ? 'red' : 
@@ -93,7 +81,6 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
         
         return (
           <group key={`error-${index}`} position={affectedNode.position}>
-            {/* Error effect */}
             <Sparkles
               count={15}
               scale={[1, 1, 1]}
@@ -108,13 +95,12 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
               distance={5}
             />
             
-            {/* Error message tooltip */}
             <group position={[0, 1.5, 0]}>
               <Text
                 color={errorColor}
                 fontSize={0.3}
                 maxWidth={4}
-                textAlign="center"
+                textAlign="center"}
                 anchorY="bottom"
               >
                 {error.message}
@@ -122,7 +108,7 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
             </group>
           </group>
         );
-      })}
+      })} */}
     </group>
   );
 } 

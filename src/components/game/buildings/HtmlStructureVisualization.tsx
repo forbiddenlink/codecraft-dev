@@ -3,45 +3,67 @@ import { useMemo } from 'react';
 import BuildingModel, { BuildingModelType } from './BuildingModel';
 import { Html, Line } from '@react-three/drei';
 import { useAppSelector } from '@/hooks/reduxHooks';
+import { applyStyles } from '@/utils/cssParser';
 import type { HtmlNode } from '@/types/html';
 
 interface HtmlStructureVisualizationProps {
   htmlStructure: HtmlNode[];
-  cssRules?: string[];
   onBuildingSelect?: (node: HtmlNode) => void;
   selectedNodeId?: string | null;
 }
+
+// Extended type with position info for 3D rendering
+type ProcessedHtmlNode = HtmlNode & {
+  level: number;
+  index: number;
+  position?: [number, number, number];
+  children?: ProcessedHtmlNode[];
+};
 
 const NODE_VERTICAL_SPACING = 3;
 const NODE_HORIZONTAL_SPACING = 4;
 const BASE_HEIGHT = 0;
 
-export default function HtmlStructureVisualization({ 
-  htmlStructure, 
-  cssRules,
+export default function HtmlStructureVisualization({
+  htmlStructure,
   onBuildingSelect,
-  selectedNodeId 
+  selectedNodeId
 }: HtmlStructureVisualizationProps) {
-  const editorErrors = useAppSelector(state => state.editor.validationErrors);
+  const editorErrors = useAppSelector(state => state.editor.errors);
+  const cssRules = useAppSelector(state => state.game.cssRules);
   
   // Process HTML structure and layout buildings in 3D space
   const processedStructure = useMemo(() => {
     if (!htmlStructure || htmlStructure.length === 0) {
-      return [];
+      return { roots: [], all: [] };
     }
-    
-    const processedNodes: HtmlNode[] = [];
-    
+
+    const processedNodes: ProcessedHtmlNode[] = [];
+
     // Calculate horizontal positions based on tree structure
     function processNode(
-      node: HtmlNode, 
-      level: number, 
+      node: HtmlNode,
+      level: number,
       parentPosition: [number, number, number] | null = null,
       index: number = 0,
       siblingCount: number = 1
-    ): HtmlNode {
-      // Create a copy of the node
-      const processedNode = { ...node, level, index };
+    ): ProcessedHtmlNode {
+      // Apply CSS styles to the node if cssRules are available
+      const appliedStyles = cssRules.length > 0 ? applyStyles(node as any, cssRules) : undefined;
+
+      // Create a copy of the node with styles
+      const processedNode: ProcessedHtmlNode = {
+        ...node,
+        level,
+        index,
+        styles: appliedStyles ? {
+          ...node.styles,
+          color: appliedStyles.color,
+          opacity: appliedStyles.opacity,
+          scale: appliedStyles.scale,
+          backgroundColor: appliedStyles.emissive || appliedStyles.color,
+        } : node.styles
+      };
       
       // Calculate node position
       let nodePosition: [number, number, number];
@@ -68,13 +90,14 @@ export default function HtmlStructureVisualization({
       
       // Process children recursively
       if (node.children && node.children.length > 0) {
-        processedNode.children = node.children.map((child, childIndex) => 
+        const children = node.children; // Store in const for type narrowing
+        processedNode.children = children.map((child, childIndex) => 
           processNode(
             child, 
             level + 1, 
             nodePosition, 
             childIndex, 
-            node.children.length
+            children.length
           )
         );
       } else {
@@ -91,19 +114,19 @@ export default function HtmlStructureVisualization({
     const rootNodes = htmlStructure.map((node, index) => 
       processNode(node, 0, null, index, htmlStructure.length)
     );
-    
+
     return { roots: rootNodes, all: processedNodes };
-  }, [htmlStructure]);
+  }, [htmlStructure, cssRules]);
   
   // Connect nodes with lines to show hierarchy
   const connectionLines = useMemo(() => {
     const lines: Array<{ from: [number, number, number], to: [number, number, number] }> = [];
     
-    function addConnectionLines(node: HtmlNode) {
+    function addConnectionLines(node: ProcessedHtmlNode) {
       if (!node.position || !node.children) return;
       
       // Connect parent to each child
-      node.children.forEach(child => {
+      node.children.forEach((child: ProcessedHtmlNode) => {
         if (child.position) {
           lines.push({
             from: node.position as [number, number, number],
@@ -125,23 +148,15 @@ export default function HtmlStructureVisualization({
   }, [processedStructure]);
   
   // Check if a node has errors
-  const nodeHasError = (node: HtmlNode) => {
-    if (!editorErrors || editorErrors.length === 0 || !node.lineNumber) return false;
-    
-    return editorErrors.some(error => 
-      error.lineNumber === node.lineNumber || 
-      (node.children && node.children.some(child => 
-        child.lineNumber && error.lineNumber === child.lineNumber
-      ))
-    );
+  const nodeHasError = (_node: HtmlNode) => {
+    // Error checking not implemented yet - would need lineNumber in HtmlNode type
+    return false;
   };
   
   // Find error message for a node if it exists
-  const getNodeErrorMessage = (node: HtmlNode) => {
-    if (!editorErrors || editorErrors.length === 0 || !node.lineNumber) return null;
-    
-    const error = editorErrors.find(error => error.lineNumber === node.lineNumber);
-    return error ? error.message : null;
+  const getNodeErrorMessage = (_node: HtmlNode) => {
+    // Error checking not implemented yet - would need lineNumber in HtmlNode type
+    return null;
   };
   
   // Return null if no structure
@@ -176,15 +191,19 @@ export default function HtmlStructureVisualization({
             <BuildingModel
               elementType={buildingType}
               styles={{
-                ...node.styles,
-                width: node.styles.width || getDefaultWidth(node),
-                height: node.styles.height || getDefaultHeight(node),
+                backgroundColor: node.styles?.backgroundColor as string | undefined,
+                color: node.styles?.color as string | undefined,
+                borderRadius: node.styles?.borderRadius as string | number | undefined,
+                width: (node.styles?.width as string | number | undefined) || getDefaultWidth(node),
+                height: (node.styles?.height as string | number | undefined) || getDefaultHeight(node),
+                depth: node.styles?.depth as string | number | undefined,
+                opacity: node.styles?.opacity as number | undefined,
               }}
               position={node.position}
               isHovered={false}
               isSelected={isSelected}
               isError={hasError}
-              textContent={node.textContent}
+              textContent={undefined}
               onClick={() => onBuildingSelect && onBuildingSelect(node)}
             />
             
@@ -196,7 +215,7 @@ export default function HtmlStructureVisualization({
                 distanceFactor={15}
               >
                 <div className="bg-red-800 text-white p-2 rounded-md text-sm max-w-xs">
-                  <div className="font-bold">Error on line {node.lineNumber}</div>
+                  <div className="font-bold">Error</div>
                   <div>{getNodeErrorMessage(node)}</div>
                 </div>
               </Html>

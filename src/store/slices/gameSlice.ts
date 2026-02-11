@@ -7,6 +7,34 @@ interface Position {
   z: number;
 }
 
+interface GameStructureStyle {
+  color?: string;
+  scale?: number;
+  rotation?: [number, number, number];
+  position?: [number, number, number];
+  opacity?: number;
+  emissive?: string;
+  metalness?: number;
+  roughness?: number;
+  wireframe?: boolean;
+  animation?: string;
+  glow?: boolean;
+  shadow?: boolean;
+}
+
+export interface ParsedCSSRule {
+  selector: string;
+  properties: GameStructureStyle;
+}
+
+export interface JSExecutionContext {
+  success: boolean;
+  output?: any;
+  error?: string;
+  variables?: Record<string, any>;
+  console?: string[];
+}
+
 interface GameState {
   playerPosition: Position;
   pixelPosition: Position;
@@ -29,6 +57,8 @@ interface GameState {
     food: number;
   };
   htmlStructure: GameStructureNode[];
+  cssRules: ParsedCSSRule[];
+  jsExecutionContext: JSExecutionContext | null;
 }
 
 const initialState: GameState = {
@@ -48,7 +78,9 @@ const initialState: GameState = {
     water: 100,
     food: 50
   },
-  htmlStructure: []
+  htmlStructure: [],
+  cssRules: [],
+  jsExecutionContext: null
 };
 
 export const gameSlice = createSlice({
@@ -87,6 +119,12 @@ export const gameSlice = createSlice({
     },
     updateHtmlStructure: (state, action: PayloadAction<GameStructureNode[]>) => {
       state.htmlStructure = action.payload;
+    },
+    updateCssRules: (state, action: PayloadAction<ParsedCSSRule[]>) => {
+      state.cssRules = action.payload;
+    },
+    updateJsExecution: (state, action: PayloadAction<JSExecutionContext | null>) => {
+      state.jsExecutionContext = action.payload;
     }
   }
 });
@@ -100,7 +138,9 @@ export const {
   setPixelMood,
   updatePlayerPosition,
   updatePixelPosition,
-  updateHtmlStructure
+  updateHtmlStructure,
+  updateCssRules,
+  updateJsExecution
 } = gameSlice.actions;
 
 export default gameSlice.reducer; 

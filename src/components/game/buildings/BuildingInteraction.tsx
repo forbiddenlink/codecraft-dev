@@ -3,18 +3,17 @@ import { Html, Trail } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import { Group, MeshStandardMaterial } from 'three';
 import { useAppSelector } from '@/hooks/reduxHooks';
-import { buildingTemplates } from '@/data/buildingTemplates';
-import { Building } from '@/store/slices/buildingSlice';
+import { buildingTemplates, PlacedBuilding } from '@/data/buildingTemplates';
 import { animated, useSpring } from '@react-spring/three';
 
 interface BuildingInteractionProps {
-  building: Building;
+  building: PlacedBuilding;
   onSelect: (id: string) => void;
   isSelected: boolean;
 }
 
 export default function BuildingInteraction({ building, onSelect, isSelected }: BuildingInteractionProps) {
-  const resources = useAppSelector(state => state.resources.resources);
+  const resources = useAppSelector(state => state.resource.storage);
   const buildingRef = useRef<Group>(null);
   const materialRef = useRef<MeshStandardMaterial>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -57,8 +56,8 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
     >
       <animated.group scale={scale}>
         {/* Building base with effects */}
-        <mesh>
-          <meshStandardMaterial
+        <animated.mesh>
+          <animated.meshStandardMaterial
             ref={materialRef}
             color={building.status === 'construction' ? '#666666' : '#4A5568'}
             emissive={building.status === 'active' ? '#3B82F6' : '#000000'}
@@ -68,7 +67,7 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
             transparent
             opacity={building.status === 'construction' ? 0.8 : 1}
           />
-        </mesh>
+        </animated.mesh>
 
         {/* Resource generation effects */}
         {building.status === 'active' && building.effects.map((effect, index) => {
@@ -119,7 +118,16 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
             {building.status === 'active' && (
               <div className="flex flex-wrap gap-2 justify-center">
                 {building.effects.map((effect, index) => {
-                  const resourceIcon = resources[effect.target]?.icon;
+                  // Only show effects for resources that exist in storage
+                  if (!effect.target || !(effect.target in resources)) return null;
+                  
+                  const resourceIcons: Record<string, string> = {
+                    energy: '⚡',
+                    minerals: '💎',
+                    water: '💧',
+                    food: '🌾'
+                  };
+                  const resourceIcon = resourceIcons[effect.target];
                   if (!resourceIcon) return null;
 
                   return (

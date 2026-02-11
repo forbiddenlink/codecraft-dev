@@ -4,27 +4,15 @@ import { useAppDispatch } from '@/store/hooks';
 import { setEditorErrors } from '@/store/slices/editorSlice';
 import { GameStructureNode } from '@/utils/htmlParser';
 import { BuildingLayout } from '@/game/systems/CodeToGamePipeline';
+import { ValidationError } from '@/utils/codeValidation';
 
 interface CodeProcessingResult {
   success: boolean;
   htmlStructure: GameStructureNode[];
-  cssRules: Record<string, unknown>;
   buildings: BuildingLayout[];
   behaviors: Record<string, unknown>;
-  errors: Array<{
-    line: number;
-    column: number;
-    message: string;
-    severity: string;
-    source: string;
-  }>;
-  warnings: Array<{
-    line: number;
-    column: number;
-    message: string;
-    severity: string;
-    source: string;
-  }>;
+  errors: ValidationError[];
+  warnings: ValidationError[];
 }
 
 export function useCodeProcessor() {
@@ -49,22 +37,21 @@ export function useCodeProcessor() {
       setLastResult(result);
       
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing code:', error);
-      
+
       // Create error object
       const errorResult: CodeProcessingResult = {
         success: false,
         htmlStructure: [],
-        cssRules: {},
         buildings: [],
         behaviors: {},
         errors: [{
           line: 1,
           column: 1,
-          message: `Code processing error: ${error.message}`,
-          severity: 'error',
-          source: 'processing'
+          message: `Code processing error: ${error?.message || 'Unknown error'}`,
+          severity: 'error' as const,
+          source: 'html' as const
         }],
         warnings: []
       };

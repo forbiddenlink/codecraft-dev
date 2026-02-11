@@ -1,6 +1,7 @@
 'use client';
 import { useAppSelector } from '@/store/hooks';
 import { ResourceCollector } from './ResourceCollector';
+import { ResourceType } from '@/utils/resourceManagement';
 
 type ResourceKey = 'energy' | 'minerals' | 'water' | 'food';
 
@@ -82,18 +83,11 @@ export default function ResourceCollectors() {
 
   return (
     <group>
-      {Object.entries(storage).map(([resourceType, amount]: [string, number]) => 
+      {Object.entries(storage).map(([resourceType, amount]: [string, number]) =>
         collectorPositions[resourceType as ResourceKey]?.map((position: [number, number, number], index: number) => (
           <ResourceCollector
             key={`${resourceType}-${index}`}
-            resource={{
-              id: resourceType,
-              name: RESOURCE_METADATA[resourceType as ResourceKey].name,
-              color: RESOURCE_METADATA[resourceType as ResourceKey].color,
-              icon: RESOURCE_METADATA[resourceType as ResourceKey].icon,
-              amount,
-              generationRate: productionRates[resourceType as ResourceKey]
-            }}
+            resource={resourceType as ResourceType}
             position={position}
             collectionRadius={3.5}
           />

@@ -56,15 +56,18 @@ export default function usePixelDialogue(): UsePixelDialogueReturn {
   const dialogueTimeout = useRef<NodeJS.Timeout | null>(null);
   
   // Get relevant game state for contextual dialogue
-  const {
-    pixelMood,
-    editorErrors,
-    tutorialActive,
-    tutorialStep,
-    colonyResources,
-    playerProgress,
-    isEditorVisible
-  } = useAppSelector<GameState>((state: RootState) => state.game);
+  const gameState = useAppSelector((state: RootState) => state.game);
+
+  // Extract properties with fallbacks for missing values
+  const pixelMood = gameState.pixelMood || 'neutral';
+  const editorErrors = gameState.editorErrors || [];
+  const tutorialActive = gameState.tutorialActive || false;
+  const tutorialStep = gameState.tutorialStep;
+  const colonyResources = gameState.colonyResources || { energy: 0, oxygen: 0 };
+  // playerProgress is not in the actual GameState, using completedChallenges from challenge slice instead
+  const completedChallenges = useAppSelector((state: RootState) => state.challenges.completed);
+  const playerProgress = { recentlyUnlocked: [], completedChallenges };
+  const isEditorVisible = gameState.isEditorVisible || false;
   
   // Get current challenge
   const currentChallenge = useAppSelector<Challenge | undefined>((state: RootState) => 
@@ -104,18 +107,19 @@ export default function usePixelDialogue(): UsePixelDialogueReturn {
       if (colonyResources.energy < 20) {
         return "Your colony's energy levels are getting low. We should build more collectors!";
       }
-      if (colonyResources.oxygen < 30) {
-        return "Oxygen levels are dropping. Consider building more life support systems.";
+      if (colonyResources.water < 30) {
+        return "Water levels are dropping. Consider building more water collectors.";
       }
     }
     
     // 5. Progression tips
     if (playerProgress) {
-      if (playerProgress.recentlyUnlocked && playerProgress.recentlyUnlocked.length > 0) {
-        const unlocked = playerProgress.recentlyUnlocked[0];
-        return `You've unlocked a new ${unlocked.type}: ${unlocked.name}! Want to try it out?`;
-      }
-      
+      // TODO: Implement recently unlocked tracking
+      // if (playerProgress.recentlyUnlocked && playerProgress.recentlyUnlocked.length > 0) {
+      //   const unlocked = playerProgress.recentlyUnlocked[0];
+      //   return `You've unlocked a new ${unlocked.type}: ${unlocked.name}! Want to try it out?`;
+      // }
+
       // Suggest next steps based on progress
       if (playerProgress.completedChallenges.length === 0) {
         return "Ready to start your first challenge? Click on the Challenges panel to begin!";

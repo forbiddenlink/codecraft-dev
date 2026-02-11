@@ -128,14 +128,15 @@ export function validateCss(code: string): ValidationResult {
         }
       });
     });
-  } catch (error) {
-    const match = error.message.match(/line (\d+)/i);
+  } catch (error: any) {
+    const message = error?.message || 'Unknown CSS parsing error';
+    const match = message.match(/line (\d+)/i);
     const line = match ? parseInt(match[1]) : 1;
-    
+
     errors.push({
       line,
       column: 1,
-      message: 'CSS parsing error: ' + error.message,
+      message: 'CSS parsing error: ' + message,
       severity: 'error',
       source: 'css'
     });
@@ -179,15 +180,16 @@ export function validateJs(code: string): ValidationResult {
         });
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     // Try to extract line number from error message
-    const match = error.message.match(/line (\d+)/i);
+    const message = error?.message || 'Unknown JavaScript syntax error';
+    const match = message.match(/line (\d+)/i);
     const line = match ? parseInt(match[1]) : 1;
-    
+
     errors.push({
       line,
       column: 1,
-      message: 'JavaScript syntax error: ' + error.message,
+      message: 'JavaScript syntax error: ' + message,
       severity: 'error',
       source: 'js'
     });

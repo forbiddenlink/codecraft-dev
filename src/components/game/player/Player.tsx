@@ -3,6 +3,7 @@ import { useRef, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Sphere, Trail, Html } from '@react-three/drei';
 import { Group, Vector3, MathUtils } from 'three';
+import * as THREE from 'three';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { setIsMoving } from '@/store/slices/playerSlice';
 
@@ -194,8 +195,7 @@ export default function Player() {
         width={0.5}
         length={8}
         color={'#60A5FA'}
-        attenuation={(t) => t * t}
-        opacity={0.4}
+        attenuation={(width) => width * width}
       >
         <mesh visible={false}>
           <sphereGeometry args={[0.1]} />

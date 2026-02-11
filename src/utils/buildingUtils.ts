@@ -1,6 +1,5 @@
 import { Vector3 } from 'three';
-import { Building } from '@/store/slices/buildingSlice';
-import { buildingTemplates } from '@/data/buildingTemplates';
+import { PlacedBuilding, buildingTemplates } from '@/data/buildingTemplates';
 
 interface GridBounds {
   minX: number;
@@ -43,7 +42,7 @@ export function checkBuildingCollision(
   position: Vector3,
   templateId: string,
   rotation: number,
-  existingBuildings: Record<string, Building>
+  existingBuildings: PlacedBuilding[]
 ): boolean {
   const newBuildingBounds = getBuildingBounds(position, templateId, rotation);
 
@@ -58,7 +57,7 @@ export function checkBuildingCollision(
   }
 
   // Check collision with existing buildings
-  return Object.values(existingBuildings).some(building => {
+  return existingBuildings.some(building => {
     const existingBounds = getBuildingBounds(
       new Vector3(building.position.x, building.position.y, building.position.z),
       building.templateId,
@@ -78,7 +77,7 @@ export function checkBuildingCollision(
 export function getValidGridPositions(
   center: Vector3,
   radius: number,
-  existingBuildings: Record<string, Building>
+  existingBuildings: PlacedBuilding[]
 ): Vector3[] {
   const positions: Vector3[] = [];
   
@@ -96,7 +95,7 @@ export function getValidGridPositions(
         pos.x <= COLONY_BOUNDS.maxX &&
         pos.z >= COLONY_BOUNDS.minZ &&
         pos.z <= COLONY_BOUNDS.maxZ &&
-        !Object.values(existingBuildings).some(building => {
+        !existingBuildings.some(building => {
           const buildingPos = new Vector3(
             building.position.x,
             building.position.y,

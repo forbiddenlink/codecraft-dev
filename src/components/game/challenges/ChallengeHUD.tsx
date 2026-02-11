@@ -83,7 +83,7 @@ export default function ChallengeHUD() {
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Requirements:</h3>
         <ul className="space-y-1">
-          {currentChallenge.requirements.buildings?.map((building, i) => (
+          {currentChallenge.requirements.buildings?.map((building: string, i: number) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-blue-400">•</span>
               <span>Build a {building}</span>
@@ -92,7 +92,7 @@ export default function ChallengeHUD() {
           {currentChallenge.requirements.resources && Object.entries(currentChallenge.requirements.resources).map(([resource, amount], i) => (
             <li key={i} className="flex items-start gap-2">
               <span className="text-blue-400">•</span>
-              <span>Collect {amount} {resource}</span>
+              <span>Collect {String(amount)} {resource}</span>
             </li>
           ))}
         </ul>
@@ -132,12 +132,12 @@ export default function ChallengeHUD() {
                 key={resource}
                 className="px-2 py-1 bg-green-900 rounded-full text-sm flex items-center gap-1"
               >
-                {amount} {resource}
+                {String(amount)} {resource}
               </span>
             )
           ))}
           
-          {currentChallenge.rewards.unlocks?.buildings?.map((building, i) => (
+          {currentChallenge.rewards.unlocks?.buildings?.map((building: string, i: number) => (
             <span
               key={`building-${i}`}
               className="px-2 py-1 bg-purple-900 rounded-full text-sm"

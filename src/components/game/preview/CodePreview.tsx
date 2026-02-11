@@ -7,7 +7,7 @@ import { Group } from 'three';
 import { useFrame } from '@react-three/fiber';
 
 export default function CodePreview() {
-  const code = useAppSelector(state => state.editor.currentCode);
+  const code = useAppSelector(state => state.editor.code.html);
   const isEditorVisible = useAppSelector(state => state.editor.isVisible);
   const [previewObjects, setPreviewObjects] = useState<ReturnType<typeof parseHtmlToGameObjects>>([]);
   const [previewGroup, setPreviewGroup] = useState<Group | null>(null);
@@ -48,7 +48,6 @@ export default function CodePreview() {
           el={obj}
           objectKey={index}
           onClick={() => {}} // We'll implement interaction later
-          completed={new Set()}
         />
       ))}
     </group>

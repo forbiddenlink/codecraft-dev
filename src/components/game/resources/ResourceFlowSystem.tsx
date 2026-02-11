@@ -15,7 +15,7 @@ interface ResourceFlowSystemProps {
   flows: ResourceFlow[];
 }
 
-const RESOURCE_COLORS = {
+const RESOURCE_COLORS: Record<string, string> = {
   energy: '#FFD700',
   code: '#4CAF50',
   data: '#2196F3',

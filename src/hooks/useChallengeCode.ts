@@ -5,13 +5,13 @@ import { setCode } from '@/store/slices/editorSlice';
 
 export default function useChallengeCode(challengeId: string) {
   const dispatch = useAppDispatch();
-  const code = useAppSelector((state) => state.editor.currentCode);
+  const code = useAppSelector((state) => state.editor.code.html);
 
   // Load code from localStorage on challenge change
   useEffect(() => {
     const saved = localStorage.getItem(`challenge-code:${challengeId}`);
     if (saved) {
-      dispatch(setCode(saved));
+      dispatch(setCode({ language: 'html', code: saved }));
     }
   }, [challengeId, dispatch]);
 

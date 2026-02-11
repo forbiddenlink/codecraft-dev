@@ -84,7 +84,7 @@ export const parseCSSRule = (rule: string): ParsedRule | null => {
     while ((match = propertyRegex.exec(propertiesStr))) {
       const [, property, value] = match;
       const camelCaseProperty = property.replace(/-([a-z])/g, g => g[1].toUpperCase());
-      properties[camelCaseProperty] = convertCSSValue(property, value.trim());
+      (properties as any)[camelCaseProperty] = convertCSSValue(property, value.trim());
     }
 
     return {
@@ -95,6 +95,30 @@ export const parseCSSRule = (rule: string): ParsedRule | null => {
     console.error('Error parsing CSS rule:', error);
     return null;
   }
+};
+
+/**
+ * Parse all CSS rules from a CSS string
+ */
+export const parseCSSRules = (cssString: string): ParsedRule[] => {
+  const rules: ParsedRule[] = [];
+
+  // Remove comments
+  const cleaned = cssString.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Split by closing braces and process each rule
+  const ruleStrings = cleaned.split('}').filter(s => s.trim());
+
+  for (const ruleStr of ruleStrings) {
+    if (ruleStr.trim()) {
+      const rule = parseCSSRule(ruleStr + '}');
+      if (rule) {
+        rules.push(rule);
+      }
+    }
+  }
+
+  return rules;
 };
 
 /**
@@ -189,7 +213,7 @@ export const styleToMaterialProps = (style: GameStructureStyle) => {
     metalness: style.metalness,
     roughness: style.roughness,
     opacity: style.opacity,
-    transparent: style.opacity < 1,
+    transparent: (style.opacity !== undefined && style.opacity < 1) || false,
     wireframe: style.wireframe,
   };
 };

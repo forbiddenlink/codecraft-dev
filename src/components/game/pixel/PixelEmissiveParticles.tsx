@@ -2,6 +2,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Vector3 } from 'three';
+import * as THREE from 'three';
 
 /**
  * PixelEmissiveParticles Component
@@ -74,9 +75,14 @@ export default function PixelEmissiveParticles({
   color = '#7C3AED', 
   mood = 'neutral', 
   isMoving = false 
+}: {
+  count: number;
+  color: string;
+  mood: string;
+  isMoving: boolean;
 }) {
-  const particlesRef = useRef();
-  const trailRef = useRef<Float32Array>();
+  const particlesRef = useRef<THREE.Points>(null);
+  const trailRef = useRef<Float32Array | undefined>(undefined);
   
   // Generate initial positions and trail data
   const [initialPositions, initialTrail] = useMemo(() => {
@@ -154,9 +160,7 @@ export default function PixelEmissiveParticles({
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={count}
-            array={initialPositions}
-            itemSize={3}
+            args={[initialPositions, 3]}
           />
         </bufferGeometry>
         <pointsMaterial 
@@ -164,8 +168,6 @@ export default function PixelEmissiveParticles({
           color={color} 
           transparent 
           opacity={MOOD_PARTICLE_BEHAVIORS[mood].opacity}
-          emissive={color}
-          emissiveIntensity={1}
           depthWrite={false}
         />
       </points>
@@ -175,9 +177,7 @@ export default function PixelEmissiveParticles({
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={count}
-            array={initialTrail}
-            itemSize={3}
+            args={[initialTrail, 3]}
           />
         </bufferGeometry>
         <pointsMaterial 
@@ -185,8 +185,6 @@ export default function PixelEmissiveParticles({
           color={color} 
           transparent 
           opacity={MOOD_PARTICLE_BEHAVIORS[mood].opacity * 0.5}
-          emissive={color}
-          emissiveIntensity={0.5}
           depthWrite={false}
         />
       </points>
