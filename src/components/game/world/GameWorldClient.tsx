@@ -3,11 +3,13 @@ import React, { Suspense, useRef, useState, useMemo } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Stars, Sky, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive';
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setEditorVisible } from "@/store/slices/editorSlice";
 import { setTargetPosition } from "@/store/slices/playerSlice";
-import type { OrbitControlsImpl } from 'three-stdlib';
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RootState } from "@/store/store";
+import { ParsedCSSRule, JSExecutionContext } from "@/store/slices/gameSlice";
 import { parseCSSRule } from "@/utils/cssParser";
 import ResourceCollectors from "@/components/game/resources/ResourceCollectors";
 import ResourceFlowSystem from "@/components/game/resources/ResourceFlowSystem";
@@ -23,14 +25,17 @@ import CodeExecutionVisualizer from "@/components/game/code/CodeExecutionVisuali
 import TutorialOverlay from "@/components/game/tutorial/TutorialOverlay";
 import ResourceHUD from "@/components/game/hud/ResourceHUD";
 import BuildingMenu from "@/components/game/buildings/BuildingMenu";
-import ChallengeHUD from '@/components/game/challenges/ChallengeHUD';
+// import ChallengeHUD from '@/components/game/challenges/ChallengeHUD';
 import { getAvailableChallenges } from '@/data/challenges';
 import Ground from "@/components/game/ground/Ground";
-import { useChallengeProgress } from "@/hooks/useChallengeProgress";
+import HintPanel from "@/components/game/challenges/HintPanel";
+import MasteryDashboard from "@/components/game/challenges/MasteryDashboard";
+import StreakDisplay from "@/components/game/streaks/StreakDisplay";
+import CelebrationSparkles from "@/components/game/celebrations/CelebrationSparkles";
+import { useChallengeProgress, CelebrationType } from "@/hooks/useChallengeProgress";
 import { parseHtmlToStructure } from "@/utils/htmlParser";
 import type { Challenge } from '@/types/challenge';
 import type { HtmlNode } from '@/types/html';
-import { GameState } from '@/types/gameState';
 import { ThreeEvent } from '@react-three/fiber';
 import Player from '@/components/game/player/Player';
 import Pixel from '@/components/game/pixel/Pixel';
@@ -80,15 +85,15 @@ const ENVIRONMENT_CONFIG = {
   }
 };
 
-// Helper function to determine sun position based on time of day
-function getSunPosition(timeOfDay: number): [number, number, number] {
-  const angleRad = ((timeOfDay / 24) * Math.PI * 2) - Math.PI/2;
-  const radius = 100;
-  const x = Math.cos(angleRad) * radius;
-  const y = Math.sin(angleRad) * radius;
-  const adjustedY = y < -20 ? -20 : y;
-  return [x, adjustedY, 0];
-}
+// Helper function to determine sun position based on time of day (currently unused)
+// function getSunPosition(timeOfDay: number): [number, number, number] {
+//   const angleRad = ((timeOfDay / 24) * Math.PI * 2) - Math.PI/2;
+//   const radius = 100;
+//   const x = Math.cos(angleRad) * radius;
+//   const y = Math.sin(angleRad) * radius;
+//   const adjustedY = y < -20 ? -20 : y;
+//   return [x, adjustedY, 0];
+// }
 
 // Helper to determine pixel's mood based on context
 function determinePixelMood(
@@ -123,21 +128,8 @@ function generateContextualTip(
 // Component Props
 type HtmlStructureVisualizationProps = React.ComponentProps<typeof HtmlStructureVisualization>;
 type BuildingPreviewProps = React.ComponentProps<typeof BuildingPreview>;
-type ErrorVisualizationProps = React.ComponentProps<typeof ErrorVisualization>;
-type ChallengeHUDProps = React.ComponentProps<typeof ChallengeHUD>;
-type CodeExecutionVisualizerProps = React.ComponentProps<typeof CodeExecutionVisualizer>;
-
-interface PixelProps {
-  mood: 'concerned' | 'curious' | 'happy' | 'neutral';
-  contextualTip: string;
-}
-
-interface ValidationError {
-  lineNumber: number;
-  column: number;
-  message: string;
-  severity: 'error' | 'warning' | 'info';
-}
+// type ErrorVisualizationProps = React.ComponentProps<typeof ErrorVisualization>;
+// type CodeExecutionVisualizerProps = React.ComponentProps<typeof CodeExecutionVisualizer>;
 
 interface ResourceGenerator {
   id: string;
@@ -176,14 +168,14 @@ interface ParsedHtmlNode {
   styles?: Record<string, string>;
 }
 
-interface ResourceGeneratorsProps {
-  generators: ResourceGenerator[];
-  showProductionEffects: boolean;
-}
+// interface ResourceGeneratorsProps {
+//   generators: ResourceGenerator[];
+//   showProductionEffects: boolean;
+// }
 
-interface ResourceFlowSystemProps {
-  flows: ResourceFlow[];
-}
+// interface ResourceFlowSystemProps {
+//   flows: ResourceFlow[];
+// }
 
 // Define building state interface
 interface BuildingState {
@@ -200,8 +192,8 @@ interface TutorialStep {
 
 interface GameStatePartial {
   colonyResources?: Record<string, number>;
-  cssRules?: string[];
-  jsExecutionContext?: Record<string, unknown>;
+  cssRules?: ParsedCSSRule[];
+  jsExecutionContext?: JSExecutionContext | null;
   tutorialActive?: boolean;
   tutorialStep?: number;
   tutorialState?: {
@@ -248,8 +240,12 @@ const SceneContent = () => {
 export default function GameWorldClient() {
   const dispatch = useAppDispatch();
   const [challengeIndex, setChallengeIndex] = useState(0);
-  const { completed } = useChallengeProgress();
+  const { completed, pendingCelebration, clearCelebration } = useChallengeProgress();
   const controlsRef = useRef<OrbitControlsImpl>(null);
+
+  // Performance optimization: detect low-power devices and reduced motion preference
+  const isLowPowerDevice = useIsLowPowerDevice();
+  const prefersReducedMotion = useReducedMotion();
   
   // Game state selectors with safe defaults
   const isEditorVisible = useAppSelector((state: RootState) => state.editor.isVisible);
@@ -262,7 +258,7 @@ export default function GameWorldClient() {
   const {
     colonyResources = {},
     cssRules = [],
-    jsExecutionContext = {},
+    jsExecutionContext: _jsExecutionContext = {},
     tutorialActive = false,
     tutorialStep = 0,
     tutorialState = { active: false, step: 0, steps: [] },
@@ -275,7 +271,7 @@ export default function GameWorldClient() {
   const resourceGenerators = generators as ResourceGenerator[];
   
   // Environment state
-  const [timeOfDay, setTimeOfDay] = useState<number>(12);
+  const [_timeOfDay, setTimeOfDay] = useState<number>(12);
   const [weather, setWeather] = useState<'clear' | 'cloudy' | 'stormy' | 'foggy'>('clear');
   const [weatherIntensity, setWeatherIntensity] = useState<number>(0.5);
   
@@ -292,9 +288,8 @@ export default function GameWorldClient() {
     if (language === 'html' && code.html) {
       try {
         const structure = parseHtmlToStructure(code.html) as ParsedHtmlNode[];
-        const cssRulesParsed = cssRules
-          .map(parseCSSRule)
-          .filter((rule): rule is NonNullable<ReturnType<typeof parseCSSRule>> => rule !== null);
+        // cssRules are already parsed in the Redux store
+        const cssRulesParsed = cssRules;
         
         // Convert to HtmlNode format with proper typing
         const convertNode = (node: ParsedHtmlNode): HtmlNode => ({
@@ -483,12 +478,6 @@ export default function GameWorldClient() {
     [formattedResourceGenerators]
   );
 
-  const executionData: GameExecutionData = {
-    variables: {},
-    callStack: [],
-    output: []
-  };
-
   // Use the mood determination function
   const pixelMood = useMemo(() => 
     determinePixelMood(currentChallenge, isEditorVisible, errors),
@@ -504,7 +493,6 @@ export default function GameWorldClient() {
   // Type-safe component props
   const htmlStructureProps: HtmlStructureVisualizationProps = {
     htmlStructure: parsedStructure,
-    cssRules,
     onBuildingSelect: (node: HtmlNode) => {
       console.log('Selected building:', node);
     }
@@ -514,14 +502,15 @@ export default function GameWorldClient() {
     gridSnap: true
   };
 
-  const errorVisualizationProps: ErrorVisualizationProps = {
-    position: [0, 5, 0]
-  };
+  // These props are prepared for future use
+  // const errorVisualizationProps: ErrorVisualizationProps = {
+  //   position: [0, 5, 0]
+  // };
 
-  const codeExecutionVisualizerProps: CodeExecutionVisualizerProps = {
-    executionData,
-    position: [5, 2, 5]
-  };
+  // const codeExecutionVisualizerProps: CodeExecutionVisualizerProps = {
+  //   executionData,
+  //   position: [5, 2, 5]
+  // };
 
   return (
     <>
@@ -564,7 +553,7 @@ export default function GameWorldClient() {
               width: '100%',
               height: '100%'
             }}
-            dpr={[1, 2]}
+            dpr={isLowPowerDevice ? [1, 1.5] : [1, 2]}
             linear
           >
             {/* Scene setup */}
@@ -592,7 +581,7 @@ export default function GameWorldClient() {
             <Stars
               radius={ENVIRONMENT_CONFIG.stars.radius}
               depth={ENVIRONMENT_CONFIG.stars.depth}
-              count={ENVIRONMENT_CONFIG.stars.count}
+              count={isLowPowerDevice ? 2000 : ENVIRONMENT_CONFIG.stars.count}
               factor={ENVIRONMENT_CONFIG.stars.factor}
               saturation={ENVIRONMENT_CONFIG.stars.saturation}
               fade={ENVIRONMENT_CONFIG.stars.fade}
@@ -617,11 +606,13 @@ export default function GameWorldClient() {
                   showGridLines={isBuildModeActive}
                 />
                 
-                {/* Weather */}
-                <WeatherSystem
-                  currentWeather={weather}
-                  intensity={weatherIntensity}
-                />
+                {/* Weather - reduced or disabled for accessibility/performance */}
+                {!prefersReducedMotion && (
+                  <WeatherSystem
+                    currentWeather={weather}
+                    intensity={isLowPowerDevice ? weatherIntensity * 0.5 : weatherIntensity}
+                  />
+                )}
                 
                 {/* Colony Structure */}
                 <group name="colony-root">
@@ -706,10 +697,22 @@ export default function GameWorldClient() {
               // Set initial target to center of resources
               target={[0, 0, -15]}
             />
-            
-            <EffectComposer>
-              <Bloom intensity={0.5} luminanceThreshold={0.9} />
-            </EffectComposer>
+
+            {/* Celebration Effects */}
+            {pendingCelebration && (
+              <CelebrationSparkles
+                position={[0, 3, -15]}
+                type={pendingCelebration}
+                onComplete={clearCelebration}
+              />
+            )}
+
+            {/* Post-processing effects - disabled on mobile for performance */}
+            {!isLowPowerDevice && (
+              <EffectComposer>
+                <Bloom intensity={0.5} luminanceThreshold={0.9} />
+              </EffectComposer>
+            )}
           </Canvas>
         </div>
 
@@ -718,33 +721,81 @@ export default function GameWorldClient() {
           {/* Challenge UI - Left Side */}
           <div className="absolute left-4 top-4 z-50 pointer-events-auto">
             {currentChallenge && (
-              <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
-                <h2 className="text-white text-xl font-bold mb-4">{currentChallenge.title}</h2>
-                <div className="flex flex-col gap-2">
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={handlePrev}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              <div className="flex flex-col gap-3">
+                {/* Challenge Card */}
+                <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs text-gray-400">
+                      Challenge {challengeIndex + 1} of {availableChallenges.length}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      currentChallenge.difficulty === 1 ? 'bg-green-600' :
+                      currentChallenge.difficulty === 2 ? 'bg-yellow-600' : 'bg-red-600'
+                    }`}>
+                      {currentChallenge.difficulty === 1 ? 'Beginner' :
+                       currentChallenge.difficulty === 2 ? 'Intermediate' : 'Advanced'}
+                    </span>
+                  </div>
+                  <h2 className="text-white text-xl font-bold mb-2">{currentChallenge.title}</h2>
+                  <p className="text-gray-300 text-sm mb-3">{currentChallenge.description}</p>
+
+                  {/* Objectives */}
+                  {currentChallenge.objectives && currentChallenge.objectives.length > 0 && (
+                    <div className="mb-3">
+                      <h4 className="text-xs font-semibold text-gray-400 mb-1">Objectives:</h4>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        {currentChallenge.objectives.map((obj, i) => (
+                          <li key={i} className="flex items-start gap-1">
+                            <span className="text-blue-400">•</span>
+                            <span>{obj}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handlePrev}
+                        disabled={challengeIndex === 0}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        disabled={challengeIndex === availableChallenges.length - 1}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </div>
+                    <button
+                      onClick={handleEditorOpen}
+                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                     >
-                      Previous
-                    </button>
-                    <button 
-                      onClick={handleNext}
-                      className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                    >
-                      Next
+                      {completed.includes(currentChallenge.id) ? 'Edit Code' : 'Start Coding'}
                     </button>
                   </div>
-                  <button 
-                    onClick={handleEditorOpen}
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                  >
-                    Start Coding
-                  </button>
+                  {completed.includes(currentChallenge.id) && (
+                    <div className="mt-2 text-center text-green-400 flex items-center justify-center gap-1">
+                      <span>✓</span>
+                      <span>Completed</span>
+                    </div>
+                  )}
                 </div>
-                {completed.includes(currentChallenge.id) && (
-                  <div className="mt-2 text-center text-green-400">Completed</div>
+
+                {/* Progressive Hints Panel */}
+                {!completed.includes(currentChallenge.id) && (
+                  <HintPanel challenge={currentChallenge} className="max-w-sm" />
                 )}
+
+                {/* Mastery Dashboard */}
+                <MasteryDashboard className="max-w-sm mt-2" />
+
+                {/* Daily Streak */}
+                <StreakDisplay className="max-w-sm mt-2" />
               </div>
             )}
           </div>
