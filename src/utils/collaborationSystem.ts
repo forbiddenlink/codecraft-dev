@@ -1,7 +1,16 @@
 /**
  * Real-Time Collaboration System
  * Enables pair programming, code sharing, and multiplayer features
+ *
+ * Uses Liveblocks for real-time sync when enabled, falls back to local state.
  */
+
+import { Room } from '@liveblocks/client';
+import {
+  isLiveblocksEnabled,
+  enterCollaborationRoom,
+  generateRoomCode,
+} from './liveblocks';
 
 export interface User {
   id: string;
@@ -78,12 +87,15 @@ class CollaborationSystem {
   private cursors: Map<string, Map<string, CursorPosition>> = new Map(); // sessionId -> userId -> position
   private chatHistory: Map<string, ChatMessage[]> = new Map(); // sessionId -> messages
 
-  // Simulated WebSocket connection (in production, connect to real WebSocket server)
-  private wsConnections: Map<string, any> = new Map();
-  private eventListeners: Map<string, Set<(event: any) => void>> = new Map();
+  // Liveblocks room connections (when enabled)
+  private liveblocksRooms: Map<string, { room: Room; leave: () => void }> = new Map();
+
+  // Event listeners for local fallback
+  private eventListeners: Map<string, Set<(event: unknown) => void>> = new Map();
 
   /**
    * Create a new collaboration session
+   * Uses Liveblocks room when enabled, otherwise local state
    */
   createSession(
     hostId: string,
@@ -91,7 +103,22 @@ class CollaborationSystem {
     challengeId?: string,
     settings?: Partial<CollaborationSession['settings']>
   ): CollaborationSession {
-    const sessionId = this.generateSessionId();
+    // Use room code for Liveblocks, fallback to generated ID
+    const sessionId = isLiveblocksEnabled()
+      ? generateRoomCode()
+      : this.generateSessionId();
+
+    // Enter Liveblocks room if enabled
+    if (isLiveblocksEnabled()) {
+      const roomConnection = enterCollaborationRoom(sessionId, {
+        id: host.id,
+        username: host.username,
+        color: host.color,
+      });
+      if (roomConnection) {
+        this.liveblocksRooms.set(sessionId, roomConnection);
+      }
+    }
 
     const session: CollaborationSession = {
       id: sessionId,
@@ -144,6 +171,19 @@ class CollaborationSystem {
     // Check if user already in session
     if (session.participants.some((p) => p.id === user.id)) {
       return { success: true, session };
+    }
+
+    // Enter Liveblocks room if enabled and not already connected
+    if (isLiveblocksEnabled() && !this.liveblocksRooms.has(`${sessionId}-${user.id}`)) {
+      const roomConnection = enterCollaborationRoom(sessionId, {
+        id: user.id,
+        username: user.username,
+        color: user.color,
+      });
+      if (roomConnection) {
+        // Track per-user room connection
+        this.liveblocksRooms.set(`${sessionId}-${user.id}`, roomConnection);
+      }
     }
 
     session.participants.push(user);
