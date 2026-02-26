@@ -146,7 +146,7 @@ export default function VillagerMesh({ villager, position }: Props) {
     
     document.body.appendChild(labelContainer);
     
-    // Dialog box
+    // Dialog box - built using DOM methods to avoid XSS
     if (showDialog) {
       const dialog = document.createElement('div');
       dialog.id = `villager-dialog-${villager.id}`;
@@ -165,15 +165,28 @@ export default function VillagerMesh({ villager, position }: Props) {
         z-index: 1000;
         pointer-events: none;
       `;
-      
-      dialog.innerHTML = `
-        <div style="margin-bottom: 8px;">
-          <span style="margin-right: 8px;">${getSpecialtyIcon()}</span>
-          <span style="color: ${villager.color};">${villager.name}</span>
-        </div>
-        <div>${villager.dialog[dialogIndex]}</div>
-      `;
-      
+
+      // Build dialog content safely using DOM methods
+      const headerDiv = document.createElement('div');
+      headerDiv.style.marginBottom = '8px';
+
+      const iconSpan = document.createElement('span');
+      iconSpan.style.marginRight = '8px';
+      iconSpan.textContent = getSpecialtyIcon();
+
+      const nameSpan = document.createElement('span');
+      nameSpan.style.color = villager.color;
+      nameSpan.textContent = villager.name;
+
+      headerDiv.appendChild(iconSpan);
+      headerDiv.appendChild(nameSpan);
+
+      const dialogTextDiv = document.createElement('div');
+      dialogTextDiv.textContent = villager.dialog[dialogIndex];
+
+      dialog.appendChild(headerDiv);
+      dialog.appendChild(dialogTextDiv);
+
       document.body.appendChild(dialog);
     }
     

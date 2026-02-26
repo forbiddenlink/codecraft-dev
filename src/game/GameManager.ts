@@ -202,8 +202,7 @@ export class GameManager {
     this.state.progress.completedChallenges.push(challengeId);
 
     // Play sound
-    // TODO: Implement playSound method on soundSystem
-    // soundSystem.playSound('challengeComplete');
+    soundSystem.playSFX('challenge_complete');
 
     // Update Pixel mood
     this.updatePixelMood();
@@ -236,7 +235,7 @@ export class GameManager {
     this.state.player.skillPoints += 1;
 
     // Play sound
-    // TODO: soundSystem.playSound('achievementUnlock');
+    soundSystem.playSFX('level_up');
 
     // Show cutscene
     this.triggerCutscene('level-up');
@@ -278,7 +277,7 @@ export class GameManager {
     // Unlock skill
     this.state.progress.unlockedSkills.push(skillId);
 
-    // TODO: soundSystem.playSound('achievementUnlock');
+    soundSystem.playSFX('unlock');
 
     return { success: true, message: `Unlocked: ${skill.name}!` };
   }
@@ -289,7 +288,7 @@ export class GameManager {
       this.state.resources[type as keyof typeof this.state.resources] += amount;
       
       if (amount > 0) {
-        // TODO: soundSystem.playSound('resourceCollect');
+        soundSystem.playSFX('resource_collect');
       }
     }
   }
@@ -327,7 +326,7 @@ export class GameManager {
 
   private triggerEvent(eventId: string) {
     this.state.active.activeEvent = eventId;
-    // TODO: soundSystem.playSound('buttonClick');
+    soundSystem.playSFX('notification');
     console.log(`📅 Event triggered: ${eventId}`);
   }
 
@@ -423,7 +422,7 @@ export class GameManager {
       }
     }
 
-    // TODO: soundSystem.playSound('achievementUnlock');
+    soundSystem.playSFX('unlock');
 
     return { success: true, message: `Discovered: ${story.name}` };
   }
@@ -444,7 +443,7 @@ export class GameManager {
 
   private earnAchievement(achievementId: string) {
     this.state.progress.earnedAchievements.push(achievementId);
-    // TODO: soundSystem.playSound('achievementUnlock');
+    soundSystem.playSFX('achievement_unlock');
     console.log(`🏆 Achievement earned: ${achievementId}`);
   }
 

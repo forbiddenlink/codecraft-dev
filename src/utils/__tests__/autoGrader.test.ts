@@ -59,7 +59,7 @@ describe('AutoGrader', () => {
 
       expect(result.passed).toBe(false);
       expect(result.score).toBe(0);
-      expect(result.feedback.failed).toContain('Has an h1 element');
+      expect(result.feedback.failed).toContain('✗ Has an h1 element');
     });
 
     it('should calculate weighted scores correctly', () => {

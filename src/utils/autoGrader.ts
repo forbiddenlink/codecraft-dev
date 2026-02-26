@@ -3,7 +3,7 @@
  * Provides comprehensive code validation and feedback
  */
 
-import { parseHtmlToStructure } from './htmlParser';
+import { parseHtmlToStructure, getAllNodes } from './htmlParser';
 import { parseCSSRule } from './cssParser';
 import { validateHtml, validateCss, validateJs } from './codeValidation';
 
@@ -288,14 +288,16 @@ export const CriteriaBuilders = {
   }),
 
   /**
-   * Check minimum number of elements
+   * Check minimum number of elements (searches all nested elements)
    */
   hasMinimumElements: (tagName: string, count: number, description?: string): GradingCriteria => ({
     type: 'html',
     description: description || `Has at least ${count} <${tagName}> element(s)`,
     test: (code, context) => {
       const structure = context?.structure || parseHtmlToStructure(code);
-      const matches = structure.filter((node: any) => node.elementType === tagName);
+      // Use getAllNodes to find all elements including nested ones
+      const allNodes = getAllNodes(structure);
+      const matches = allNodes.filter((node: any) => node.elementType === tagName);
       return matches.length >= count;
     },
     weight: 1,
@@ -324,4 +326,124 @@ export const CriteriaBuilders = {
 
 // Export singleton instance
 export const autoGrader = new AutoGrader();
+
+/**
+ * Convenience functions for grading challenges
+ * These wrap the AutoGrader class methods and adapt Challenge grading criteria
+ */
+
+interface ChallengeGradingCriteria {
+  id: string;
+  description: string;
+  weight: number;
+  validator: (code: string) => boolean;
+}
+
+interface ChallengeWithGrading {
+  gradingCriteria: ChallengeGradingCriteria[];
+}
+
+interface SimplifiedGradingResult {
+  passed: boolean;
+  score: number;
+  feedback: {
+    passed: string[];
+    failed: string[];
+    suggestions: string[];
+  };
+}
+
+function convertChallengeToGradingCriteria(criteria: ChallengeGradingCriteria[]): GradingCriteria[] {
+  return criteria.map(c => ({
+    type: 'html' as const,
+    description: c.description,
+    test: (code: string) => c.validator(code),
+    weight: c.weight / 100, // Normalize weight
+    hint: undefined
+  }));
+}
+
+/**
+ * Grade HTML code against a challenge's criteria
+ */
+export function gradeHtml(challenge: ChallengeWithGrading, code: string): SimplifiedGradingResult {
+  const criteria = convertChallengeToGradingCriteria(challenge.gradingCriteria);
+  return autoGrader.gradeHtml(code, criteria);
+}
+
+/**
+ * Grade CSS code against a challenge's criteria
+ */
+export function gradeCss(challenge: ChallengeWithGrading, code: string): SimplifiedGradingResult {
+  const criteria = convertChallengeToGradingCriteria(challenge.gradingCriteria);
+  return autoGrader.gradeCss(code, criteria);
+}
+
+/**
+ * Grade JavaScript code against a challenge's criteria
+ */
+export function gradeJavaScript(challenge: ChallengeWithGrading, code: string): SimplifiedGradingResult {
+  const criteria = convertChallengeToGradingCriteria(challenge.gradingCriteria);
+  return autoGrader.gradeJavaScript(code, criteria);
+}
+
+/**
+ * Criteria builder helpers that return Challenge-compatible grading criteria
+ * These return objects with `validator` instead of `test` for test compatibility
+ */
+export const createCriteria = {
+  hasElement: (tagName: string, description?: string): ChallengeGradingCriteria => {
+    const criteria = CriteriaBuilders.hasElement(tagName, description);
+    return {
+      id: `has-${tagName}`,
+      description: criteria.description,
+      weight: 100,
+      validator: (code: string) => criteria.test(code, { structure: parseHtmlToStructure(code) })
+    };
+  },
+
+  hasElementWithAttribute: (
+    tagName: string,
+    attrName: string,
+    description?: string
+  ): ChallengeGradingCriteria => {
+    const criteria = CriteriaBuilders.hasElementWithAttribute(tagName, attrName, undefined, description);
+    return {
+      id: `has-${tagName}-${attrName}`,
+      description: criteria.description,
+      weight: 100,
+      validator: (code: string) => criteria.test(code, { structure: parseHtmlToStructure(code) })
+    };
+  },
+
+  hasMinimumElements: (tagName: string, count: number, description?: string): ChallengeGradingCriteria => {
+    const criteria = CriteriaBuilders.hasMinimumElements(tagName, count, description);
+    return {
+      id: `min-${tagName}-${count}`,
+      description: criteria.description,
+      weight: 100,
+      validator: (code: string) => criteria.test(code, { structure: parseHtmlToStructure(code) })
+    };
+  },
+
+  hasStyleProperty: (property: string, value?: string, description?: string): ChallengeGradingCriteria => {
+    const criteria = CriteriaBuilders.hasStyleProperty(property, value, description);
+    return {
+      id: `style-${property}`,
+      description: criteria.description,
+      weight: 100,
+      validator: (code: string) => criteria.test(code, {})
+    };
+  },
+
+  matchesPattern: (pattern: RegExp, description: string): ChallengeGradingCriteria => {
+    const criteria = CriteriaBuilders.matchesPattern(pattern, description);
+    return {
+      id: `pattern-${description.toLowerCase().replace(/\s+/g, '-')}`,
+      description: criteria.description,
+      weight: 100,
+      validator: (code: string) => criteria.test(code, {})
+    };
+  }
+};
 

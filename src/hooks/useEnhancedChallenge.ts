@@ -74,11 +74,11 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
         const timeSpent = Date.now() - state.startTime;
 
         // Play success sound
-        // TODO: soundSystem.playSound('challenge_complete');
+        soundSystem.playSFX('challenge_complete');
 
         // Award achievement for perfect score
         if (result.score === 100) {
-          // TODO: soundSystem.playSound('achievement_unlock');
+          soundSystem.playSFX('achievement_unlock');
         }
 
         // TODO: Complete challenge in GameManager with proper parameters
@@ -91,7 +91,7 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
         };
       } else {
         // Play error sound
-        // TODO: soundSystem.playSound('code_error');
+        soundSystem.playSFX('code_error');
 
         // Provide encouragement after multiple attempts
         if (state.attempts + 1 >= 3) {
@@ -107,7 +107,7 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
     } catch (error) {
       console.error('Error checking solution:', error);
       setState((prev) => ({ ...prev, isChecking: false }));
-      // TODO: soundSystem.playSound('code_error');
+      soundSystem.playSFX('code_error');
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -119,7 +119,7 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
     if (!challenge) return null;
 
     setState((prev) => ({ ...prev, hintsUsed: prev.hintsUsed + 1 }));
-    // TODO: soundSystem.playSound('notification');
+    soundSystem.playSFX('notification');
 
     // Return progressive hints
     if (challenge.hints) {
@@ -133,7 +133,7 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
   const skipChallenge = useCallback(() => {
     if (!challenge) return;
 
-    // TODO: soundSystem.playSound('ui_click');
+    soundSystem.playSFX('ui_click');
     // TODO: Mark as skipped in GameManager
     // gameManager.skipChallenge(challenge.id);
     console.log('Challenge skipped:', challenge.id);
@@ -147,7 +147,7 @@ export function useEnhancedChallenge(challenge: Challenge | null) {
       startTime: Date.now(),
       hintsUsed: 0,
     });
-    // TODO: soundSystem.playSound('ui_click');
+    soundSystem.playSFX('ui_click');
   }, []);
 
   return {

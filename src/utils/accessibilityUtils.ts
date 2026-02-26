@@ -191,11 +191,21 @@ export function meetsWCAGAAA(foreground: string, background: string): boolean {
 export function createSkipLinks(): HTMLDivElement {
   const skipLinks = document.createElement('div');
   skipLinks.className = 'skip-links';
-  skipLinks.innerHTML = `
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    <a href="#code-editor" class="skip-link">Skip to code editor</a>
-    <a href="#navigation" class="skip-link">Skip to navigation</a>
-  `;
+
+  // Create skip links using DOM methods instead of innerHTML for security best practices
+  const links = [
+    { href: '#main-content', text: 'Skip to main content' },
+    { href: '#code-editor', text: 'Skip to code editor' },
+    { href: '#navigation', text: 'Skip to navigation' },
+  ];
+
+  links.forEach(({ href, text }) => {
+    const link = document.createElement('a');
+    link.href = href;
+    link.className = 'skip-link';
+    link.textContent = text;
+    skipLinks.appendChild(link);
+  });
 
   // Styling for skip links (visible on focus)
   const style = document.createElement('style');
