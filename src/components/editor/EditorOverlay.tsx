@@ -46,54 +46,38 @@ export default function EditorOverlay() {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="absolute inset-8 bg-opacity-95 bg-gray-900 rounded-lg shadow-2xl overflow-hidden"
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.2, ease: [0.33, 1, 0.68, 1] }}
+          className="absolute inset-8 panel overflow-hidden"
           style={{ zIndex: 1000 }}
         >
           <div className="h-full flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-2 bg-gray-800">
-              <h2 className="text-white font-semibold">Code Editor</h2>
-              
+            <div className="flex items-center justify-between px-5 py-3 bg-elevated border-b border-[rgb(var(--border-subtle))]">
+              <h2 className="text-h4">Code Editor</h2>
+
               {/* Language tabs */}
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleLanguageChange('html')}
-                  className={`px-3 py-1 rounded text-white transition-colors ${
-                    language === 'html' 
-                      ? 'bg-blue-600 hover:bg-blue-700' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                >
-                  HTML
-                </button>
-                <button
-                  onClick={() => handleLanguageChange('css')}
-                  className={`px-3 py-1 rounded text-white transition-colors ${
-                    language === 'css' 
-                      ? 'bg-blue-600 hover:bg-blue-700' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                >
-                  CSS
-                </button>
-                <button
-                  onClick={() => handleLanguageChange('javascript')}
-                  className={`px-3 py-1 rounded text-white transition-colors ${
-                    language === 'javascript' 
-                      ? 'bg-blue-600 hover:bg-blue-700' 
-                      : 'bg-gray-700 hover:bg-gray-600'
-                  }`}
-                >
-                  JavaScript
-                </button>
+              <div className="flex gap-1">
+                {(['html', 'css', 'javascript'] as const).map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => handleLanguageChange(lang)}
+                    className={`px-3 py-1.5 rounded-[var(--radius-sm)] text-body font-medium transition-colors focus-ring ${
+                      language === lang
+                        ? 'bg-accent text-white'
+                        : 'text-text-muted hover:text-text-secondary hover:bg-surface'
+                    }`}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
               </div>
-              
+
               <button
                 onClick={handleClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="btn-secondary text-body focus-ring"
                 aria-label="Close editor"
               >
                 Close
@@ -101,38 +85,36 @@ export default function EditorOverlay() {
             </div>
 
             {/* Editor */}
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden bg-base">
               <MonacoEditor />
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2 bg-gray-800 flex justify-between items-center">
+            <div className="px-5 py-3 bg-elevated border-t border-[rgb(var(--border-subtle))] flex justify-between items-center">
               {/* Status indicator */}
-              <div className="text-sm">
+              <div className="text-body">
                 {isProcessing ? (
-                  <span className="text-yellow-400">Processing...</span>
+                  <span className="text-warning">Processing...</span>
                 ) : lastResult ? (
                   lastResult.success ? (
-                    <span className="text-green-400">Code processed successfully</span>
+                    <span className="text-success">Code processed successfully</span>
                   ) : (
-                    <span className="text-red-400">
+                    <span className="text-error">
                       {lastResult.errors.length} error(s)
                       {lastResult.warnings.length > 0 && `, ${lastResult.warnings.length} warning(s)`}
                     </span>
                   )
                 ) : null}
               </div>
-              
+
               {/* Action buttons */}
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleRunCode}
-                  className="px-4 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors disabled:opacity-50"
-                  disabled={isProcessing}
-                >
-                  Run Code
-                </button>
-              </div>
+              <button
+                onClick={handleRunCode}
+                className="btn-primary focus-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isProcessing}
+              >
+                Run Code
+              </button>
             </div>
           </div>
         </motion.div>

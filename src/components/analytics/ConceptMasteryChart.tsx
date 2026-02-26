@@ -29,11 +29,11 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
   const displayConcepts = concepts.slice(0, displayLimit);
 
   const getMasteryColor = (rate: number) => {
-    if (rate >= 90) return 'bg-green-500';
-    if (rate >= 75) return 'bg-blue-500';
-    if (rate >= 60) return 'bg-yellow-500';
+    if (rate >= 90) return 'bg-success';
+    if (rate >= 75) return 'bg-info';
+    if (rate >= 60) return 'bg-warning';
     if (rate >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
+    return 'bg-error';
   };
 
   const getMasteryLabel = (rate: number) => {
@@ -45,13 +45,13 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="card">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-bold text-white mb-1">Concept Mastery</h3>
-          <p className="text-gray-400 text-sm">Your proficiency across different topics</p>
+          <h3 className="text-h3 mb-1">Concept Mastery</h3>
+          <p className="text-body">Your proficiency across different topics</p>
         </div>
-        <div className="text-3xl">🎯</div>
+        <div className="text-2xl opacity-70">🎯</div>
       </div>
 
       <div className="space-y-4">
@@ -59,45 +59,38 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
           <div key={concept.name} className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-white font-medium">{concept.name}</span>
+                <span className="text-h4">{concept.name}</span>
                 {concept.isStrong && (
-                  <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full border border-green-500/30">
+                  <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-[var(--radius-sm)] border border-success/20 font-medium">
                     💪 Strong
                   </span>
                 )}
                 {concept.isWeak && (
-                  <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                  <span className="px-2 py-0.5 bg-error/10 text-error text-xs rounded-[var(--radius-sm)] border border-error/20 font-medium">
                     📚 Practice
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-gray-400 text-sm">
+                <span className="text-small">
                   {getMasteryLabel(concept.successRate)}
                 </span>
-                <span className="text-white font-bold text-sm">{concept.successRate}%</span>
+                <span className="text-body font-semibold">{concept.successRate}%</span>
               </div>
             </div>
 
             {/* Progress Bar */}
-            <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
+            <div className="relative h-2 bg-elevated rounded-full overflow-hidden">
               <div
                 className={`absolute left-0 top-0 h-full ${getMasteryColor(
                   concept.successRate
                 )} transition-all duration-500 ease-out rounded-full`}
                 style={{ width: `${concept.successRate}%` }}
               />
-              {/* Glow effect */}
-              <div
-                className={`absolute left-0 top-0 h-full ${getMasteryColor(
-                  concept.successRate
-                )} opacity-50 blur-sm transition-all duration-500`}
-                style={{ width: `${concept.successRate}%` }}
-              />
             </div>
 
             {detailed && (
-              <p className="text-gray-500 text-xs">
+              <p className="text-small">
                 {concept.attempts} attempt{concept.attempts !== 1 ? 's' : ''} recorded
               </p>
             )}
@@ -106,7 +99,7 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
       </div>
 
       {!detailed && concepts.length > displayLimit && (
-        <p className="text-center text-gray-500 text-sm mt-4">
+        <p className="text-center text-small mt-4">
           +{concepts.length - displayLimit} more concepts
         </p>
       )}

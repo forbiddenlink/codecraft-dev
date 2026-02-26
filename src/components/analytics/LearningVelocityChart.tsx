@@ -29,34 +29,34 @@ export function LearningVelocityChart({ analytics }: LearningVelocityChartProps)
   const filledBars = Math.min(Math.ceil((velocity / 3) * maxBars), maxBars);
 
   return (
-    <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="card">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-xl font-bold text-white mb-1">Learning Velocity</h3>
-          <p className="text-gray-400 text-sm">Your learning pace and efficiency</p>
+          <h3 className="text-h3 mb-1">Learning Velocity</h3>
+          <p className="text-body">Your learning pace and efficiency</p>
         </div>
-        <div className="text-3xl">{rating.emoji}</div>
+        <div className="text-2xl opacity-70">{rating.emoji}</div>
       </div>
 
       {/* Velocity Display */}
-      <div className="mb-6">
-        <div className="flex items-baseline gap-2 mb-2">
-          <span className="text-4xl font-bold text-white">{velocity.toFixed(1)}</span>
-          <span className="text-gray-400 text-lg">challenges/hour</span>
+      <div className="mb-5">
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-3xl font-semibold text-text-primary">{velocity.toFixed(1)}</span>
+          <span className="text-body">challenges/hour</span>
         </div>
         <p className={`${rating.color} font-medium`}>{rating.label} pace!</p>
       </div>
 
-      {/* Visual Velocity Bars */}
-      <div className="mb-6">
+      {/* Visual Velocity Bars - Keep gradient for visual interest */}
+      <div className="mb-5">
         <div className="flex gap-1 h-12">
           {Array.from({ length: maxBars }).map((_, i) => (
             <div
               key={i}
-              className={`flex-1 rounded transition-all duration-300 ${
+              className={`flex-1 rounded-[var(--radius-sm)] transition-all duration-300 ${
                 i < filledBars
-                  ? 'bg-gradient-to-t from-purple-600 to-blue-500 shadow-lg shadow-purple-500/50'
-                  : 'bg-gray-700'
+                  ? 'bg-accent'
+                  : 'bg-elevated'
               }`}
               style={{
                 height: `${((i + 1) / maxBars) * 100}%`,
@@ -68,24 +68,24 @@ export function LearningVelocityChart({ analytics }: LearningVelocityChartProps)
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-          <p className="text-gray-400 text-sm mb-1">Avg. Time</p>
-          <p className="text-white font-bold text-xl">{avgTime.toFixed(1)}m</p>
-          <p className="text-gray-500 text-xs">per challenge</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-elevated rounded-[var(--radius-md)] p-4 border border-[rgb(var(--border-subtle))]">
+          <p className="text-small mb-1">Avg. Time</p>
+          <p className="text-xl font-semibold text-text-primary">{avgTime.toFixed(1)}m</p>
+          <p className="text-small">per challenge</p>
         </div>
-        <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-          <p className="text-gray-400 text-sm mb-1">Total Time</p>
-          <p className="text-white font-bold text-xl">
+        <div className="bg-elevated rounded-[var(--radius-md)] p-4 border border-[rgb(var(--border-subtle))]">
+          <p className="text-small mb-1">Total Time</p>
+          <p className="text-xl font-semibold text-text-primary">
             {Math.round(analytics.totalPlayTime / 60000)}m
           </p>
-          <p className="text-gray-500 text-xs">learning time</p>
+          <p className="text-small">learning time</p>
         </div>
       </div>
 
       {/* Insights */}
-      <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <p className="text-blue-400 text-sm">
+      <div className="mt-4 p-4 bg-info/10 border border-info/20 rounded-[var(--radius-md)]">
+        <p className="text-info text-body">
           💡 {velocity >= 2
             ? "You're learning at an excellent pace! Keep up the momentum."
             : velocity >= 1

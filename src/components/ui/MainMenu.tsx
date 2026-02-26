@@ -99,25 +99,25 @@ export function MainMenu() {
 
   return (
     <>
-      {/* Menu Button */}
+      {/* Menu Button - Keep gradient as the single accent element */}
       <button
         onClick={() => dispatch(toggleMainMenu())}
         onMouseEnter={() => setShowQuickActions(true)}
         onMouseLeave={() => setShowQuickActions(false)}
-        className="fixed top-4 left-4 z-50 w-14 h-14 bg-gradient-to-br from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 rounded-full shadow-2xl flex items-center justify-center text-2xl transition-all duration-300 hover:scale-110 group"
+        className="fixed top-4 left-4 z-50 w-12 h-12 bg-accent hover:bg-accent-hover rounded-[var(--radius-md)] shadow-lg flex items-center justify-center text-xl text-white transition-all duration-150 hover:scale-105 focus-ring"
         aria-label="Main Menu"
         title="Main Menu (Esc)"
       >
-        <span className={`transition-transform duration-300 ${isOpen ? 'rotate-90' : ''}`}>
+        <span className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
           ☰
         </span>
 
         {/* Quick Action Indicators */}
         {showQuickActions && !isOpen && (
-          <div className="absolute -right-2 -top-2 flex gap-1">
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" title="Achievements" />
-            <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" title="Analytics" />
-            <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse" title="Multiplayer" />
+          <div className="absolute -right-1 -top-1 flex gap-0.5">
+            <div className="w-2 h-2 bg-success rounded-full" title="Achievements" />
+            <div className="w-2 h-2 bg-info rounded-full" title="Analytics" />
+            <div className="w-2 h-2 bg-accent rounded-full" title="Multiplayer" />
           </div>
         )}
       </button>
@@ -127,16 +127,16 @@ export function MainMenu() {
         <div className="fixed inset-0 z-40 flex items-start justify-start p-4 pointer-events-none">
           {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto"
+            className="modal-backdrop absolute inset-0 pointer-events-auto"
             onClick={() => dispatch(toggleMainMenu())}
           />
 
           {/* Menu Content */}
-          <div className="relative mt-20 ml-4 w-full max-w-md bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl shadow-2xl border border-purple-500/30 overflow-hidden pointer-events-auto animate-in slide-in-from-left duration-300">
+          <div className="relative mt-20 ml-4 w-full max-w-md panel overflow-hidden pointer-events-auto animate-slide-up">
             {/* Header */}
-            <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4">
-              <h2 className="text-2xl font-bold text-white mb-1">CodeCraft Menu</h2>
-              <p className="text-purple-100 text-sm">Access all features and settings</p>
+            <div className="bg-accent px-6 py-5">
+              <h2 className="text-h2 text-white mb-1">CodeCraft Menu</h2>
+              <p className="text-white/80 text-body">Access all features and settings</p>
             </div>
 
             {/* Menu Items */}
@@ -145,27 +145,27 @@ export function MainMenu() {
                 <button
                   key={item.id}
                   onClick={item.action}
-                  className="w-full group bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 hover:border-purple-500/50 rounded-xl p-4 transition-all duration-200 hover:scale-102 hover:shadow-lg text-left"
+                  className="w-full group bg-surface hover:bg-elevated border border-[rgb(var(--border-subtle))] hover:border-accent/30 rounded-[var(--radius-md)] p-4 transition-all duration-150 text-left focus-ring"
                 >
                   <div className="flex items-center gap-4">
                     {/* Icon */}
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                    <div className="w-11 h-11 bg-elevated rounded-[var(--radius-sm)] flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
                       {item.icon}
                     </div>
 
                     {/* Content */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-white font-bold">{item.label}</h3>
-                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 text-xs rounded-full border border-purple-500/30">
+                        <h3 className="text-h4">{item.label}</h3>
+                        <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-[var(--radius-sm)] border border-accent/20 font-medium">
                           {item.hotkey}
                         </span>
                       </div>
-                      <p className="text-gray-400 text-sm">{item.description}</p>
+                      <p className="text-small">{item.description}</p>
                     </div>
 
                     {/* Arrow */}
-                    <div className="text-gray-500 group-hover:text-purple-400 transition-colors">
+                    <div className="text-text-muted group-hover:text-accent transition-colors">
                       →
                     </div>
                   </div>
@@ -174,12 +174,12 @@ export function MainMenu() {
             </div>
 
             {/* Footer */}
-            <div className="bg-gray-800/50 border-t border-gray-700 px-6 py-4">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-gray-400">Press ESC to close</span>
+            <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4">
+              <div className="flex items-center justify-between">
+                <span className="text-small">Press ESC to close</span>
                 <button
                   onClick={() => dispatch(toggleMainMenu())}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors font-medium"
+                  className="btn-primary focus-ring"
                 >
                   Close
                 </button>

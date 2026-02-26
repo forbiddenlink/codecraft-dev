@@ -115,18 +115,33 @@ export default function BuildingDetailsPanel({
     }));
   };
   
+  // Status indicator color
+  const statusColor = {
+    active: 'bg-success',
+    damaged: 'bg-error',
+    inactive: 'bg-text-muted',
+    construction: 'bg-warning'
+  }[building.status] || 'bg-warning';
+
+  // Health bar color
+  const healthColor = building.health > 60
+    ? 'bg-success'
+    : building.health > 30
+      ? 'bg-warning'
+      : 'bg-error';
+
   // Panel content
   const panelContent = (
-    <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg text-white w-[350px]">
+    <div className="panel w-[350px] p-6 text-text-secondary animate-slide-up">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
           <span className="text-2xl">{template.icon}</span>
-          <h2 className="text-xl font-bold">{template.name}</h2>
+          <h2 className="text-h3">{template.name}</h2>
         </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="btn-icon focus-ring"
           aria-label="Close"
         >
           ✕
@@ -134,48 +149,39 @@ export default function BuildingDetailsPanel({
       </div>
 
       {/* Status */}
-      <div className="mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={`w-2 h-2 rounded-full ${
-            building.status === 'active' ? 'bg-green-500' : 
-            building.status === 'damaged' ? 'bg-red-500' : 
-            building.status === 'inactive' ? 'bg-gray-500' : 
-            'bg-yellow-500'
-          }`} />
-          <span className="capitalize">{building.status}</span>
-          
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-3">
+          <div className={`w-2 h-2 rounded-full ${statusColor}`} />
+          <span className="text-body capitalize">{building.status}</span>
+
           {/* Efficiency */}
-          <span className="ml-auto text-sm">
+          <span className="ml-auto text-small">
             Efficiency: {Math.round(building.efficiency * 100)}%
           </span>
         </div>
-        
+
         {/* Construction progress bar */}
         {building.status === 'construction' && (
-          <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
+          <div className="w-full bg-elevated rounded-full h-2 mb-2 overflow-hidden">
             <div
-              className="bg-green-500 rounded-full h-2"
+              className="bg-success rounded-full h-2 transition-all duration-300"
               style={{ width: `${building.constructionProgress * 100}%` }}
             />
           </div>
         )}
-        
+
         {/* Health bar */}
-        <div className="w-full bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-elevated rounded-full h-2 overflow-hidden">
           <div
-            className={`rounded-full h-2 ${
-              building.health > 60 ? 'bg-green-500' : 
-              building.health > 30 ? 'bg-yellow-500' : 
-              'bg-red-500'
-            }`}
+            className={`rounded-full h-2 transition-all duration-300 ${healthColor}`}
             style={{ width: `${building.health}%` }}
           />
         </div>
       </div>
 
       {/* Effects */}
-      <div className="mb-4">
-        <h3 className="font-semibold mb-2">Effects</h3>
+      <div className="mb-5">
+        <h3 className="text-h4 mb-3">Effects</h3>
         {building.effects && building.effects.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {building.effects.map((effect: any, index: number) => {
@@ -185,7 +191,7 @@ export default function BuildingDetailsPanel({
               return (
                 <div
                   key={`${effect.type}-${effect.target}-${index}`}
-                  className="flex items-center gap-2 bg-gray-800 p-2 rounded"
+                  className="flex items-center gap-2 bg-elevated p-2 rounded-md text-body"
                 >
                   <span>{resourceMeta.icon}</span>
                   <span>
@@ -199,12 +205,12 @@ export default function BuildingDetailsPanel({
             })}
           </div>
         ) : (
-          <div className="text-gray-400 text-sm">No active effects</div>
+          <div className="text-small">No active effects</div>
         )}
       </div>
-      
+
       {/* Technical */}
-      <div className="mb-4 text-xs text-gray-300">
+      <div className="mb-5 text-small space-y-1">
         <div>Position: {Math.round(building.position.x)}, {Math.round(building.position.z)}</div>
         <div>Rotation: {Math.round(building.rotation * (180/Math.PI))}°</div>
         <div>Template: {building.templateId}</div>
@@ -215,35 +221,35 @@ export default function BuildingDetailsPanel({
         {building.status !== 'construction' && (
           <button
             onClick={handleToggleStatus}
-            className={`flex-1 py-2 px-4 rounded transition-colors ${
+            className={`btn-secondary flex-1 focus-ring ${
               building.status === 'active'
-                ? 'bg-yellow-600 hover:bg-yellow-700'
-                : 'bg-green-600 hover:bg-green-700'
+                ? 'border-warning/30 hover:border-warning/50'
+                : 'border-success/30 hover:border-success/50'
             }`}
           >
             {building.status === 'active' ? 'Deactivate' : 'Activate'}
           </button>
         )}
-        
+
         {building.status === 'damaged' && (
           <button
             onClick={handleRepair}
-            className="flex-1 py-2 px-4 bg-blue-600 hover:bg-blue-700 rounded transition-colors"
+            className="btn-primary flex-1 focus-ring"
           >
             Repair
           </button>
         )}
-        
+
         <button
           onClick={handleViewCode}
-          className="flex-1 py-2 px-4 bg-gray-600 hover:bg-gray-700 rounded transition-colors"
+          className="btn-secondary flex-1 focus-ring"
         >
           View Code
         </button>
-        
+
         <button
           onClick={handleDemolish}
-          className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 rounded transition-colors"
+          className="btn-danger flex-1 focus-ring"
         >
           Demolish
         </button>
@@ -269,10 +275,11 @@ export default function BuildingDetailsPanel({
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 20 }}
-        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50"
+        exit={{ opacity: 0, y: 12 }}
+        transition={{ duration: 0.2, ease: [0.33, 1, 0.68, 1] }}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"
       >
         {panelContent}
       </motion.div>

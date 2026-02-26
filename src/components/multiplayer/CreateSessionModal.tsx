@@ -40,23 +40,29 @@ export function CreateSessionModal({
     onSessionCreated(session);
   };
 
+  const editingOptions = [
+    { value: 'all', icon: '✏️', label: 'All can edit', description: 'Everyone can write code simultaneously' },
+    { value: 'host-only', icon: '👁️', label: 'Host only', description: 'Only you can edit, others can watch' },
+    { value: 'turn-based', icon: '🔄', label: 'Turn-based', description: 'Pass control between participants' },
+  ] as const;
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl shadow-2xl max-w-md w-full border border-purple-500/30">
+    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div className="modal-content max-w-md w-full animate-slide-up">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+        <div className="bg-accent px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-2xl">
+            <div className="w-10 h-10 bg-white/20 rounded-[var(--radius-sm)] flex items-center justify-center text-2xl">
               ✨
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Create Session</h2>
-              <p className="text-purple-100 text-sm">Set up your collaboration space</p>
+              <h2 className="text-h3 text-white">Create Session</h2>
+              <p className="text-white/80 text-body">Set up your collaboration space</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors focus-ring"
             aria-label="Close"
           >
             ✕
@@ -64,10 +70,10 @@ export function CreateSessionModal({
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-surface">
           {/* Max Participants */}
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-h4 mb-3">
               Maximum Participants
             </label>
             <div className="flex gap-2">
@@ -75,10 +81,10 @@ export function CreateSessionModal({
                 <button
                   key={num}
                   onClick={() => setSettings({ ...settings, maxParticipants: num })}
-                  className={`flex-1 py-2 rounded-lg font-medium text-sm transition-all ${
+                  className={`flex-1 py-2.5 rounded-[var(--radius-sm)] font-medium text-body transition-all focus-ring ${
                     settings.maxParticipants === num
-                      ? 'bg-purple-600 text-white ring-2 ring-purple-400'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      ? 'bg-accent text-white'
+                      : 'bg-elevated text-text-muted hover:text-text-secondary'
                   }`}
                 >
                   {num}
@@ -89,73 +95,48 @@ export function CreateSessionModal({
 
           {/* Editing Mode */}
           <div>
-            <label className="block text-white font-medium mb-2">
+            <label className="block text-h4 mb-3">
               Editing Permissions
             </label>
             <div className="space-y-2">
-              <button
-                onClick={() => setSettings({ ...settings, allowEditing: 'all' })}
-                className={`w-full p-4 rounded-lg text-left transition-all ${
-                  settings.allowEditing === 'all'
-                    ? 'bg-purple-600 text-white ring-2 ring-purple-400'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                <div className="font-medium mb-1">✏️ All can edit</div>
-                <div className="text-sm opacity-80">
-                  Everyone can write code simultaneously
-                </div>
-              </button>
-
-              <button
-                onClick={() => setSettings({ ...settings, allowEditing: 'host-only' })}
-                className={`w-full p-4 rounded-lg text-left transition-all ${
-                  settings.allowEditing === 'host-only'
-                    ? 'bg-purple-600 text-white ring-2 ring-purple-400'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                <div className="font-medium mb-1">👁️ Host only</div>
-                <div className="text-sm opacity-80">
-                  Only you can edit, others can watch
-                </div>
-              </button>
-
-              <button
-                onClick={() => setSettings({ ...settings, allowEditing: 'turn-based' })}
-                className={`w-full p-4 rounded-lg text-left transition-all ${
-                  settings.allowEditing === 'turn-based'
-                    ? 'bg-purple-600 text-white ring-2 ring-purple-400'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                <div className="font-medium mb-1">🔄 Turn-based</div>
-                <div className="text-sm opacity-80">
-                  Pass control between participants
-                </div>
-              </button>
+              {editingOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setSettings({ ...settings, allowEditing: option.value })}
+                  className={`w-full p-4 rounded-[var(--radius-md)] text-left transition-all focus-ring ${
+                    settings.allowEditing === option.value
+                      ? 'bg-accent text-white'
+                      : 'bg-elevated text-text-secondary hover:bg-elevated/80'
+                  }`}
+                >
+                  <div className="font-medium mb-1">{option.icon} {option.label}</div>
+                  <div className={`text-body ${settings.allowEditing === option.value ? 'text-white/80' : 'text-text-muted'}`}>
+                    {option.description}
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
           {/* Additional Options */}
-          <div className="space-y-3">
-            <label className="flex items-center justify-between bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors">
+          <div className="space-y-2">
+            <label className="flex items-center justify-between bg-elevated p-4 rounded-[var(--radius-md)] cursor-pointer hover:bg-elevated/80 transition-colors">
               <div>
-                <div className="text-white font-medium">🎤 Voice Chat</div>
-                <div className="text-gray-400 text-sm">Enable voice communication</div>
+                <div className="text-h4">🎤 Voice Chat</div>
+                <div className="text-small">Enable voice communication</div>
               </div>
               <input
                 type="checkbox"
                 checked={settings.voiceChat}
                 onChange={(e) => setSettings({ ...settings, voiceChat: e.target.checked })}
-                className="w-5 h-5 rounded bg-gray-600 border-gray-500 text-purple-600 focus:ring-purple-500"
+                className="w-5 h-5 rounded bg-surface border-[rgb(var(--border-subtle))] text-accent focus:ring-accent/50"
               />
             </label>
 
-            <label className="flex items-center justify-between bg-gray-700 p-4 rounded-lg cursor-pointer hover:bg-gray-600 transition-colors">
+            <label className="flex items-center justify-between bg-elevated p-4 rounded-[var(--radius-md)] cursor-pointer hover:bg-elevated/80 transition-colors">
               <div>
-                <div className="text-white font-medium">👥 Allow Spectators</div>
-                <div className="text-gray-400 text-sm">Let others watch when full</div>
+                <div className="text-h4">👥 Allow Spectators</div>
+                <div className="text-small">Let others watch when full</div>
               </div>
               <input
                 type="checkbox"
@@ -163,18 +144,18 @@ export function CreateSessionModal({
                 onChange={(e) =>
                   setSettings({ ...settings, allowSpectators: e.target.checked })
                 }
-                className="w-5 h-5 rounded bg-gray-600 border-gray-500 text-purple-600 focus:ring-purple-500"
+                className="w-5 h-5 rounded bg-surface border-[rgb(var(--border-subtle))] text-accent focus:ring-accent/50"
               />
             </label>
           </div>
 
           {/* Challenge Info */}
           {challengeId && (
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-              <div className="flex items-center gap-2 text-blue-400 font-medium mb-1">
+            <div className="bg-info/10 border border-info/20 rounded-[var(--radius-md)] p-4">
+              <div className="flex items-center gap-2 text-info font-medium mb-1">
                 🎯 Challenge Mode
               </div>
-              <p className="text-gray-300 text-sm">
+              <p className="text-body">
                 This session is linked to a specific coding challenge
               </p>
             </div>
@@ -182,16 +163,16 @@ export function CreateSessionModal({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-800/50 border-t border-gray-700 px-6 py-4 flex gap-3 rounded-b-2xl">
+        <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+            className="btn-secondary flex-1 focus-ring"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
-            className="flex-1 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-lg"
+            className="btn-primary flex-1 focus-ring"
           >
             Create Session
           </button>

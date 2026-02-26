@@ -16,11 +16,12 @@ export interface AchievementToastProps {
   duration?: number;
 }
 
-const rarityColors = {
-  common: 'from-gray-600 to-gray-700',
+// Keep gradients for toast celebrations - these are special moments
+const rarityGradients = {
+  common: 'from-zinc-600 to-zinc-700',
   rare: 'from-blue-600 to-blue-700',
-  epic: 'from-purple-600 to-purple-700',
-  legendary: 'from-yellow-600 to-orange-600',
+  epic: 'from-violet-600 to-violet-700',
+  legendary: 'from-amber-500 to-orange-600',
 };
 
 export function AchievementToast({
@@ -50,7 +51,7 @@ export function AchievementToast({
       }`}
     >
       <div
-        className={`bg-gradient-to-r ${rarityColors[achievement.rarity]} rounded-lg shadow-2xl overflow-hidden border-2 border-white/20 min-w-80`}
+        className={`bg-gradient-to-r ${rarityGradients[achievement.rarity]} rounded-[var(--radius-md)] shadow-lg overflow-hidden border border-white/20 min-w-80`}
         onClick={() => {
           setIsVisible(false);
           setTimeout(onClose, 300);
@@ -58,7 +59,7 @@ export function AchievementToast({
       >
         <div className="p-4 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors">
           {/* Icon */}
-          <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-3xl animate-bounce">
+          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
             {achievement.icon}
           </div>
 
@@ -67,12 +68,12 @@ export function AchievementToast({
             <p className="text-white/80 text-xs font-medium uppercase tracking-wide">
               Achievement Unlocked
             </p>
-            <p className="text-white font-bold text-lg">{achievement.title}</p>
+            <p className="text-white font-semibold text-base">{achievement.title}</p>
           </div>
 
           {/* Close */}
           <button
-            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors"
+            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               setIsVisible(false);
@@ -86,8 +87,10 @@ export function AchievementToast({
         {/* Progress bar */}
         <div className="h-1 bg-white/20">
           <div
-            className="h-full bg-white/60 animate-shrink origin-left"
-            style={{ animationDuration: `${duration}ms` }}
+            className="h-full bg-white/60 origin-left"
+            style={{
+              animation: `shrink ${duration}ms linear forwards`,
+            }}
           />
         </div>
       </div>

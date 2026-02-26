@@ -1,6 +1,6 @@
 /**
  * Stats Card Component
- * Displays individual statistics with visual appeal
+ * Displays individual statistics with clean, minimal styling
  */
 
 import React from 'react';
@@ -14,69 +14,38 @@ export interface StatsCardProps {
   trend?: 'up' | 'down' | 'stable';
 }
 
+// Simplified color mapping - just accent colors for the value
 const colorClasses = {
-  purple: {
-    bg: 'from-purple-600/20 to-purple-800/20',
-    border: 'border-purple-500/30',
-    text: 'text-purple-400',
-    glow: 'shadow-purple-500/20',
-  },
-  blue: {
-    bg: 'from-blue-600/20 to-blue-800/20',
-    border: 'border-blue-500/30',
-    text: 'text-blue-400',
-    glow: 'shadow-blue-500/20',
-  },
-  green: {
-    bg: 'from-green-600/20 to-green-800/20',
-    border: 'border-green-500/30',
-    text: 'text-green-400',
-    glow: 'shadow-green-500/20',
-  },
-  orange: {
-    bg: 'from-orange-600/20 to-orange-800/20',
-    border: 'border-orange-500/30',
-    text: 'text-orange-400',
-    glow: 'shadow-orange-500/20',
-  },
-  red: {
-    bg: 'from-red-600/20 to-red-800/20',
-    border: 'border-red-500/30',
-    text: 'text-red-400',
-    glow: 'shadow-red-500/20',
-  },
-  yellow: {
-    bg: 'from-yellow-600/20 to-yellow-800/20',
-    border: 'border-yellow-500/30',
-    text: 'text-yellow-400',
-    glow: 'shadow-yellow-500/20',
-  },
+  purple: 'text-violet-400',
+  blue: 'text-blue-400',
+  green: 'text-emerald-400',
+  orange: 'text-orange-400',
+  red: 'text-red-400',
+  yellow: 'text-amber-400',
 };
 
 export function StatsCard({ title, value, icon, color, subtitle, trend }: StatsCardProps) {
-  const colors = colorClasses[color];
+  const valueColor = colorClasses[color];
 
   return (
-    <div
-      className={`bg-gradient-to-br ${colors.bg} border ${colors.border} rounded-xl p-6 shadow-lg ${colors.glow} hover:shadow-xl transition-all duration-300 hover:scale-105`}
-    >
-      <div className="flex items-start justify-between mb-4">
+    <div className="card card-interactive hover:scale-[1.02]">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <p className="text-gray-400 text-sm font-medium mb-1">{title}</p>
+          <p className="text-small mb-1">{title}</p>
           <div className="flex items-baseline gap-2">
-            <p className={`text-3xl font-bold ${colors.text}`}>{value}</p>
+            <p className={`text-2xl font-semibold ${valueColor}`}>{value}</p>
             {trend && (
               <span className="text-sm">
-                {trend === 'up' && <span className="text-green-400">↗</span>}
-                {trend === 'down' && <span className="text-red-400">↘</span>}
-                {trend === 'stable' && <span className="text-gray-400">→</span>}
+                {trend === 'up' && <span className="text-success">↗</span>}
+                {trend === 'down' && <span className="text-error">↘</span>}
+                {trend === 'stable' && <span className="text-text-muted">→</span>}
               </span>
             )}
           </div>
         </div>
-        <div className={`text-4xl opacity-80`}>{icon}</div>
+        <div className="text-3xl opacity-70">{icon}</div>
       </div>
-      {subtitle && <p className="text-gray-500 text-xs">{subtitle}</p>}
+      {subtitle && <p className="text-small">{subtitle}</p>}
     </div>
   );
 }

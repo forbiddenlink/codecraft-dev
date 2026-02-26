@@ -46,16 +46,16 @@ export function ResourcePanel() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl p-4 shadow-xl">
+    <div className="card">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-white font-bold text-lg flex items-center gap-2">
+        <h3 className="text-h3 flex items-center gap-2">
           <span>🏭</span>
           Resources
         </h3>
         <button
           onClick={() => setExpanded(!expanded)}
-          className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white rounded text-sm transition-colors"
+          className="btn-secondary text-body focus-ring"
         >
           {expanded ? 'Collapse' : 'Expand'}
         </button>
@@ -71,42 +71,42 @@ export function ResourcePanel() {
           return (
             <div
               key={resource.type}
-              className="bg-gray-700/50 rounded-lg p-3 border border-gray-600 hover:border-gray-500 transition-colors"
+              className="bg-elevated rounded-[var(--radius-md)] p-3 border border-[rgb(var(--border-subtle))] hover:border-accent/20 transition-colors"
             >
               {/* Icon & Name */}
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{resourceIcons[resource.type]}</span>
-                <span className="text-white text-sm font-medium capitalize">
+                <span className="text-xl">{resourceIcons[resource.type]}</span>
+                <span className="text-body font-medium capitalize">
                   {resource.type}
                 </span>
               </div>
 
               {/* Amount */}
               <div className="mb-2">
-                <p className="text-2xl font-bold text-white">
+                <p className="text-xl font-semibold text-text-primary">
                   {Math.round(resource.amount)}
                 </p>
-                <p className="text-gray-400 text-xs">/ {resource.capacity}</p>
+                <p className="text-small">/ {resource.capacity}</p>
               </div>
 
-              {/* Progress Bar */}
-              <div className="relative h-2 bg-gray-600 rounded-full overflow-hidden mb-2">
+              {/* Progress Bar - Keep gradient for resource visualization */}
+              <div className="relative h-2 bg-surface rounded-full overflow-hidden mb-2">
                 <div
-                  className={`absolute left-0 top-0 h-full bg-gradient-to-r ${resourceColors[resource.type]} transition-all duration-500`}
+                  className={`absolute left-0 top-0 h-full bg-gradient-to-r ${resourceColors[resource.type]} transition-all duration-500 rounded-full`}
                   style={{ width: `${Math.min(100, percentage)}%` }}
                 />
               </div>
 
               {/* Net Rate */}
-              <div className="flex items-center gap-1 text-xs">
+              <div className="flex items-center gap-1 text-small">
                 {netRate > 0 ? (
-                  <span className="text-green-400">+{netRate.toFixed(1)}/hr</span>
+                  <span className="text-success">+{netRate.toFixed(1)}/hr</span>
                 ) : netRate < 0 ? (
-                  <span className="text-red-400">{netRate.toFixed(1)}/hr</span>
+                  <span className="text-error">{netRate.toFixed(1)}/hr</span>
                 ) : (
-                  <span className="text-gray-400">±0/hr</span>
+                  <span className="text-text-muted">±0/hr</span>
                 )}
-                {!forecast?.isOptimal && <span className="text-orange-400">⚠️</span>}
+                {!forecast?.isOptimal && <span className="text-warning">⚠️</span>}
               </div>
             </div>
           );
@@ -115,54 +115,54 @@ export function ResourcePanel() {
 
       {/* Expanded View */}
       {expanded && (
-        <div className="mt-4 space-y-4">
+        <div className="mt-5 space-y-5">
           {/* Forecasts */}
           <div>
-            <h4 className="text-white font-medium mb-2">📊 Forecasts</h4>
+            <h4 className="text-h4 mb-3">📊 Forecasts</h4>
             <div className="space-y-2">
               {forecasts.map((forecast) => (
                 <div
                   key={forecast.resource}
-                  className="bg-gray-700/30 rounded-lg p-3 border border-gray-600"
+                  className="bg-elevated rounded-[var(--radius-md)] p-4 border border-[rgb(var(--border-subtle))]"
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium capitalize flex items-center gap-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-h4 capitalize flex items-center gap-2">
                       <span>{resourceIcons[forecast.resource]}</span>
                       {forecast.resource}
                     </span>
                     {!forecast.isOptimal && (
-                      <span className="px-2 py-0.5 bg-orange-500/20 text-orange-400 text-xs rounded-full border border-orange-500/30">
+                      <span className="px-2 py-1 bg-warning/10 text-warning text-xs rounded-[var(--radius-sm)] border border-warning/20 font-medium">
                         Needs Attention
                       </span>
                     )}
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="grid grid-cols-3 gap-3">
                     <div>
-                      <p className="text-gray-400">1 Hour</p>
-                      <p className="text-white font-bold">
+                      <p className="text-small mb-1">1 Hour</p>
+                      <p className="text-body font-semibold text-text-primary">
                         {Math.round(forecast.projected1Hour)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-400">6 Hours</p>
-                      <p className="text-white font-bold">
+                      <p className="text-small mb-1">6 Hours</p>
+                      <p className="text-body font-semibold text-text-primary">
                         {Math.round(forecast.projected6Hours)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-400">24 Hours</p>
-                      <p className="text-white font-bold">
+                      <p className="text-small mb-1">24 Hours</p>
+                      <p className="text-body font-semibold text-text-primary">
                         {Math.round(forecast.projected24Hours)}
                       </p>
                     </div>
                   </div>
                   {forecast.timeToEmpty && (
-                    <p className="text-red-400 text-xs mt-2">
+                    <p className="text-error text-small mt-3">
                       ⏱️ Depletes in {Math.round(forecast.timeToEmpty)} minutes
                     </p>
                   )}
                   {forecast.timeToFull && (
-                    <p className="text-green-400 text-xs mt-2">
+                    <p className="text-success text-small mt-3">
                       ⏱️ Full in {Math.round(forecast.timeToFull)} minutes
                     </p>
                   )}
@@ -174,14 +174,14 @@ export function ResourcePanel() {
           {/* Suggestions */}
           {suggestions.length > 0 && (
             <div>
-              <h4 className="text-white font-medium mb-2">💡 Suggestions</h4>
+              <h4 className="text-h4 mb-3">💡 Suggestions</h4>
               <div className="space-y-2">
                 {suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3"
+                    className="bg-info/10 border border-info/20 rounded-[var(--radius-md)] p-3"
                   >
-                    <p className="text-blue-400 text-sm">{suggestion}</p>
+                    <p className="text-info text-body">{suggestion}</p>
                   </div>
                 ))}
               </div>

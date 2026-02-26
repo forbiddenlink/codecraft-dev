@@ -19,27 +19,12 @@ export interface AchievementProgressProps {
   onAchievementClick?: (id: string) => void;
 }
 
+// Simplified rarity colors - only the text/badge color varies
 const rarityColors = {
-  common: {
-    bg: 'from-gray-600/20 to-gray-700/20',
-    border: 'border-gray-500/30',
-    text: 'text-gray-400',
-  },
-  rare: {
-    bg: 'from-blue-600/20 to-blue-700/20',
-    border: 'border-blue-500/30',
-    text: 'text-blue-400',
-  },
-  epic: {
-    bg: 'from-purple-600/20 to-purple-700/20',
-    border: 'border-purple-500/30',
-    text: 'text-purple-400',
-  },
-  legendary: {
-    bg: 'from-yellow-600/20 to-orange-600/20',
-    border: 'border-yellow-500/30',
-    text: 'text-yellow-400',
-  },
+  common: { text: 'text-zinc-400', bar: 'bg-zinc-500' },
+  rare: { text: 'text-blue-400', bar: 'bg-blue-500' },
+  epic: { text: 'text-violet-400', bar: 'bg-violet-500' },
+  legendary: { text: 'text-amber-400', bar: 'bg-gradient-to-r from-amber-500 to-orange-500' },
 };
 
 export function AchievementProgress({
@@ -53,12 +38,12 @@ export function AchievementProgress({
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-xl p-6 shadow-xl">
+    <div className="card">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1">🏆 Achievements</h2>
-          <p className="text-gray-400 text-sm">
+          <h2 className="text-h2 mb-1">🏆 Achievements</h2>
+          <p className="text-body">
             {categories.unlocked.length} / {achievements.length} Unlocked
           </p>
         </div>
@@ -72,7 +57,7 @@ export function AchievementProgress({
               stroke="currentColor"
               strokeWidth="8"
               fill="none"
-              className="text-gray-700"
+              className="text-elevated"
             />
             <circle
               cx="40"
@@ -85,12 +70,12 @@ export function AchievementProgress({
               strokeDashoffset={`${
                 2 * Math.PI * 36 * (1 - categories.unlocked.length / achievements.length)
               }`}
-              className="text-yellow-500"
+              className="text-amber-500"
               strokeLinecap="round"
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">
+            <span className="text-text-primary font-semibold text-body">
               {Math.round((categories.unlocked.length / achievements.length) * 100)}%
             </span>
           </div>
@@ -100,7 +85,7 @@ export function AchievementProgress({
       {/* Unlocked Achievements */}
       {categories.unlocked.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+          <h3 className="text-h4 mb-3 flex items-center gap-2">
             <span>✅</span>
             Unlocked ({categories.unlocked.length})
           </h3>
@@ -110,20 +95,20 @@ export function AchievementProgress({
               return (
                 <div
                   key={achievement.id}
-                  className={`bg-gradient-to-br ${colors.bg} border ${colors.border} rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform`}
+                  className="bg-elevated rounded-[var(--radius-md)] p-4 cursor-pointer hover:scale-[1.02] transition-transform border border-[rgb(var(--border-subtle))]"
                   onClick={() => onAchievementClick?.(achievement.id)}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="text-4xl">{achievement.icon}</div>
+                    <div className="text-3xl">{achievement.icon}</div>
                     <div className="flex-1">
-                      <p className="text-white font-bold">{achievement.title}</p>
-                      <p className={`text-xs uppercase ${colors.text}`}>
+                      <p className="text-h4">{achievement.title}</p>
+                      <p className={`text-xs uppercase font-medium ${colors.text}`}>
                         {achievement.rarity}
                       </p>
                     </div>
-                    <span className="text-green-400">✓</span>
+                    <span className="text-success">✓</span>
                   </div>
-                  <p className="text-gray-400 text-sm">{achievement.description}</p>
+                  <p className="text-small">{achievement.description}</p>
                 </div>
               );
             })}
@@ -134,7 +119,7 @@ export function AchievementProgress({
       {/* In Progress Achievements */}
       {categories.inProgress.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+          <h3 className="text-h4 mb-3 flex items-center gap-2">
             <span>⏳</span>
             In Progress ({categories.inProgress.length})
           </h3>
@@ -144,27 +129,25 @@ export function AchievementProgress({
               return (
                 <div
                   key={achievement.id}
-                  className={`bg-gradient-to-br ${colors.bg} border ${colors.border} rounded-lg p-4`}
+                  className="bg-elevated rounded-[var(--radius-md)] p-4 border border-[rgb(var(--border-subtle))]"
                 >
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="text-3xl opacity-60">{achievement.icon}</div>
+                    <div className="text-2xl opacity-60">{achievement.icon}</div>
                     <div className="flex-1">
-                      <p className="text-white font-bold">{achievement.title}</p>
-                      <p className="text-gray-400 text-sm">{achievement.description}</p>
+                      <p className="text-h4">{achievement.title}</p>
+                      <p className="text-small">{achievement.description}</p>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="space-y-1">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">{achievement.requirement}</span>
-                      <span className="text-white font-bold">{achievement.progress}%</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-small">{achievement.requirement}</span>
+                      <span className="text-body font-semibold">{achievement.progress}%</span>
                     </div>
-                    <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div className="relative h-2 bg-surface rounded-full overflow-hidden">
                       <div
-                        className={`absolute left-0 top-0 h-full bg-gradient-to-r ${
-                          colors.text.replace('text-', 'from-')
-                        } to-white transition-all duration-500`}
+                        className={`absolute left-0 top-0 h-full ${colors.bar} transition-all duration-500 rounded-full`}
                         style={{ width: `${achievement.progress}%` }}
                       />
                     </div>
@@ -179,7 +162,7 @@ export function AchievementProgress({
       {/* Locked Achievements */}
       {categories.locked.length > 0 && (
         <div>
-          <h3 className="text-white font-bold mb-3 flex items-center gap-2">
+          <h3 className="text-h4 mb-3 flex items-center gap-2">
             <span>🔒</span>
             Locked ({categories.locked.length})
           </h3>
@@ -187,11 +170,11 @@ export function AchievementProgress({
             {categories.locked.map((achievement) => (
               <div
                 key={achievement.id}
-                className="bg-gray-800/30 border border-gray-700 rounded-lg p-3 text-center opacity-50"
+                className="bg-elevated/50 border border-[rgb(var(--border-subtle))] rounded-[var(--radius-md)] p-3 text-center opacity-50"
               >
-                <div className="text-3xl mb-2 grayscale">{achievement.icon}</div>
-                <p className="text-gray-500 font-medium text-sm">{achievement.title}</p>
-                <p className="text-gray-600 text-xs mt-1">???</p>
+                <div className="text-2xl mb-2 grayscale">{achievement.icon}</div>
+                <p className="text-text-muted font-medium text-small">{achievement.title}</p>
+                <p className="text-text-muted/60 text-xs mt-1">???</p>
               </div>
             ))}
           </div>

@@ -65,23 +65,23 @@ export function SessionBrowser({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-purple-500/30">
+    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div className="modal-content max-w-4xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-accent px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-2xl">
+            <div className="w-10 h-10 bg-white/20 rounded-[var(--radius-sm)] flex items-center justify-center text-2xl">
               🌐
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Collaboration Sessions</h2>
-              <p className="text-purple-100 text-sm">Join or create a coding session</p>
+              <h2 className="text-h2 text-white">Collaboration Sessions</h2>
+              <p className="text-white/80 text-body">Join or create a coding session</p>
             </div>
           </div>
           {onClose && (
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors focus-ring"
               aria-label="Close"
             >
               ✕
@@ -90,7 +90,7 @@ export function SessionBrowser({
         </div>
 
         {/* Controls */}
-        <div className="bg-gray-800/50 border-b border-gray-700 px-6 py-4">
+        <div className="bg-elevated/50 border-b border-[rgb(var(--border-subtle))] px-6 py-4">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search */}
             <div className="flex-1">
@@ -99,38 +99,31 @@ export function SessionBrowser({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by username..."
-                className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full bg-elevated text-text-secondary rounded-[var(--radius-sm)] px-4 py-2.5 text-body border border-[rgb(var(--border-subtle))] focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 placeholder:text-text-muted"
               />
             </div>
 
             {/* Filter */}
             <div className="flex gap-2">
-              <button
-                onClick={() => setFilterMode('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterMode === 'all'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setFilterMode('open')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filterMode === 'open'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-              >
-                Open
-              </button>
+              {(['all', 'open'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setFilterMode(mode)}
+                  className={`px-4 py-2.5 rounded-[var(--radius-sm)] text-body font-medium transition-colors focus-ring ${
+                    filterMode === mode
+                      ? 'bg-accent text-white'
+                      : 'bg-elevated text-text-muted hover:text-text-secondary'
+                  }`}
+                >
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </button>
+              ))}
             </div>
 
             {/* Create Session */}
             <button
               onClick={onCreateSession}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg text-sm font-medium transition-all shadow-lg"
+              className="btn-primary focus-ring"
             >
               + Create Session
             </button>
@@ -138,7 +131,7 @@ export function SessionBrowser({
         </div>
 
         {/* Session List */}
-        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 bg-surface">
           {filteredSessions.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredSessions.map((session) => {
@@ -148,14 +141,14 @@ export function SessionBrowser({
                 return (
                   <div
                     key={session.id}
-                    className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-5 hover:border-purple-500/50 transition-all"
+                    className="card card-interactive"
                   >
                     {/* Host Info */}
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-lg"
+                        className="w-11 h-11 rounded-full flex items-center justify-center font-semibold text-white"
                         style={{
-                          backgroundColor: session.participants.find((p) => p.id === session.hostId)?.color || '#6366f1',
+                          backgroundColor: session.participants.find((p) => p.id === session.hostId)?.color || '#8b5cf6',
                         }}
                       >
                         {session.participants
@@ -164,10 +157,10 @@ export function SessionBrowser({
                           .toUpperCase()}
                       </div>
                       <div className="flex-1">
-                        <p className="text-white font-medium">
+                        <p className="text-h4">
                           {session.participants.find((p) => p.id === session.hostId)?.username}'s Session
                         </p>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-small">
                           Created {new Date(session.createdAt).toLocaleTimeString()}
                         </p>
                       </div>
@@ -179,7 +172,7 @@ export function SessionBrowser({
                         {session.participants.slice(0, 4).map((participant) => (
                           <div
                             key={participant.id}
-                            className="w-8 h-8 rounded-full border-2 border-gray-800 flex items-center justify-center font-bold text-white text-xs"
+                            className="w-8 h-8 rounded-full border-2 border-surface flex items-center justify-center font-semibold text-white text-xs"
                             style={{ backgroundColor: participant.color }}
                             title={participant.username}
                           >
@@ -187,23 +180,23 @@ export function SessionBrowser({
                           </div>
                         ))}
                       </div>
-                      <p className="text-gray-400 text-sm">
+                      <p className="text-small">
                         {session.participants.length}/{session.settings.maxParticipants} participants
                       </p>
                     </div>
 
                     {/* Settings */}
                     <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full border border-purple-500/30">
+                      <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-[var(--radius-sm)] border border-accent/20">
                         {session.settings.allowEditing === 'all' ? '✏️ All can edit' : '👁️ View only'}
                       </span>
                       {session.challengeId && (
-                        <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full border border-blue-500/30">
+                        <span className="px-2 py-1 bg-info/10 text-info text-xs rounded-[var(--radius-sm)] border border-info/20">
                           🎯 Challenge mode
                         </span>
                       )}
                       {isFull && (
-                        <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded-full border border-red-500/30">
+                        <span className="px-2 py-1 bg-error/10 text-error text-xs rounded-[var(--radius-sm)] border border-error/20">
                           🔒 Full
                         </span>
                       )}
@@ -213,12 +206,12 @@ export function SessionBrowser({
                     <button
                       onClick={() => handleJoin(session.id)}
                       disabled={isFull && !isInSession}
-                      className={`w-full py-2 rounded-lg font-medium text-sm transition-all ${
+                      className={`w-full py-2.5 rounded-[var(--radius-sm)] font-medium text-body transition-colors focus-ring ${
                         isInSession
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          ? 'bg-success hover:bg-success/90 text-white'
                           : isFull
-                          ? 'bg-gray-700 cursor-not-allowed text-gray-500'
-                          : 'bg-purple-600 hover:bg-purple-700 text-white'
+                          ? 'bg-elevated cursor-not-allowed text-text-muted'
+                          : 'bg-accent hover:bg-accent-hover text-white'
                       }`}
                     >
                       {isInSession ? '✓ Joined' : isFull ? 'Session Full' : 'Join Session'}
@@ -229,16 +222,16 @@ export function SessionBrowser({
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-bold text-white mb-2">No Sessions Found</h3>
-              <p className="text-gray-400 mb-6">
+              <div className="text-5xl mb-4 opacity-80">🔍</div>
+              <h3 className="text-h3 mb-2">No Sessions Found</h3>
+              <p className="text-body mb-6">
                 {searchQuery
                   ? 'Try adjusting your search or filters'
                   : 'Be the first to create a collaboration session!'}
               </p>
               <button
                 onClick={onCreateSession}
-                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all shadow-lg"
+                className="btn-primary focus-ring"
               >
                 + Create Session
               </button>
@@ -247,13 +240,13 @@ export function SessionBrowser({
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-800/50 border-t border-gray-700 px-6 py-3 flex items-center justify-between">
-          <p className="text-gray-400 text-sm">
+        <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-3 flex items-center justify-between">
+          <p className="text-small">
             {filteredSessions.length} active session{filteredSessions.length !== 1 ? 's' : ''}
           </p>
           <button
             onClick={loadSessions}
-            className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors"
+            className="text-accent hover:text-accent-hover text-body font-medium transition-colors focus-ring"
           >
             🔄 Refresh
           </button>

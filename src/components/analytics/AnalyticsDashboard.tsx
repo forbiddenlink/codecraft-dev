@@ -53,23 +53,23 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
   ];
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 rounded-2xl shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden border border-purple-500/30">
+    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
+      <div className="modal-content max-w-7xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4 flex items-center justify-between">
+        <div className="bg-accent px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-2xl">
+            <div className="w-10 h-10 bg-white/20 rounded-[var(--radius-sm)] flex items-center justify-center text-2xl">
               📈
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Learning Analytics</h2>
-              <p className="text-purple-100 text-sm">Track your progress and insights</p>
+              <h2 className="text-h2 text-white">Learning Analytics</h2>
+              <p className="text-white/80 text-body">Track your progress and insights</p>
             </div>
           </div>
           {onClose && (
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors focus-ring"
               aria-label="Close dashboard"
             >
               ✕
@@ -78,16 +78,16 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-gray-800/50 border-b border-gray-700 px-6">
+        <div className="bg-elevated/50 border-b border-[rgb(var(--border-subtle))] px-6">
           <div className="flex gap-1 -mb-px">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 font-medium transition-all ${
+                className={`px-4 py-3 text-body font-medium transition-all focus-ring rounded-t-[var(--radius-sm)] ${
                   activeTab === tab.id
-                    ? 'text-purple-400 border-b-2 border-purple-400 bg-gray-800/50'
-                    : 'text-gray-400 hover:text-gray-300'
+                    ? 'text-accent border-b-2 border-accent bg-surface'
+                    : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
                 <span className="mr-2">{tab.icon}</span>
@@ -98,7 +98,7 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-140px)] p-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-160px)] p-6 bg-surface">
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {/* Key Stats Grid */}
@@ -210,13 +210,13 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-800/50 border-t border-gray-700 px-6 py-4 flex items-center justify-between">
-          <p className="text-gray-400 text-sm">
+        <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4 flex items-center justify-between">
+          <p className="text-small">
             Last updated: {new Date().toLocaleTimeString()}
           </p>
           <button
             onClick={() => setAnalytics(getAnalytics())}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-sm font-medium"
+            className="btn-primary focus-ring"
           >
             🔄 Refresh Data
           </button>
