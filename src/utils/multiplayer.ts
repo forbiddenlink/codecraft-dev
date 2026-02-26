@@ -172,32 +172,64 @@ export const createRoom = async (
 /**
  * Set up collaborative editing with Yjs and Monaco
  * Call this after joining a room to enable real-time code collaboration
+ *
+ * @param room - Liveblocks room instance from joinRoom()
+ * @param editorInstance - Monaco editor instance from onMount callback
  */
 export const setupCollaborativeEditor = async (
-  _room: unknown,
-  _editorInstance: unknown
+  room: unknown,
+  editorInstance: unknown
 ): Promise<{ cleanup: () => void } | null> => {
   if (!isMultiplayerEnabled()) return null;
 
   try {
-    // These would be dynamically imported when multiplayer is enabled
-    // const Y = await import('yjs');
-    // const { MonacoBinding } = await import('y-monaco');
-    // const { LiveblocksYjsProvider } = await import('@liveblocks/yjs');
+    // Dynamically import Yjs and Monaco binding
+    const Y = await import('yjs');
+    const { MonacoBinding } = await import('y-monaco');
+    const { LiveblocksYjsProvider } = await import('@liveblocks/yjs');
 
-    // Implementation would set up:
-    // 1. Yjs document for CRDT-based text synchronization
-    // 2. Liveblocks provider for WebSocket transport
-    // 3. Monaco binding for editor integration
+    // Cast to expected types (Monaco and Liveblocks types are complex)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const editor = editorInstance as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const liveblocksRoom = room as any;
 
-    console.log('Collaborative editor setup - dependencies not installed');
+    // Create Yjs document and provider
+    const yDoc = new Y.Doc();
+    const yText = yDoc.getText('monaco');
+
+    // Create Liveblocks Yjs provider for real-time sync
+    const provider = new LiveblocksYjsProvider(liveblocksRoom, yDoc);
+
+    // Get the Monaco model
+    const model = editor.getModel();
+    if (!model) {
+      console.warn('No Monaco model available for collaborative editing');
+      return null;
+    }
+
+    // Initialize with current editor content if this is a new room
+    if (yText.toString() === '' && editor.getValue()) {
+      yText.insert(0, editor.getValue());
+    }
+
+    // Create Monaco binding for collaborative editing
+    const binding = new MonacoBinding(
+      yText,
+      model,
+      new Set([editor]),
+      provider.awareness
+    );
+
     return {
       cleanup: () => {
-        // Cleanup bindings
+        binding.destroy();
+        provider.destroy();
+        yDoc.destroy();
       },
     };
-  } catch {
-    console.warn('Failed to setup collaborative editor');
+  } catch (error) {
+    console.warn('Failed to setup collaborative editor:', error);
     return null;
   }
 };

@@ -17,6 +17,9 @@ importers:
       '@liveblocks/react':
         specifier: ^3.14.0
         version: 3.14.0(@types/json-schema@7.0.15)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react@19.2.3)
+      '@liveblocks/yjs':
+        specifier: ^3.14.1
+        version: 3.14.1(@types/json-schema@7.0.15)(yjs@13.6.29)
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -681,8 +684,16 @@ packages:
   '@liveblocks/client@3.14.0':
     resolution: {integrity: sha512-+2VukE9iaVDaSTwMCQMBtIBwpn0t2PVfIVGLydT8O/nHGiA84ew2bV0pZc+Z+G4WQuFnAYcSBhddmZrdiQJyIQ==}
 
+  '@liveblocks/client@3.14.1':
+    resolution: {integrity: sha512-XrDTwCTDeC9q/ncCH8hJLt9IEUlaHPqOELiOcQSvDR/AUvL9wGjduwi7p+HEKhGDYNHqXx/PUQAkSfLugL4+1Q==}
+
   '@liveblocks/core@3.14.0':
     resolution: {integrity: sha512-U57xnMLBv3O271YS/RiL9Wj/E1F28D2rmVPpWorlHyEytXeodmibWM4oLgmoRBF/GPSCpCJGMcCTSRKFOcTLPg==}
+    peerDependencies:
+      '@types/json-schema': ^7
+
+  '@liveblocks/core@3.14.1':
+    resolution: {integrity: sha512-AgX/tEZnQnDBvpwxEBW6ISqfv5P8Bb6QI4OW9gTVVgmLessivjsjGcT4lw+8/eUYeuIx1H3RjRZpu1LXsnoJVg==}
     peerDependencies:
       '@types/json-schema': ^7
 
@@ -697,6 +708,11 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
+
+  '@liveblocks/yjs@3.14.1':
+    resolution: {integrity: sha512-SAg0Vvn7DVZBk5S8kV6KPSULbZ9VMBevlohrYnIQ8aZ9rn2s/agmaZCzAJJP6ayudSoWjxtJ0ZF9OGUD2JGjJg==}
+    peerDependencies:
+      yjs: ^13.6.1
 
   '@mediapipe/tasks-vision@0.10.17':
     resolution: {integrity: sha512-CZWV/q6TTe8ta61cZXjfnnHsfWIdFhms03M9T7Cnd5y2mdpylJM0rF1qRq+wsQVRMLz1OYPVEBU9ph2Bx8cxrg==}
@@ -776,6 +792,10 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -3350,6 +3370,9 @@ packages:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
 
+  js-base64@3.7.8:
+    resolution: {integrity: sha512-hNngCeKxIUQiEUN3GPJOkz4wF/YvdUdbNL9hsBcMQTkKzboD7T/q3OYOuuPZLUE6dBxSGpwhk5mwuDud7JVAow==}
+
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -4665,6 +4688,12 @@ packages:
     resolution: {integrity: sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==}
     engines: {node: '>=0.4'}
 
+  y-indexeddb@9.0.12:
+    resolution: {integrity: sha512-9oCFRSPPzBK7/w5vOkJBaVCQZKHXB/v6SIT+WYhnJxlEC61juqG0hBrAf+y3gmSMLFLwICNH9nQ53uscuse6Hg==}
+    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
+    peerDependencies:
+      yjs: ^13.0.0
+
   y-monaco@0.1.6:
     resolution: {integrity: sha512-sYRywMmcylt+Nupl+11AvizD2am06ST8lkVbUXuaEmrtV6Tf+TD4rsEm6u9YGGowYue+Vfg1IJ97SUP2J+PVXg==}
     engines: {node: '>=12.0.0', npm: '>=6.0.0'}
@@ -5341,7 +5370,17 @@ snapshots:
     transitivePeerDependencies:
       - '@types/json-schema'
 
+  '@liveblocks/client@3.14.1(@types/json-schema@7.0.15)':
+    dependencies:
+      '@liveblocks/core': 3.14.1(@types/json-schema@7.0.15)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
   '@liveblocks/core@3.14.0(@types/json-schema@7.0.15)':
+    dependencies:
+      '@types/json-schema': 7.0.15
+
+  '@liveblocks/core@3.14.1(@types/json-schema@7.0.15)':
     dependencies:
       '@types/json-schema': 7.0.15
 
@@ -5353,6 +5392,17 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.7
       '@types/react-dom': 19.2.3(@types/react@19.2.7)
+    transitivePeerDependencies:
+      - '@types/json-schema'
+
+  '@liveblocks/yjs@3.14.1(@types/json-schema@7.0.15)(yjs@13.6.29)':
+    dependencies:
+      '@liveblocks/client': 3.14.1(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.14.1(@types/json-schema@7.0.15)
+      '@noble/hashes': 1.8.0
+      js-base64: 3.7.8
+      y-indexeddb: 9.0.12(yjs@13.6.29)
+      yjs: 13.6.29
     transitivePeerDependencies:
       - '@types/json-schema'
 
@@ -5410,6 +5460,8 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@16.1.1':
     optional: true
+
+  '@noble/hashes@1.8.0': {}
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -8490,6 +8542,8 @@ snapshots:
 
   jiti@2.4.2: {}
 
+  js-base64@3.7.8: {}
+
   js-tokens@4.0.0: {}
 
   js-yaml@3.14.2:
@@ -9908,6 +9962,11 @@ snapshots:
   xmlchars@2.2.0: {}
 
   xtend@4.0.2: {}
+
+  y-indexeddb@9.0.12(yjs@13.6.29):
+    dependencies:
+      lib0: 0.2.117
+      yjs: 13.6.29
 
   y-monaco@0.1.6(monaco-editor@0.55.1)(yjs@13.6.29):
     dependencies:
