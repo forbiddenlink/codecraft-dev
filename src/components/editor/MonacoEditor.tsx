@@ -1,11 +1,14 @@
 // File: /src/components/editor/MonacoEditor.tsx
 'use client';
 import { useCallback, useRef, useEffect } from 'react';
-import Editor, { loader } from '@monaco-editor/react';
+import Editor, { loader, type Monaco } from '@monaco-editor/react';
+import type { editor } from 'monaco-editor';
 import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
+import { useLiveblocksPresence } from '@/hooks/useLiveblocksPresence';
 import { setCode, setEditorErrors } from '@/store/slices/editorSlice';
 import { validateHtml, validateCss, validateJs, ValidationError } from '@/utils/codeValidation';
 import { monacoEditorOptions } from '@/utils/monacoWorker';
+import { getCollabRoom } from '@/utils/collaborationSystem';
 
 // Debounce delay for validation (ms) - prevents distraction during typing
 const VALIDATION_DEBOUNCE_MS = 300;
@@ -73,18 +76,60 @@ export default function MonacoEditor() {
   const dispatch = useAppDispatch();
   const language = useAppSelector(state => state.editor.language);
   const code = useAppSelector(state => state.editor.code[language]);
+  const { isInSession, sessionId } = useAppSelector(state => state.multiplayer);
+  const { updateCursor } = useLiveblocksPresence();
 
   // Ref for debounce timer
   const validationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Ref for editor instance (for collaborative editing)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+  // Ref for collaborative editing cleanup
+  const collabCleanupRef = useRef<(() => void) | null>(null);
+  // Ref for cursor position listener cleanup
+  const cursorListenerRef = useRef<{ dispose: () => void } | null>(null);
 
-  // Cleanup timer on unmount
+  // Cleanup timer, collaborative editing, and cursor listener on unmount
   useEffect(() => {
     return () => {
       if (validationTimerRef.current) {
         clearTimeout(validationTimerRef.current);
       }
+      if (collabCleanupRef.current) {
+        collabCleanupRef.current();
+        collabCleanupRef.current = null;
+      }
+      if (cursorListenerRef.current) {
+        cursorListenerRef.current.dispose();
+        cursorListenerRef.current = null;
+      }
     };
   }, []);
+
+  // Set up collaborative editing when in a session
+  useEffect(() => {
+    const setupCollab = async () => {
+      // Clean up previous collaborative session
+      if (collabCleanupRef.current) {
+        collabCleanupRef.current();
+        collabCleanupRef.current = null;
+      }
+
+      // Set up new collaborative session if conditions are met
+      if (isInSession && sessionId && editorRef.current) {
+        const room = getCollabRoom(sessionId);
+        if (room) {
+          // Dynamic import to avoid SSR issues with y-monaco
+          const { setupCollaborativeEditor } = await import('@/utils/multiplayer');
+          const result = await setupCollaborativeEditor(room, editorRef.current);
+          if (result) {
+            collabCleanupRef.current = result.cleanup;
+          }
+        }
+      }
+    };
+
+    setupCollab();
+  }, [isInSession, sessionId]);
 
   // Validation handler with friendly error messages
   const validateCode = useCallback((newCode: string, lang: string) => {
@@ -130,9 +175,45 @@ export default function MonacoEditor() {
   }, [dispatch, language, debouncedValidate]);
 
   // Handle editor mount
-  const handleEditorDidMount = useCallback(() => {
-    // Editor is ready
-  }, []);
+  const handleEditorDidMount = useCallback(async (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
+    editorRef.current = editor;
+
+    // Set up cursor position tracking for multiplayer
+    if (cursorListenerRef.current) {
+      cursorListenerRef.current.dispose();
+    }
+    cursorListenerRef.current = editor.onDidChangeCursorPosition((e) => {
+      if (!isInSession) return;
+
+      const selection = editor.getSelection();
+      const hasSelection = selection && !selection.isEmpty();
+
+      updateCursor({
+        language,
+        line: e.position.lineNumber,
+        column: e.position.column,
+        selection: hasSelection && selection ? {
+          startLine: selection.startLineNumber,
+          startColumn: selection.startColumn,
+          endLine: selection.endLineNumber,
+          endColumn: selection.endColumn,
+        } : undefined,
+      });
+    });
+
+    // If already in a session, set up collaborative editing
+    if (isInSession && sessionId) {
+      const room = getCollabRoom(sessionId);
+      if (room) {
+        // Dynamic import to avoid SSR issues with y-monaco
+        const { setupCollaborativeEditor } = await import('@/utils/multiplayer');
+        const result = await setupCollaborativeEditor(room, editor);
+        if (result) {
+          collabCleanupRef.current = result.cleanup;
+        }
+      }
+    }
+  }, [isInSession, sessionId, language, updateCursor]);
 
   // Loading component
   const LoadingComponent = () => (

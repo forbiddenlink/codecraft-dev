@@ -214,11 +214,12 @@ export const setupCollaborativeEditor = async (
     }
 
     // Create Monaco binding for collaborative editing
+    // Cast awareness to any due to version mismatch between @liveblocks/yjs and y-protocols
     const binding = new MonacoBinding(
       yText,
       model,
       new Set([editor]),
-      provider.awareness
+      provider.awareness as unknown as import('y-protocols/awareness').Awareness
     );
 
     return {

@@ -203,6 +203,18 @@ class CollaborationSystem {
     const user = session.participants.find((p) => p.id === userId);
     if (!user) return;
 
+    // Leave Liveblocks room if connected (check both host and joiner key formats)
+    const joinerKey = `${sessionId}-${userId}`;
+    const hostKey = sessionId;
+    for (const key of [joinerKey, hostKey]) {
+      const roomConnection = this.liveblocksRooms.get(key);
+      if (roomConnection) {
+        roomConnection.leave();
+        this.liveblocksRooms.delete(key);
+        break;
+      }
+    }
+
     session.participants = session.participants.filter((p) => p.id !== userId);
     this.addSystemMessage(sessionId, `${user.username} left the session`);
     this.broadcastEvent(sessionId, 'user-left', { userId });
@@ -368,6 +380,25 @@ class CollaborationSystem {
   }
 
   /**
+   * Get Liveblocks room for a session (for collaborative editing)
+   * Returns the room instance or null if not connected
+   */
+  getLiveblocksRoom(sessionId: string): Room | null {
+    // Check host key first, then any participant key
+    const hostConnection = this.liveblocksRooms.get(sessionId);
+    if (hostConnection) return hostConnection.room;
+
+    // Find any participant connection for this session
+    for (const [key, connection] of this.liveblocksRooms.entries()) {
+      if (key.startsWith(`${sessionId}-`)) {
+        return connection.room;
+      }
+    }
+
+    return null;
+  }
+
+  /**
    * Subscribe to session events
    */
   on(sessionId: string, callback: (event: any) => void): () => void {
@@ -420,6 +451,14 @@ class CollaborationSystem {
     const session = this.sessions.get(sessionId);
     if (!session || session.hostId !== hostId) return;
 
+    // Close all Liveblocks room connections for this session
+    for (const [key, connection] of this.liveblocksRooms.entries()) {
+      if (key === sessionId || key.startsWith(`${sessionId}-`)) {
+        connection.leave();
+        this.liveblocksRooms.delete(key);
+      }
+    }
+
     session.isActive = false;
     this.addSystemMessage(sessionId, 'Session ended by host');
     this.broadcastEvent(sessionId, 'session-ended', { sessionId });
@@ -471,3 +510,6 @@ export const sendCollabMessage = (
   message: string,
   codeSnippet?: ChatMessage['codeSnippet']
 ) => getCollaborationSystem().sendMessage(sessionId, userId, message, codeSnippet);
+
+export const getCollabRoom = (sessionId: string) =>
+  getCollaborationSystem().getLiveblocksRoom(sessionId);
