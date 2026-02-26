@@ -9,7 +9,7 @@ import type { CursorPosition, User } from '@/utils/collaborationSystem';
 export interface CollaborativeCursorsProps {
   cursors: CursorPosition[];
   users: User[];
-  editorRef: React.RefObject<HTMLDivElement>;
+  editorRef: React.RefObject<HTMLDivElement | null>;
   currentLanguage: 'html' | 'css' | 'javascript';
 }
 
