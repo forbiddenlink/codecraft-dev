@@ -43,3 +43,8 @@ next-env.d.ts
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+
+# Local tool directories
+.claude/
+.history/
+.playwright-mcp/
