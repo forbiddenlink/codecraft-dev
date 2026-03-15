@@ -34,7 +34,7 @@
     "monaco-editor": "^0.55.1",
     "next": "16.1.1",
     "posthog-js": "^1.354.4",
-    "postprocessing": "7.0.0-beta.14",
+    "postprocessing": "7.0.0-beta.16",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-redux": "^9.2.0",
