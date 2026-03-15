@@ -1,66 +1,34 @@
-# CodeCraft: Galactic Developer
+# ⚒️ CodeCraft Dev
 
-An educational coding game that combines real programming with engaging space colony gameplay. Build, code, and explore in a unique learning environment where your code shapes an entire galactic civilization.
+> Interactive coding challenges and mini-projects for developers leveling up their skills.
 
-## 🚀 Game Vision
+[![Live Demo](https://img.shields.io/badge/Live_Demo-000?style=for-the-badge&logo=vercel&logoColor=white)](https://codecraft-dev.vercel.app)
+![Next.js](https://img.shields.io/badge/Next.js-000?style=flat-square&logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 
-CodeCraft: Galactic Developer is an immersive educational experience where players:
-- Write real code that has immediate visual impact on their space colony
-- Explore a mysterious narrative about ancient "CodeCraft" technology
-- Interact with NPC developers and potentially other players
-- Progress through structured learning from basic HTML to advanced full-stack development
-- Enjoy coding in a relaxed, non-threatening environment
+## 🎯 What It Does
 
-## 🎯 Target Audience
+CodeCraft Dev is a platform for developer skill-building through hands-on coding challenges, mini-projects, and guided exercises. Progress through challenges across front-end, back-end, and CS fundamentals.
 
-- Beginner programmers (13+ years old) looking for an engaging way to learn coding
-- Intermediate developers wanting to reinforce their skills in a fun environment
-- Casual gamers interested in learning practical skills
-- Educators seeking interactive teaching tools for web development
+## ✨ Features
 
-## 🛠 Core Features
-
-### Code-Driven Colony Building
-- Real-time code editing using Monaco Editor
-- Immediate visual feedback in the 3D colony
-- Structured challenges teaching specific coding concepts
-- Error handling visualized through colony systems
-
-### Story-Driven Progression
-- Mysterious narrative about ancient technology
-- Progressive difficulty curve
-- Interactive tutorials and challenges
-
-## 🔧 Technical Stack
-
-- Next.js 15.2
-- React 19
-- Three.js for 3D visualization
-- Monaco Editor for code editing
-- Redux for state management
-- TailwindCSS for styling
+- 🧩 Curated coding challenges by skill level
+- ✅ Built-in test runner for challenge verification
+- 📈 Progress tracking across topics
+- 💡 Hints and solution walkthroughs
 
 ## 🚀 Getting Started
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   # or
-   pnpm dev
-   ```
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+```bash
+git clone https://github.com/forbiddenlink/codecraft-dev
+cd codecraft-dev
+npm install
+npm run dev
+```
 
-## 🤝 Contributing
+## 🛠️ Tech Stack
 
-We welcome contributions! Whether you're fixing bugs, adding features, or improving documentation, please feel free to make a pull request.
-
-## 📝 License
-
-[License details to be added]
+- **Framework:** Next.js
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
