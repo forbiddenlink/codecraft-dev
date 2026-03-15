@@ -74,8 +74,9 @@
       "brace-expansion": ">=1.1.12"
     }
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "description": "Educational coding game combining real programming with space colony gameplay"
 }
