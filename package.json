@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@liveblocks/client": "^3.14.1",
-    "@liveblocks/react": "^3.14.1",
+    "@liveblocks/react": "^3.15.2",
     "@liveblocks/yjs": "^3.14.1",
     "@monaco-editor/react": "^4.7.0",
     "@react-spring/three": "^9.7.5",
