@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   // Turbopack is now default in Next.js 16
   turbopack: {},
   // Required for Monaco Editor with Turbopack
