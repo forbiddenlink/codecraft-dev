@@ -89,7 +89,8 @@
   },
   "pnpm": {
     "overrides": {
-      "brace-expansion": ">=1.1.12"
+      "brace-expansion": ">=1.1.12",
+      "undici": ">=6.24.0"
     }
   },
   "license": "MIT",
