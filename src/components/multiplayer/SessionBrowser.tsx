@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { getCollaborationSystem } from '@/utils/collaborationSystem';
 import type { CollaborationSession, User } from '@/utils/collaborationSystem';
 
@@ -23,6 +24,7 @@ export function SessionBrowser({
   const [sessions, setSessions] = useState<CollaborationSession[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterMode, setFilterMode] = useState<'all' | 'open' | 'friends'>('all');
+  const [sessionsListRef] = useAutoAnimate<HTMLDivElement>();
 
   const collabSystem = getCollaborationSystem();
 
@@ -133,7 +135,7 @@ export function SessionBrowser({
         {/* Session List */}
         <div className="overflow-y-auto max-h-[calc(90vh-200px)] p-6 bg-surface">
           {filteredSessions.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div ref={sessionsListRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredSessions.map((session) => {
                 const isFull = session.participants.length >= session.settings.maxParticipants;
                 const isInSession = session.participants.some((p) => p.id === currentUser.id);

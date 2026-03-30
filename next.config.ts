@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import { withAxiom } from 'next-axiom';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -7,7 +8,7 @@ const nextConfig: NextConfig = {
   turbopack: {},
   // Required for Monaco Editor with Turbopack
   transpilePackages: ['@monaco-editor/react'],
-  // Serve Monaco Editor's static files
+  // Serve Monaco Editor's static files and WebContainer security headers
   async headers() {
     return [
       {
@@ -17,6 +18,22 @@ const nextConfig: NextConfig = {
             key: 'cache-control',
             value: 'public, max-age=31536000, immutable',
           },
+        ],
+      },
+      // WebContainer security headers for code runner pages
+      // Required for SharedArrayBuffer support
+      {
+        source: '/playground/:path*',
+        headers: [
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        ],
+      },
+      {
+        source: '/challenge/:path*',
+        headers: [
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         ],
       },
     ];
@@ -41,4 +58,4 @@ const sentryConfig = {
   // tunnelRoute: "/monitoring",
 };
 
-export default withSentryConfig(nextConfig, sentryConfig);
+export default withAxiom(withSentryConfig(nextConfig, sentryConfig));

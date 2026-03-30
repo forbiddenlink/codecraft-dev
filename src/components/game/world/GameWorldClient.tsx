@@ -29,6 +29,7 @@ import BuildingMenu from "@/components/game/buildings/BuildingMenu";
 // import ChallengeHUD from '@/components/game/challenges/ChallengeHUD';
 import { getAvailableChallenges } from '@/data/challenges';
 import Ground from "@/components/game/ground/Ground";
+import { PhysicsProvider, PhysicsGround, PhysicsCelebration } from "@/components/game/physics";
 import HintPanel from "@/components/game/challenges/HintPanel";
 import MasteryDashboard from "@/components/game/challenges/MasteryDashboard";
 import StreakDisplay from "@/components/game/streaks/StreakDisplay";
@@ -601,13 +602,14 @@ export default function GameWorldClient() {
             {/* Rest of scene content */}
             <Suspense fallback={null}>
               <SceneContent />
-              
-              {/* Scene Content */}
-              <group>
-                <Ground
+
+              {/* Physics-enabled Scene Content */}
+              <PhysicsProvider gravity={[0, -9.81, 0]}>
+                <PhysicsGround
                   onClick={handleGroundClick}
                   onPointerMove={handleGroundHover}
                   color={ENVIRONMENT_CONFIG.scene.groundColor}
+                  size={ENVIRONMENT_CONFIG.grid.width}
                 />
                 
                 <BuildingGrid 
@@ -690,7 +692,7 @@ export default function GameWorldClient() {
                   shadow-camera-top={50}
                   shadow-camera-bottom={-50}
                 />
-              </group>
+              </PhysicsProvider>
             </Suspense>
 
             <OrbitControls
