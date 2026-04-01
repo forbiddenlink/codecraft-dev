@@ -1,3 +1,4 @@
+import "./src/env.js";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import { withAxiom } from 'next-axiom';
