@@ -1,14 +1,9 @@
-import "./src/env.ts";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import { withAxiom } from 'next-axiom';
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  // Turbopack is now default in Next.js 16
-  turbopack: {},
-  // Required for Monaco Editor with Turbopack
-  transpilePackages: ['@monaco-editor/react'],
   // Serve Monaco Editor's static files and WebContainer security headers
   async headers() {
     return [

@@ -45,7 +45,7 @@ interface UseWebContainerSandboxReturn {
 let wcInstance: Awaited<
   ReturnType<typeof import("@webcontainer/api").WebContainer.boot>
 > | null = null;
-let bootPromise: Promise<typeof wcInstance> | null = null;
+let bootPromise: Promise<Awaited<ReturnType<typeof import("@webcontainer/api").WebContainer.boot>>> | null = null;
 
 async function getWebContainer() {
   if (wcInstance) return wcInstance;

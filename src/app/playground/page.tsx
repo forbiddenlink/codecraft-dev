@@ -373,7 +373,7 @@ export default function PlaygroundPage() {
   );
 
   // Editor mount handler
-  const handleEditorMount = useCallback((editor: editor.IStandaloneCodeEditor) => {
+  const handleEditorMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
     editorRef.current = editor;
 
     // Add keyboard shortcut for running code
@@ -381,10 +381,7 @@ export default function PlaygroundPage() {
       id: 'run-code',
       label: 'Run Code',
       keybindings: [
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        require('monaco-editor').KeyMod.CtrlCmd |
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          require('monaco-editor').KeyCode.Enter,
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
       ],
       run: () => {
         runCode();
