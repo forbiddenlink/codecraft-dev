@@ -1,4 +1,4 @@
-import "./src/env.js";
+import "./src/env.ts";
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import { withAxiom } from 'next-axiom';
@@ -50,7 +50,6 @@ const sentryConfig = {
   disableSourceMapUpload: process.env.NODE_ENV !== "production",
 
   // Hide source maps from client bundles
-  hideSourceMaps: true,
 
   // Automatically tree-shake Sentry logger
   disableLogger: true,
