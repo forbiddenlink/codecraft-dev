@@ -48,7 +48,7 @@
     "html-react-parser": "^5.2.3",
     "monaco-editor": "^0.55.1",
     "monaco-vim": "^0.4.4",
-    "next": "16.1.1",
+    "next": "^16.1.7",
     "next-axiom": "^1.5.0",
     "next-safe-action": "^8.3.0",
     "nuqs": "^2.8.9",
@@ -100,8 +100,19 @@
   },
   "pnpm": {
     "overrides": {
-      "brace-expansion": ">=1.1.12",
-      "undici": ">=6.24.0"
+      "brace-expansion": ">=5.0.5",
+      "undici": ">=6.24.0",
+      "next": ">=16.1.7",
+      "webpack": ">=5.104.1",
+      "ajv": ">=6.14.0",
+      "minimatch": ">=9.0.7",
+      "@tootallnate/once": ">=3.0.1",
+      "dompurify": ">=3.3.2",
+      "flatted": ">=3.4.2",
+      "picomatch": ">=4.0.4",
+      "esbuild": ">=0.25.0",
+      "defu": ">=6.1.5",
+      "vite": ">=8.0.5"
     }
   },
   "license": "MIT",
