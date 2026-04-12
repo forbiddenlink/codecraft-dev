@@ -119,5 +119,20 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "description": "Educational coding game combining real programming with space colony gameplay"
+  "description": "Educational coding game combining real programming with space colony gameplay",
+  "overrides": {
+    "brace-expansion": ">=5.0.5",
+    "undici": ">=6.24.0",
+    "next": ">=16.1.7",
+    "webpack": ">=5.104.1",
+    "ajv": ">=6.14.0",
+    "minimatch": ">=9.0.7",
+    "@tootallnate/once": ">=3.0.1",
+    "dompurify": ">=3.3.2",
+    "flatted": ">=3.4.2",
+    "picomatch": ">=4.0.4",
+    "esbuild": ">=0.25.0",
+    "defu": ">=6.1.5",
+    "vite": ">=8.0.5"
+  }
 }
