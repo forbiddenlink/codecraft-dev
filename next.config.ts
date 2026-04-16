@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import { withAxiom } from 'next-axiom';
+import withBundleAnalyzerInit from "@next/bundle-analyzer";
+const withBundleAnalyzer = withBundleAnalyzerInit({ enabled: process.env.ANALYZE === "true" });
+
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -53,4 +56,4 @@ const sentryConfig = {
   // tunnelRoute: "/monitoring",
 };
 
-export default withAxiom(withSentryConfig(nextConfig, sentryConfig));
+export default withBundleAnalyzer(withAxiom(withSentryConfig(nextConfig, sentryConfig)));
