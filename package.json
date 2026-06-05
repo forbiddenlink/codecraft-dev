@@ -90,7 +90,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.2.7",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
@@ -101,7 +101,7 @@
     "next-transpile-modules": "^10.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.7",
+    "vitest": "^4.1.8",
     "worker-loader": "^3.0.8"
   },
   "pnpm": {
