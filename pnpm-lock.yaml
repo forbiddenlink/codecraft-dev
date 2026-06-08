@@ -37,14 +37,14 @@ importers:
         specifier: ^0.9.0
         version: 0.9.0
       '@liveblocks/client':
-        specifier: ^3.19.4
-        version: 3.19.4(@types/json-schema@7.0.15)
+        specifier: ^3.19.5
+        version: 3.19.5(@types/json-schema@7.0.15)
       '@liveblocks/react':
-        specifier: ^3.19.4
-        version: 3.19.4(@types/json-schema@7.0.15)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react@19.2.7)
+        specifier: ^3.19.5
+        version: 3.19.5(@types/json-schema@7.0.15)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react@19.2.7)
       '@liveblocks/yjs':
-        specifier: ^3.19.4
-        version: 3.19.4(@types/json-schema@7.0.15)(yjs@13.6.31)
+        specifier: ^3.19.5
+        version: 3.19.5(@types/json-schema@7.0.15)(yjs@13.6.31)
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -136,8 +136,8 @@ importers:
         specifier: ^13.1.3
         version: 13.1.3
       posthog-js:
-        specifier: ^1.381.0
-        version: 1.381.0
+        specifier: ^1.382.0
+        version: 1.382.0
       postprocessing:
         specifier: 7.0.0-beta.16
         version: 7.0.0-beta.16(three@0.184.0)
@@ -1278,16 +1278,16 @@ packages:
   '@lezer/lr@1.4.8':
     resolution: {integrity: sha512-bPWa0Pgx69ylNlMlPvBPryqeLYQjyJjqPx+Aupm5zydLIF3NE+6MMLT8Yi23Bd9cif9VS00aUebn+6fDIGBcDA==}
 
-  '@liveblocks/client@3.19.4':
-    resolution: {integrity: sha512-vucJQ62edHi56NdBfZTyojXC4iaDjrG1taTF6ik8MmfUZ/+0i0GhnL2VCnju6UWkqhHd+P57hFbD653Tg0B2Jg==}
+  '@liveblocks/client@3.19.5':
+    resolution: {integrity: sha512-kXffixgJnMtlaCL8iRrRvMekXo8wBhwKAVKlrZ0QKupo8gmkAF0pQR3NhoK7HOCKNly7zQhKKBiHDA0Mk1MtHw==}
 
-  '@liveblocks/core@3.19.4':
-    resolution: {integrity: sha512-J+W8HqoUI1GVQTs1UsjZ29ld1cabErj2xidV44kelyQ0luPovxfsp55wY1RSpydTzKaOgrT8CldfEBmKyU8Dxw==}
+  '@liveblocks/core@3.19.5':
+    resolution: {integrity: sha512-mcPxarCWdKFYHWS4xuLNXiCZIyjLALTR6mSGHC0b8dXtZEtNFIC/PqJ7D7Y5ZTtN5cT37uzdUAAmSYnbWGfcjg==}
     peerDependencies:
       '@types/json-schema': ^7
 
-  '@liveblocks/react@3.19.4':
-    resolution: {integrity: sha512-l2ui2T9u4r3NlhJtV+SRSsuPr79JeD4IfF4KfZEPQ+AKwSUbbBoADBTaGND7kJqXbxQDQ5seYTjK9pL9yJgQQw==}
+  '@liveblocks/react@3.19.5':
+    resolution: {integrity: sha512-rXGx1qwTyZFmFZ1E6OOJm5m00OLfK6NcHI7UtLPaJHYq7AfhoGogYqSRC5rog3dOFL21vBNFyCqh568CrnVIww==}
     peerDependencies:
       '@types/react': ^18 || ^19
       '@types/react-dom': ^18 || ^19
@@ -1298,8 +1298,8 @@ packages:
       '@types/react-dom':
         optional: true
 
-  '@liveblocks/yjs@3.19.4':
-    resolution: {integrity: sha512-vSmLUcbtSYzZfe9XbMgcEebNk1rNK8bbaF5Y4x5XhlHxYHqiBjKoNRk7bemdgNo03XUwyuFIuTM1y0+Rt8qrPQ==}
+  '@liveblocks/yjs@3.19.5':
+    resolution: {integrity: sha512-5opOwjhDvzhkcK/kfNCnot5gBecOIc9w1laqblSNEL+pXvVZMd4dSEJCtptBaiXsV6OtR6M1xCHph50Pwt6snQ==}
     peerDependencies:
       yjs: ^13
 
@@ -1476,11 +1476,11 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@posthog/core@1.30.9':
-    resolution: {integrity: sha512-Cn004VJ7ZWQRaVQG7efh+pMtRMIVZznktngXe5I3E8wClRdMwCZaSa6jo/X04Oc04z8PeMp4GEcWVkdEhmAEXw==}
+  '@posthog/core@1.30.10':
+    resolution: {integrity: sha512-R7Z5jDB3ugwfSujMmRd5osPPR6L6BqfcaSNcYOekzRMZ4Jklq74p05xByP09EnUvKXb5czI+RQVCITTWRWuFXw==}
 
-  '@posthog/types@1.381.0':
-    resolution: {integrity: sha512-AW68BovKFCNbPdq3VjOzfQeSQRYMvQVv+46LDywWFXO/oOTXFKwjY92FaJQSTXWgTNgDpqigCw3yUFDinK3hZA==}
+  '@posthog/types@1.382.0':
+    resolution: {integrity: sha512-iK4OcSgvtmS9FZ9EUpvwlRZmHCLXaZ3+6dbRjkE7q9LL0zHLewxJH84H6uGvCw8aGzxs5rIliZqPHgimTcQEaw==}
 
   '@react-hook/intersection-observer@3.1.2':
     resolution: {integrity: sha512-mWU3BMkmmzyYMSuhO9wu3eJVP21N8TcgYm9bZnTrMwuM818bEk+0NRM3hP+c/TqA9Ln5C7qE53p1H0QMtzYdvQ==}
@@ -2217,6 +2217,9 @@ packages:
 
   '@types/node@20.19.41':
     resolution: {integrity: sha512-ECymXOukMnOoVkC2bb1Vc/w/836DXncOg5m8Xj1RH7xSHZJWNYY6Zh7EH477vcnD5egKNNfy2RpNOmuChhFPgQ==}
+
+  '@types/node@20.19.42':
+    resolution: {integrity: sha512-5L7SUaFC1RyDraj2yRhyBzHTobyXHmohD100CChNtyPyleoq37Mqab5Gn8XEKI04dfN/oqPdpHk38MgcQWHbZg==}
 
   '@types/offscreencanvas@2019.7.3':
     resolution: {integrity: sha512-ieXiYmgSRXUDeOntE1InxjWyvEelZGP63M+cGuquuRLuIKKT1osnkXjxev9B7d1nXSug5vpunx+gNlbVxMlC9A==}
@@ -4877,8 +4880,8 @@ packages:
     resolution: {integrity: sha512-FfR8sjd4em2T6fb3I2MwAJU7HWVMr9zba+enmQeeWFfCbm+UOC/0X4DS8XtpUTMwWMGbjKYP7xjfNekzyGmB3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  posthog-js@1.381.0:
-    resolution: {integrity: sha512-botkF0PUSd19qUTB7lJxKRQAc+9b9v3XcAZnqG/4LMDXJPvMxPeSCj6OVx8e9GCZN38kOg6yUcXMXDTcBqKdlw==}
+  posthog-js@1.382.0:
+    resolution: {integrity: sha512-lXwVlNdPLkhDft48ZgLQ5Jf4RsuQVwz7Hr7luD4DAG+4wDGA+k9eE2no36r3Z1w4uK0EmIf9lmav6+4RsmP7nA==}
 
   postprocessing@6.38.3:
     resolution: {integrity: sha512-5qCFp8j62nWL6sSVv/RKuHscQUIV+VMMgWeHLYZQEBpAk7G+r3jA3bSKON7gZjiuxdZ/F4PXj2Jc1oPh/7Eg+g==}
@@ -7108,20 +7111,20 @@ snapshots:
     dependencies:
       '@lezer/common': 1.5.1
 
-  '@liveblocks/client@3.19.4(@types/json-schema@7.0.15)':
+  '@liveblocks/client@3.19.5(@types/json-schema@7.0.15)':
     dependencies:
-      '@liveblocks/core': 3.19.4(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.19.5(@types/json-schema@7.0.15)
     transitivePeerDependencies:
       - '@types/json-schema'
 
-  '@liveblocks/core@3.19.4(@types/json-schema@7.0.15)':
+  '@liveblocks/core@3.19.5(@types/json-schema@7.0.15)':
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@liveblocks/react@3.19.4(@types/json-schema@7.0.15)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react@19.2.7)':
+  '@liveblocks/react@3.19.5(@types/json-schema@7.0.15)(@types/react-dom@19.2.3(@types/react@19.2.16))(@types/react@19.2.16)(react@19.2.7)':
     dependencies:
-      '@liveblocks/client': 3.19.4(@types/json-schema@7.0.15)
-      '@liveblocks/core': 3.19.4(@types/json-schema@7.0.15)
+      '@liveblocks/client': 3.19.5(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.19.5(@types/json-schema@7.0.15)
       react: 19.2.7
     optionalDependencies:
       '@types/react': 19.2.16
@@ -7129,10 +7132,10 @@ snapshots:
     transitivePeerDependencies:
       - '@types/json-schema'
 
-  '@liveblocks/yjs@3.19.4(@types/json-schema@7.0.15)(yjs@13.6.31)':
+  '@liveblocks/yjs@3.19.5(@types/json-schema@7.0.15)(yjs@13.6.31)':
     dependencies:
-      '@liveblocks/client': 3.19.4(@types/json-schema@7.0.15)
-      '@liveblocks/core': 3.19.4(@types/json-schema@7.0.15)
+      '@liveblocks/client': 3.19.5(@types/json-schema@7.0.15)
+      '@liveblocks/core': 3.19.5(@types/json-schema@7.0.15)
       '@noble/hashes': 1.8.0
       js-base64: 3.7.8
       lib0: 0.2.117
@@ -7288,11 +7291,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@posthog/core@1.30.9':
+  '@posthog/core@1.30.10':
     dependencies:
-      '@posthog/types': 1.381.0
+      '@posthog/types': 1.382.0
 
-  '@posthog/types@1.381.0': {}
+  '@posthog/types@1.382.0': {}
 
   '@react-hook/intersection-observer@3.1.2(react@19.2.7)':
     dependencies:
@@ -7978,6 +7981,10 @@ snapshots:
   '@types/ms@2.1.0': {}
 
   '@types/node@20.19.41':
+    dependencies:
+      undici-types: 6.21.0
+
+  '@types/node@20.19.42':
     dependencies:
       undici-types: 6.21.0
 
@@ -10321,7 +10328,7 @@ snapshots:
 
   jest-worker@27.5.1:
     dependencies:
-      '@types/node': 20.19.41
+      '@types/node': 20.19.42
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
@@ -11039,10 +11046,10 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  posthog-js@1.381.0:
+  posthog-js@1.382.0:
     dependencies:
-      '@posthog/core': 1.30.9
-      '@posthog/types': 1.381.0
+      '@posthog/core': 1.30.10
+      '@posthog/types': 1.382.0
       core-js: 3.49.0
       dompurify: 3.4.8
       fflate: 0.4.8
