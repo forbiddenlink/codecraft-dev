@@ -72,7 +72,7 @@ export default function GameObjectMesh({
       onPointerOut={() => setHovered(false)}
       onClick={() => onClick(tag)}
     >
-      <animated.mesh opacity={animatedOpacity}>
+      <animated.mesh material-opacity={animatedOpacity}>
         {shape}
       </animated.mesh>
       {children.map((child, i) => (
