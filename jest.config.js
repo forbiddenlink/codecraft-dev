@@ -36,6 +36,7 @@ const customJestConfig = {
     '/node_modules/',
     '^.+\\.module\\.(css|sass|scss)$',
   ],
+  coverageProvider: 'v8',
   coverageThreshold: {
     global: {
       branches: 70,
