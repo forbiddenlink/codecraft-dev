@@ -67,7 +67,7 @@ export default function GameObjectMesh({
   return (
     <animated.group
       key={objectKey}
-      scale={animatedScale.to((s) => [s, s, s])}
+      scale={animatedScale.to((s) => [s, s, s]) as unknown as [number, number, number]}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
       onClick={() => onClick(tag)}

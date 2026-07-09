@@ -243,7 +243,7 @@ export default function PhysicsBuilding({
   const content = (
     <animated.group
       ref={groupRef}
-      scale={hoverScale.to(s => [s * scale[0], s * scale[1], s * scale[2]])}
+      scale={hoverScale.to(s => [s * scale[0], s * scale[1], s * scale[2]]) as unknown as [number, number, number]}
       onClick={onClick}
     >
       {renderShape()}
