@@ -1,109 +1,123 @@
 'use client';
-import { useFrame, ThreeEvent } from '@react-three/fiber';
-import { useState, useEffect } from 'react';
+
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
+import { useEffect, useState } from 'react';
 import { Vector3 } from 'three';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import BuildingModel from './BuildingModel';
-import { useBuildingSystem } from '@/hooks/useBuildingSystem';
+import { buildingTemplates } from '@/data/buildingTemplates';
+import { buildingSystem } from '@/game/systems/BuildingSystem';
+import {
+  cancelPlacement,
+  rotatePreview,
+  updatePreviewPosition,
+} from '@/store/slices/buildingSlice';
+import { trackBuildingConstructed } from '@/utils/analytics';
 
 interface BuildingPreviewProps {
   gridSnap?: boolean;
 }
 
 export default function BuildingPreview({ gridSnap = true }: BuildingPreviewProps) {
-  const { selectedTemplateId, buildMode } = useAppSelector(state => state.building);
-  
-  const {
-    error,
-    rotation,
-    template,
-    rotateBuilding,
-    tryPlaceBuilding,
-    cancelPlacement
-  } = useBuildingSystem(selectedTemplateId || '');
-  
+  const dispatch = useAppDispatch();
+  const { selectedTemplateId, buildMode, previewRotation } = useAppSelector(
+    (state) => state.building,
+  );
+  const resolvedTemplate = selectedTemplateId
+    ? buildingTemplates[selectedTemplateId]
+    : null;
+
   const [previewPosition, setPreviewPosition] = useState<Vector3 | null>(null);
-  
-  // Handle keyboard events for preview manipulation
+  const [placementError, setPlacementError] = useState(false);
+
   useEffect(() => {
     if (!buildMode) return;
-    
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'r' || event.key === 'R') {
-        rotateBuilding();
+        event.preventDefault();
+        dispatch(rotatePreview());
       }
       if (event.key === 'Escape') {
-        cancelPlacement();
+        event.preventDefault();
+        dispatch(cancelPlacement());
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [buildMode, rotateBuilding, cancelPlacement]);
-  
-  // Update preview position based on mouse position
+  }, [buildMode, dispatch]);
+
   useFrame((state) => {
-    if (!buildMode || !selectedTemplateId || !template) return;
-    
-    // Ray casting to find ground intersection
-    const raycaster = state.raycaster;
-    const intersects = raycaster.intersectObjects(state.scene.children, true);
-    
+    if (!buildMode || !selectedTemplateId || !resolvedTemplate) return;
+
+    const intersects = state.raycaster.intersectObjects(state.scene.children, true);
     const groundIntersect = intersects.find(
-      intersect => intersect.object.name === 'ground'
+      (intersect) => intersect.object.name === 'ground',
     );
-    
-    if (groundIntersect) {
-      const point = groundIntersect.point;
-      
-      // Apply grid snapping if enabled
-      let snappedPosition;
-      if (gridSnap) {
-        const gridSize = 2; // Default grid size
-        snappedPosition = new Vector3(
+
+    if (!groundIntersect) return;
+
+    const point = groundIntersect.point;
+    const gridSize = 2;
+    const snapped = gridSnap
+      ? new Vector3(
           Math.round(point.x / gridSize) * gridSize,
-          0, // Keep at ground level
-          Math.round(point.z / gridSize) * gridSize
-        );
-      } else {
-        snappedPosition = new Vector3(point.x, 0, point.z);
-      }
-      
-      setPreviewPosition(snappedPosition);
-    }
+          0,
+          Math.round(point.z / gridSize) * gridSize,
+        )
+      : new Vector3(point.x, 0, point.z);
+
+    setPreviewPosition(snapped);
+    dispatch(updatePreviewPosition({ x: snapped.x, y: snapped.y, z: snapped.z }));
   });
-  
-  // Handle placement on mouse click
+
   const handlePlacement = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
-    
-    if (!previewPosition || !template) return;
-    
-    tryPlaceBuilding(previewPosition);
+    if (!previewPosition || !resolvedTemplate || !selectedTemplateId) return;
+
+    const placedId = buildingSystem.placeBuilding(
+      selectedTemplateId,
+      previewPosition,
+      previewRotation,
+    );
+
+    if (!placedId) {
+      setPlacementError(true);
+      return;
+    }
+
+    setPlacementError(false);
+    void trackBuildingConstructed(
+      selectedTemplateId,
+      1,
+      Object.fromEntries(resolvedTemplate.costs.map((c) => [c.resourceId, c.amount])),
+    );
   };
-  
-  // If not in build mode or no template selected, don't render anything
-  if (!buildMode || !selectedTemplateId || !template || !previewPosition) return null;
-  
+
+  if (!buildMode || !selectedTemplateId || !resolvedTemplate || !previewPosition) {
+    return null;
+  }
+
   return (
-    <group 
+    <group
       position={[previewPosition.x, previewPosition.y, previewPosition.z]}
-      rotation={[0, rotation, 0]}
+      rotation={[0, previewRotation, 0]}
       onClick={handlePlacement}
     >
       <BuildingModel
-        elementType={template.htmlElement}
+        elementType={resolvedTemplate.htmlElement}
         styles={{
-          ...template.defaultStyles,
-          opacity: 0.7, // Make preview semi-transparent
-          color: !error ? '#00ff00' : '#ff0000'
+          ...resolvedTemplate.defaultStyles,
+          opacity: 0.7,
+          color: !placementError ? '#00ff00' : '#ff0000',
         }}
         position={[0, 0, 0]}
         isHovered={false}
         isSelected={false}
         isActive={true}
-        isError={!!error}
+        isError={placementError}
       />
     </group>
   );
-} 
+}

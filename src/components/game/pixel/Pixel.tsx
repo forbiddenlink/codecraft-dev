@@ -19,23 +19,23 @@ const HOVER_HEIGHT = 1.5; // Height above ground
 // Educational feedback parameters
 const FEEDBACK_TYPES = {
   success: {
-    color: '#10B981', // Success Green
-    icon: '✓',
+    color: '#10B981',
+    icon: 'OK',
     sound: 'success.mp3'
   },
   hint: {
-    color: '#3B82F6', // Interface Blue
-    icon: '💡',
+    color: '#3B82F6',
+    icon: 'HINT',
     sound: 'hint.mp3'
   },
   warning: {
-    color: '#F59E0B', // Warning Amber
-    icon: '⚠️',
+    color: '#F59E0B',
+    icon: 'WARN',
     sound: 'warning.mp3'
   },
   error: {
-    color: '#EF4444', // Alert Red
-    icon: '❌',
+    color: '#EF4444',
+    icon: 'ERR',
     sound: 'error.mp3'
   }
 };

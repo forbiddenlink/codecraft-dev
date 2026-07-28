@@ -18,25 +18,25 @@ const RESOURCE_METADATA: ResourceMetadata = {
   energy: {
     name: 'Energy',
     color: '#FBBF24',
-    icon: '⚡',
+    icon: 'energy',
     generationRate: 1
   },
   minerals: {
     name: 'Minerals',
     color: '#3B82F6',
-    icon: '💎',
+    icon: 'minerals',
     generationRate: 0.5
   },
   water: {
     name: 'Water',
-    color: '#1E3A8A',
-    icon: '💧',
+    color: '#60A5FA',
+    icon: 'water',
     generationRate: 0.8
   },
   food: {
     name: 'Food',
     color: '#10B981',
-    icon: '🌾',
+    icon: 'food',
     generationRate: 0.6
   }
 };

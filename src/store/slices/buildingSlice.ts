@@ -75,6 +75,7 @@ export const buildingSlice = createSlice({
       state.buildMode = false;
       state.selectedTemplateId = null;
       state.previewPosition = null;
+      state.previewRotation = 0;
     },
     
     // Remove a building
@@ -199,6 +200,7 @@ export const buildingSlice = createSlice({
       } else {
         state.selectedTemplateId = null;
         state.previewPosition = null;
+        state.previewRotation = 0;
       }
     },
     
@@ -229,6 +231,7 @@ export const buildingSlice = createSlice({
       state.buildMode = false;
       state.selectedTemplateId = null;
       state.previewPosition = null;
+      state.previewRotation = 0;
     },
     
     // Connect a building to HTML node (for code-to-building mapping)
