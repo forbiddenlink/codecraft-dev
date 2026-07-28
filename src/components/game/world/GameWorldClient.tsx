@@ -9,6 +9,7 @@ import { setEditorVisible, setCode, setLanguage } from "@/store/slices/editorSli
 import { setTargetPosition } from "@/store/slices/playerSlice";
 import { selectBuilding, placeBuilding } from "@/store/slices/buildingSlice";
 import { nextStep, endTutorial } from "@/store/slices/tutorialSlice";
+import { setCurrentChallenge } from "@/store/slices/challengeSlice";
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RootState } from "@/store/store";
 import { ParsedCSSRule, JSExecutionContext } from "@/store/slices/gameSlice";
@@ -43,6 +44,7 @@ import Player from '@/components/game/player/Player';
 import Pixel from '@/components/game/pixel/Pixel';
 import CameraFocusManager from '@/components/game/camera/CameraFocusManager';
 import * as THREE from 'three';
+import confetti from 'canvas-confetti';
 import {
   trackChallengeStarted,
   trackChallengeCompleted,
@@ -471,6 +473,28 @@ export default function GameWorldClient() {
     }
   }, [availableChallenges.length, challengeIndex]);
 
+  // Keep Redux challenge index aligned for FeatureHub / dialogue consumers
+  React.useEffect(() => {
+    dispatch(setCurrentChallenge(challengeIndex));
+  }, [challengeIndex, dispatch]);
+
+  // 2D confetti burst alongside 3D sparkles
+  React.useEffect(() => {
+    if (!pendingCelebration) return;
+    const colors =
+      pendingCelebration === 'levelUp'
+        ? ['#fbbf24', '#f59e0b', '#ffffff']
+        : pendingCelebration === 'achievement'
+          ? ['#a855f7', '#6366f1', '#ffffff']
+          : ['#22c55e', '#4ade80', '#ffffff'];
+    confetti({
+      particleCount: pendingCelebration === 'success' ? 60 : 120,
+      spread: 70,
+      origin: { y: 0.65 },
+      colors,
+    });
+  }, [pendingCelebration]);
+
   const handleEditorOpen = () => {
     if (currentChallenge) {
       const editorEmpty = !code.html.trim() && !code.css.trim();
@@ -871,6 +895,19 @@ export default function GameWorldClient() {
         <div className="fixed inset-0 pointer-events-none">
           {/* Challenge UI - Left Side */}
           <div className="absolute left-4 top-4 z-50 pointer-events-auto">
+            {!currentChallenge && (
+              <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm text-white">
+                <h2 className="text-xl font-bold mb-2">Colony status</h2>
+                <p className="text-sm text-gray-300 mb-3">
+                  {completed.length === 0
+                    ? 'Challenges are loading… if this persists, refresh the page.'
+                    : 'You cleared the available challenges. Keep building, or open Help for the playground.'}
+                </p>
+                <p className="text-xs text-gray-400">
+                  Completed: {completed.length}
+                </p>
+              </div>
+            )}
             {currentChallenge && (
               <div className="flex flex-col gap-3">
                 {/* Challenge Card */}
