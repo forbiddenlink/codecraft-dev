@@ -304,6 +304,7 @@ export default function GameWorldClient() {
 
   const isBuildModeActive = building.buildMode;
   const selectedBuildingTemplateId = building.selectedTemplateId;
+  const previewRotation = useAppSelector((state: RootState) => state.building.previewRotation);
   const resourceGenerators = generators as ResourceGenerator[];
   
   // Environment state
@@ -430,7 +431,7 @@ export default function GameWorldClient() {
         const placedId = buildingSystem.placeBuilding(
           selectedBuildingTemplateId,
           new THREE.Vector3(snappedX, 0, snappedZ),
-          0,
+          previewRotation,
         );
         if (!placedId) {
           setPlacementFeedback('Cannot place — check resources and collisions.');
@@ -453,7 +454,7 @@ export default function GameWorldClient() {
         }));
       }
     }
-  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId, checkValidPlacement]);
+  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId, checkValidPlacement, previewRotation]);
 
   const handleGroundHover = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {

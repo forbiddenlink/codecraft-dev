@@ -52,7 +52,7 @@ export default function ErrorVisualization({ position = [0, 5, 0] }: ErrorVisual
         {/* Error info */}
         <Html position={[0, 0, 0]} center>
           <div className="bg-red-900 bg-opacity-80 p-3 rounded-lg text-white text-center">
-            <div className="text-2xl font-bold">⚠️ Code Issues</div>
+            <div className="text-lg font-bold tracking-wide">Code Issues</div>
             <div className="mt-2">
               {errorCount > 0 && (
                 <div className="text-red-300">{errorCount} error{errorCount !== 1 ? 's' : ''}</div>

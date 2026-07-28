@@ -3,8 +3,9 @@
  * Shows detailed code quality and usage statistics
  */
 
-import React from 'react';
+import { FileCode2, Palette, Sparkles, Lightbulb } from 'lucide-react';
 import type { LearningAnalytics } from '@/utils/analyticsSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface CodeMetricsPanelProps {
   analytics: LearningAnalytics;
@@ -35,17 +36,23 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
       {/* Overview Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/30 rounded-xl p-6">
-          <div className="text-3xl mb-2">📝</div>
+          <div className="mb-2 text-[rgb(var(--accent-subtle))]">
+            <Icon icon={FileCode2} size={28} />
+          </div>
           <p className="text-gray-400 text-sm mb-1">Total HTML Tags</p>
           <p className="text-3xl font-bold text-blue-400">{totalHTMLTags}</p>
         </div>
-        <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/30 rounded-xl p-6">
-          <div className="text-3xl mb-2">🎨</div>
+        <div className="bg-gradient-to-br from-sky-600/20 to-sky-800/20 border border-sky-500/30 rounded-xl p-6">
+          <div className="mb-2 text-[rgb(var(--accent-subtle))]">
+            <Icon icon={Palette} size={28} />
+          </div>
           <p className="text-gray-400 text-sm mb-1">Total CSS Properties</p>
-          <p className="text-3xl font-bold text-purple-400">{totalCSSProps}</p>
+          <p className="text-3xl font-bold text-sky-400">{totalCSSProps}</p>
         </div>
         <div className="bg-gradient-to-br from-green-600/20 to-green-800/20 border border-green-500/30 rounded-xl p-6">
-          <div className="text-3xl mb-2">✨</div>
+          <div className="mb-2 text-[rgb(var(--success))]">
+            <Icon icon={Sparkles} size={28} />
+          </div>
           <p className="text-gray-400 text-sm mb-1">Unique Techniques</p>
           <p className="text-3xl font-bold text-green-400">
             {analytics.mostUsedHTMLTags.size + analytics.mostUsedCSSProperties.size}
@@ -165,7 +172,8 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
       {/* Insights */}
       <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/30 rounded-xl p-6">
         <h4 className="text-white font-bold mb-3 flex items-center gap-2">
-          💡 Code Insights
+          <Icon icon={Lightbulb} size={16} />
+          Code Insights
         </h4>
         <div className="space-y-2 text-sm">
           {topHTMLTags.length > 0 && (

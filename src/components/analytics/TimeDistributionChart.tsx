@@ -3,8 +3,9 @@
  * Shows how time is distributed across different challenges
  */
 
-import React from 'react';
+import { Clock, Lightbulb } from 'lucide-react';
 import type { LearningAnalytics } from '@/utils/analyticsSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface TimeDistributionChartProps {
   analytics: LearningAnalytics;
@@ -40,7 +41,7 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
           <h3 className="text-xl font-bold text-white mb-1">Time Distribution</h3>
           <p className="text-gray-400 text-sm">How long you spend on challenges</p>
         </div>
-        <div className="text-3xl">⏱️</div>
+        <Icon icon={Clock} size={28} className="text-[rgb(var(--accent-subtle))] opacity-80" />
       </div>
 
       {/* Chart */}
@@ -106,13 +107,15 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
 
       {/* Recommendations */}
       <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-        <p className="text-blue-400 text-sm">
-          💡 {efficiency >= 60
-            ? "Great efficiency! You're tackling challenges confidently."
-            : efficiency >= 40
-            ? "Balanced approach. Consider breaking down complex challenges into smaller steps."
-            : "Take your time to understand concepts deeply. Speed comes with practice."
-          }
+        <p className="text-blue-400 text-sm inline-flex items-start gap-2">
+          <Icon icon={Lightbulb} size={15} className="mt-0.5 shrink-0" />
+          <span>
+            {efficiency >= 60
+              ? "Great efficiency! You're tackling challenges confidently."
+              : efficiency >= 40
+                ? 'Balanced approach. Consider breaking down complex challenges into smaller steps.'
+                : 'Take your time to understand concepts deeply. Speed comes with practice.'}
+          </span>
         </p>
       </div>
     </div>

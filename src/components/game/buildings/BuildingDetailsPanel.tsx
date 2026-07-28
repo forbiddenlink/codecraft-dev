@@ -15,6 +15,8 @@ import {
   RESOURCE_COLORS,
   RESOURCE_ICONS,
 } from '@/components/ui/resourceMeta';
+import { BUILDING_TEMPLATE_ICONS } from '@/data/buildingIds';
+import { Building2 } from 'lucide-react';
 
 const RESOURCE_METADATA: Record<
   string,
@@ -117,7 +119,10 @@ export default function BuildingDetailsPanel({
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
-            <Icon icon={RESOURCE_ICONS.energy} size={18} />
+            <Icon
+              icon={BUILDING_TEMPLATE_ICONS[building.templateId] || Building2}
+              size={18}
+            />
           </span>
           <h2 className="text-h3">{template.name}</h2>
         </div>
