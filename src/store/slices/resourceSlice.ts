@@ -68,7 +68,7 @@ const initialState: ResourceState = {
   flows: [],
   storage: {
     energy: 100,
-    minerals: 50,
+    minerals: 120,
     water: 100,
     food: 50
   },

@@ -14,7 +14,7 @@ export const challenges: Challenge[] = [
     cssTemplate: '/* You can add styles to your header */',
     validate: (code: string) => /<header[\s\S]*<h1>[\s\S]*<\/h1>[\s\S]*<\/header>/i.test(code),
     rewards: [
-      { type: 'building', id: 'basicHabitat' },
+      { type: 'building', id: 'habitat-module' },
       { type: 'villager', id: 'astro' }
     ],
     objectives: [
@@ -44,7 +44,7 @@ export const challenges: Challenge[] = [
     cssTemplate: '/* Style your section */',
     validate: (code: string) => /<section[\s\S]*<p>[\s\S]*<\/p>[\s\S]*<\/section>/i.test(code),
     rewards: [
-      { type: 'building', id: 'livingQuarters' },
+      { type: 'building', id: 'greenhouse-module' },
       { type: 'resource', id: 'energy', amount: 50 }
     ],
     objectives: [
@@ -81,7 +81,7 @@ export const challenges: Challenge[] = [
       return hasGrid && hasStations && hasMultipleStations;
     },
     rewards: [
-      { type: 'building', id: 'resourceCenter' },
+      { type: 'building', id: 'storage-vault' },
       { type: 'ability', id: 'resourceTracking' }
     ],
     objectives: [
@@ -177,7 +177,7 @@ export const challenges: Challenge[] = [
       return hasNav && hasLinks;
     },
     rewards: [
-      { type: 'building', id: 'communicationHub' },
+      { type: 'building', id: 'command-center' },
       { type: 'resource', id: 'energy', amount: 35 }
     ],
     objectives: [
@@ -365,7 +365,7 @@ export const challenges: Challenge[] = [
       return hasBorder;
     },
     rewards: [
-      { type: 'building', id: 'securityStation' },
+      { type: 'building', id: 'energy-generator' },
       { type: 'resource', id: 'energy', amount: 25 }
     ],
     objectives: [
@@ -429,7 +429,7 @@ export const challenges: Challenge[] = [
       return hasDisplayFlex;
     },
     rewards: [
-      { type: 'building', id: 'crewQuarters' },
+      { type: 'building', id: 'nav-corridor' },
       { type: 'resource', id: 'colonists', amount: 3 }
     ],
     objectives: [
@@ -490,7 +490,7 @@ export const challenges: Challenge[] = [
       return hasJustifyContent;
     },
     rewards: [
-      { type: 'building', id: 'dockingBay' },
+      { type: 'building', id: 'laboratory-module' },
       { type: 'resource', id: 'energy', amount: 40 }
     ],
     objectives: [
