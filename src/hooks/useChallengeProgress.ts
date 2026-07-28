@@ -5,6 +5,8 @@ import { getChallengeById } from '@/data/challenges';
 import { addResources } from '@/store/slices/resourceSlice';
 import { unlockBuilding } from '@/store/slices/buildingSlice';
 import { unlockVillager } from '@/store/slices/villagerSlice';
+import { completeChallenge as completeChallengeRedux, hydrateCompletedChallenges } from '@/store/slices/challengeSlice';
+import { completeChallenge as completeChallengeUser } from '@/store/slices/userSlice';
 import { recordChallengeCompletion } from '@/utils/spacedRepetition';
 import hapticFeedback from '@/utils/hapticFeedback';
 
@@ -20,12 +22,26 @@ export function useChallengeProgress() {
     return [];
   });
   const [pendingCelebration, setPendingCelebration] = useState<CelebrationType | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
+  // Persist locally
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('completed-challenges', JSON.stringify(completed));
     }
   }, [completed]);
+
+  // Hydrate Redux once so FeatureHub achievements survive reload
+  useEffect(() => {
+    if (hydrated) return;
+    if (completed.length > 0) {
+      dispatch(hydrateCompletedChallenges(completed));
+      completed.forEach((id) => {
+        dispatch(completeChallengeUser(id));
+      });
+    }
+    setHydrated(true);
+  }, [completed, dispatch, hydrated]);
 
   const completeChallenge = useCallback((challengeId: string): CelebrationType | null => {
     if (completed.includes(challengeId)) return null;
@@ -77,6 +93,10 @@ export function useChallengeProgress() {
     } else {
       hapticFeedback.challengeComplete();
     }
+
+    // Keep Redux in sync so achievements / FeatureHub unlocks fire
+    dispatch(completeChallengeRedux(challengeId));
+    dispatch(completeChallengeUser(challengeId));
 
     setPendingCelebration(celebrationType);
     setCompleted(prev => [...prev, challengeId]);

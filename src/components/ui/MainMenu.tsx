@@ -7,10 +7,15 @@
 
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleMainMenu } from '@/store/slices/uiSlice';
+import {
+  toggleMainMenu,
+  toggleSettings,
+  toggleHelp,
+} from '@/store/slices/uiSlice';
 import { openAnalytics } from '@/store/slices/analyticsSlice';
 import { toggleSessionBrowser, toggleCreateModal } from '@/store/slices/multiplayerSlice';
 import { toggleAchievementProgress } from '@/store/slices/achievementSlice';
+import Link from 'next/link';
 
 export function MainMenu() {
   const dispatch = useAppDispatch();
@@ -79,7 +84,7 @@ export function MainMenu() {
       label: 'Settings',
       description: 'Configure your experience',
       action: () => {
-        // TODO: Open settings modal
+        dispatch(toggleSettings());
         dispatch(toggleMainMenu());
       },
       hotkey: 'S',
@@ -90,7 +95,7 @@ export function MainMenu() {
       label: 'Help & Tutorials',
       description: 'Learn how to play',
       action: () => {
-        // TODO: Open help modal
+        dispatch(toggleHelp());
         dispatch(toggleMainMenu());
       },
       hotkey: '?',
@@ -175,6 +180,17 @@ export function MainMenu() {
 
             {/* Footer */}
             <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4">
+              <div className="flex items-center justify-between gap-3 mb-3 text-xs text-text-muted">
+                <Link href="/privacy" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+                  Privacy
+                </Link>
+                <Link href="/terms" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+                  Terms
+                </Link>
+                <Link href="/playground" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+                  Playground
+                </Link>
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-small">Press ESC to close</span>
                 <button

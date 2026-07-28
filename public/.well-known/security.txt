@@ -1,0 +1,4 @@
+Contact: https://github.com/forbiddenlink/codecraft-dev/security/advisories/new
+Preferred-Languages: en
+Canonical: https://codecraft-dev.vercel.app/.well-known/security.txt
+Expires: 2027-07-28T00:00:00.000Z

@@ -21,52 +21,23 @@
       "purpose": "any maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
+  "categories": [
+    "education",
+    "games",
+    "productivity"
   ],
-  "categories": ["education", "games", "productivity"],
   "shortcuts": [
     {
-      "name": "Start Challenge",
-      "short_name": "Challenge",
-      "description": "Jump into a coding challenge",
-      "url": "/challenges",
-      "icons": [{ "src": "/icon-challenge.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "View Progress",
-      "short_name": "Progress",
-      "description": "Check your learning progress",
-      "url": "/progress",
-      "icons": [{ "src": "/icon-progress.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Leaderboard",
-      "short_name": "Leaderboard",
-      "description": "See top coders",
-      "url": "/leaderboard",
-      "icons": [{ "src": "/icon-leaderboard.png", "sizes": "96x96" }]
+      "name": "Open Playground",
+      "short_name": "Playground",
+      "description": "Open the live coding playground",
+      "url": "/playground",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
-  ],
-  "share_target": {
-    "action": "/share",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+  ]
 }

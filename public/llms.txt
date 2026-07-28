@@ -1,0 +1,25 @@
+# CodeCraft: Galactic Developer
+
+> Build a space colony by writing real HTML, CSS, and JavaScript.
+
+CodeCraft is an educational coding game. Learners write real front-end code in-browser and see it materialize as structures in a 3D space colony.
+
+## Site
+
+- Home (colony + challenges): https://codecraft-dev.vercel.app/
+- Playground: https://codecraft-dev.vercel.app/playground
+- Privacy: https://codecraft-dev.vercel.app/privacy
+- Terms: https://codecraft-dev.vercel.app/terms
+- Source: https://github.com/forbiddenlink/codecraft-dev
+
+## Product facts
+
+- Audience: beginners and intermediate web developers learning HTML, CSS, and JavaScript through gameplay
+- Core loop: pick a challenge → write code in Monaco → check solution → unlock colony rewards
+- Stack: Next.js App Router, React 19, Monaco, React Three Fiber, Redux Toolkit
+
+## Optional docs for agents
+
+- Environment template: /.env.example (repo)
+- Sitemap: /sitemap.xml
+- Robots: /robots.txt

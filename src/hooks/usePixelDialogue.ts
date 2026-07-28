@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { RootState } from '@/store/store';
-import { Challenge } from '@/store/slices/challengeSlice';
+import { getAvailableChallenges } from '@/data/challenges';
+import type { Challenge } from '@/types/challenges';
 
 interface TutorialStep {
   pixelDialogue?: string;
@@ -64,15 +65,17 @@ export default function usePixelDialogue(): UsePixelDialogueReturn {
   const tutorialActive = gameState.tutorialActive || false;
   const tutorialStep = gameState.tutorialStep;
   const colonyResources = gameState.colonyResources || { energy: 0, oxygen: 0 };
-  // playerProgress is not in the actual GameState, using completedChallenges from challenge slice instead
+  const isEditorVisible = useAppSelector((state: RootState) => state.editor.isVisible);
+  // Get current challenge from data layer (definitions are not stored in Redux)
   const completedChallenges = useAppSelector((state: RootState) => state.challenges.completed);
-  const playerProgress = { recentlyUnlocked: [], completedChallenges };
-  const isEditorVisible = gameState.isEditorVisible || false;
-  
-  // Get current challenge
-  const currentChallenge = useAppSelector<Challenge | undefined>((state: RootState) => 
-    state.challenges.availableChallenges[state.challenges.currentIndex]
+  const currentIndex = useAppSelector((state: RootState) => state.challenges.currentIndex);
+  const availableChallenges = useMemo(
+    () => getAvailableChallenges(completedChallenges),
+    [completedChallenges],
   );
+  const currentChallenge: Challenge | undefined =
+    availableChallenges[Math.min(currentIndex, Math.max(availableChallenges.length - 1, 0))];
+  const playerProgress = { recentlyUnlocked: [], completedChallenges };
   
   /**
    * Generate dialogue based on current context

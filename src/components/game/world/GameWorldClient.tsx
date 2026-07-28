@@ -5,9 +5,10 @@ import { OrbitControls, Stars, Sky, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive';
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setEditorVisible } from "@/store/slices/editorSlice";
+import { setEditorVisible, setCode, setLanguage } from "@/store/slices/editorSlice";
 import { setTargetPosition } from "@/store/slices/playerSlice";
-import { selectBuilding } from "@/store/slices/buildingSlice";
+import { selectBuilding, placeBuilding } from "@/store/slices/buildingSlice";
+import { nextStep, endTutorial } from "@/store/slices/tutorialSlice";
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { RootState } from "@/store/store";
 import { ParsedCSSRule, JSExecutionContext } from "@/store/slices/gameSlice";
@@ -26,7 +27,6 @@ import CodeExecutionVisualizer from "@/components/game/code/CodeExecutionVisuali
 import TutorialOverlay from "@/components/game/tutorial/TutorialOverlay";
 import ResourceHUD from "@/components/game/hud/ResourceHUD";
 import BuildingMenu from "@/components/game/buildings/BuildingMenu";
-// import ChallengeHUD from '@/components/game/challenges/ChallengeHUD';
 import { getAvailableChallenges } from '@/data/challenges';
 import Ground from "@/components/game/ground/Ground";
 import { PhysicsProvider, PhysicsGround, PhysicsCelebration } from "@/components/game/physics";
@@ -36,13 +36,20 @@ import StreakDisplay from "@/components/game/streaks/StreakDisplay";
 import CelebrationSparkles from "@/components/game/celebrations/CelebrationSparkles";
 import { useChallengeProgress, CelebrationType } from "@/hooks/useChallengeProgress";
 import { parseHtmlToStructure } from "@/utils/htmlParser";
-import type { Challenge } from '@/types/challenge';
+import type { Challenge } from '@/types/challenges';
 import type { HtmlNode } from '@/types/html';
 import { ThreeEvent } from '@react-three/fiber';
 import Player from '@/components/game/player/Player';
 import Pixel from '@/components/game/pixel/Pixel';
 import CameraFocusManager from '@/components/game/camera/CameraFocusManager';
 import * as THREE from 'three';
+import {
+  trackChallengeStarted,
+  trackChallengeCompleted,
+  trackCodeSubmitted,
+  trackBuildingConstructed,
+} from '@/utils/analytics';
+import { buildingTemplates } from '@/data/buildingTemplates';
 
 // Environment settings
 const ENVIRONMENT_CONFIG = {
@@ -243,7 +250,11 @@ const SceneContent = () => {
 export default function GameWorldClient() {
   const dispatch = useAppDispatch();
   const [challengeIndex, setChallengeIndex] = useState(0);
-  const { completed, pendingCelebration, clearCelebration } = useChallengeProgress();
+  const [validationFeedback, setValidationFeedback] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+  const { completed, completeChallenge, pendingCelebration, clearCelebration } = useChallengeProgress();
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
   // Performance optimization: detect low-power devices and reduced motion preference
@@ -262,12 +273,15 @@ export default function GameWorldClient() {
     colonyResources = {},
     cssRules = [],
     jsExecutionContext: _jsExecutionContext = {},
-    tutorialActive = false,
-    tutorialStep = 0,
-    tutorialState = { active: false, step: 0, steps: [] },
     building = { buildMode: false, selectedTemplateId: null },
     generators = []
   } = gameState;
+
+  const tutorialIsActive = useAppSelector((state: RootState) => state.tutorial.isActive);
+  const tutorialStepIndex = useAppSelector((state: RootState) => state.tutorial.currentStepIndex);
+  const tutorialSteps = useAppSelector((state: RootState) => state.tutorial.steps);
+  const [challengeStartedAt, setChallengeStartedAt] = useState<number | null>(null);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   const isBuildModeActive = building.buildMode;
   const selectedBuildingTemplateId = building.selectedTemplateId;
@@ -366,6 +380,13 @@ export default function GameWorldClient() {
   // Get selected building ID to enable deselection on ground click
   const selectedBuildingId = useAppSelector((state: RootState) => state.building.selectedBuildingId);
 
+  const checkValidPlacement = React.useCallback((x: number, z: number): boolean => {
+    return x >= -ENVIRONMENT_CONFIG.grid.width/2 &&
+           x <= ENVIRONMENT_CONFIG.grid.width/2 &&
+           z >= -ENVIRONMENT_CONFIG.grid.height/2 &&
+           z <= ENVIRONMENT_CONFIG.grid.height/2;
+  }, []);
+
   // Type-safe event handlers
   const handleGroundClick = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     event.stopPropagation();
@@ -382,7 +403,23 @@ export default function GameWorldClient() {
         const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
         const snappedX = Math.round(point.x / gridSize) * gridSize;
         const snappedZ = Math.round(point.z / gridSize) * gridSize;
-        console.log(`Placing building at ${snappedX}, ${snappedZ}`);
+        if (!checkValidPlacement(snappedX, snappedZ)) {
+          return;
+        }
+        const template = buildingTemplates[selectedBuildingTemplateId];
+        dispatch(placeBuilding({
+          templateId: selectedBuildingTemplateId,
+          position: { x: snappedX, y: 0, z: snappedZ },
+          rotation: 0,
+          effects: template?.effects,
+        }));
+        void trackBuildingConstructed(
+          selectedBuildingTemplateId,
+          1,
+          Object.fromEntries(
+            (template?.costs || []).map((c) => [c.resourceId, c.amount]),
+          ),
+        );
       } else {
         dispatch(setTargetPosition({
           x: point.x,
@@ -391,7 +428,7 @@ export default function GameWorldClient() {
         }));
       }
     }
-  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId]);
+  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId, checkValidPlacement]);
 
   const handleGroundHover = React.useCallback((event: ThreeEvent<PointerEvent>) => {
     if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {
@@ -404,15 +441,7 @@ export default function GameWorldClient() {
       ]);
       setIsValidPlacement(checkValidPlacement(point.x, point.z));
     }
-  }, [isBuildModeActive, selectedBuildingTemplateId]);
-  
-  // Placeholder for checking valid placement
-  const checkValidPlacement = (x: number, z: number): boolean => {
-    return x >= -ENVIRONMENT_CONFIG.grid.width/2 && 
-           x <= ENVIRONMENT_CONFIG.grid.width/2 &&
-           z >= -ENVIRONMENT_CONFIG.grid.height/2 &&
-           z <= ENVIRONMENT_CONFIG.grid.height/2;
-  };
+  }, [isBuildModeActive, selectedBuildingTemplateId, checkValidPlacement]);
 
   // Update Pixel's message based on challenge context
   React.useEffect(() => {
@@ -431,14 +460,108 @@ export default function GameWorldClient() {
   const handleNext = () =>
     setChallengeIndex((i) => (i < availableChallenges.length - 1 ? i + 1 : i));
 
+  // Keep challenge index in range when the available list shrinks after completion
+  React.useEffect(() => {
+    if (availableChallenges.length === 0) {
+      setChallengeIndex(0);
+      return;
+    }
+    if (challengeIndex >= availableChallenges.length) {
+      setChallengeIndex(availableChallenges.length - 1);
+    }
+  }, [availableChallenges.length, challengeIndex]);
+
   const handleEditorOpen = () => {
+    if (currentChallenge) {
+      const editorEmpty = !code.html.trim() && !code.css.trim();
+      if (editorEmpty) {
+        if (currentChallenge.htmlTemplate) {
+          dispatch(setCode({ language: 'html', code: currentChallenge.htmlTemplate }));
+        }
+        if (currentChallenge.cssTemplate) {
+          dispatch(setCode({ language: 'css', code: currentChallenge.cssTemplate }));
+        }
+      }
+      dispatch(setLanguage('html'));
+      setChallengeStartedAt(Date.now());
+      setAttemptCount(0);
+      void trackChallengeStarted(
+        currentChallenge.id,
+        currentChallenge.title,
+        currentChallenge.difficulty,
+        'html',
+      );
+    }
+    setValidationFeedback(null);
     dispatch(setEditorVisible(true));
+  };
+
+  const handleCheckSolution = () => {
+    if (!currentChallenge) return;
+
+    const combinedCode = `${code.html}\n${code.css}\n${code.javascript}`;
+    const passed = currentChallenge.validate(combinedCode);
+    const nextAttempt = attemptCount + 1;
+    setAttemptCount(nextAttempt);
+    const elapsed = challengeStartedAt ? Date.now() - challengeStartedAt : 0;
+
+    void trackCodeSubmitted(
+      currentChallenge.id,
+      passed,
+      passed ? 100 : 0,
+      elapsed,
+      nextAttempt,
+    );
+
+    if (!passed) {
+      setValidationFeedback({
+        success: false,
+        message: 'Not quite — check the objectives and try again.',
+      });
+      return;
+    }
+
+    const celebration = completeChallenge(currentChallenge.id);
+    if (!celebration) {
+      setValidationFeedback({
+        success: true,
+        message: 'Already completed — keep building or move to the next challenge.',
+      });
+      return;
+    }
+
+    void trackChallengeCompleted(
+      currentChallenge.id,
+      100,
+      elapsed,
+      nextAttempt,
+      100,
+    );
+
+    setValidationFeedback({
+      success: true,
+      message: celebration === 'levelUp'
+        ? 'Challenge complete — level up!'
+        : celebration === 'achievement'
+          ? 'Challenge complete — achievement unlocked!'
+          : 'Challenge complete! Rewards unlocked.',
+    });
+    setTimeout(() => {
+      setChallengeIndex(0);
+      setValidationFeedback(null);
+      setChallengeStartedAt(null);
+      setAttemptCount(0);
+    }, 1600);
   };
   
   const handleTutorialStepComplete = React.useCallback(() => {
-    // Tutorial step completion logic would go here
-    console.log("Tutorial step completed");
-  }, []);
+    const isLast = tutorialStepIndex >= tutorialSteps.length - 1;
+    if (isLast) {
+      dispatch(endTutorial());
+    } else {
+      dispatch(nextStep());
+    }
+  }, [dispatch, tutorialStepIndex, tutorialSteps.length]);
 
   // Set camera limits and initial position
   React.useEffect(() => {
@@ -782,9 +905,24 @@ export default function GameWorldClient() {
                     </div>
                   )}
 
+                  {validationFeedback && (
+                    <div
+                      className={`mb-3 p-3 rounded text-sm ${
+                        validationFeedback.success
+                          ? 'bg-green-900/50 text-green-200'
+                          : 'bg-red-900/50 text-red-200'
+                      }`}
+                      role="status"
+                      aria-live="polite"
+                    >
+                      {validationFeedback.message}
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-2">
                       <button
+                        type="button"
                         onClick={handlePrev}
                         disabled={challengeIndex === 0}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -792,6 +930,7 @@ export default function GameWorldClient() {
                         Previous
                       </button>
                       <button
+                        type="button"
                         onClick={handleNext}
                         disabled={challengeIndex === availableChallenges.length - 1}
                         className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -800,18 +939,20 @@ export default function GameWorldClient() {
                       </button>
                     </div>
                     <button
+                      type="button"
                       onClick={handleEditorOpen}
                       className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                     >
-                      {completed.includes(currentChallenge.id) ? 'Edit Code' : 'Start Coding'}
+                      Start Coding
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCheckSolution}
+                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                    >
+                      Check Solution
                     </button>
                   </div>
-                  {completed.includes(currentChallenge.id) && (
-                    <div className="mt-2 text-center text-green-400 flex items-center justify-center gap-1">
-                      <span>✓</span>
-                      <span>Completed</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Progressive Hints Panel */}
@@ -854,11 +995,11 @@ export default function GameWorldClient() {
           </div>
           
           {/* Tutorial Overlay */}
-          {tutorialActive && (
+          {tutorialIsActive && (
             <div className="pointer-events-auto">
               <TutorialOverlay
-                currentStep={tutorialStep}
-                focusArea={tutorialState.steps[tutorialStep]?.focusArea || ''}
+                currentStep={tutorialStepIndex}
+                focusArea={tutorialSteps[tutorialStepIndex]?.focusArea || ''}
                 onComplete={handleTutorialStepComplete}
               />
             </div>

@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://codecraft-dev.vercel.app
+
+# Sitemaps
+Sitemap: https://codecraft-dev.vercel.app/sitemap.xml
