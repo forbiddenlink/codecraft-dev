@@ -14,6 +14,7 @@ import multiplayerReducer from './slices/multiplayerSlice';
 import achievementReducer from './slices/achievementSlice';
 import dialogueReducer from './slices/dialogueSlice';
 import uiReducer from './slices/uiSlice';
+import eventReducer from './slices/eventSlice';
 import { soundMiddleware } from './middleware/soundMiddleware';
 
 export const store = configureStore({
@@ -32,6 +33,7 @@ export const store = configureStore({
     achievement: achievementReducer,
     dialogue: dialogueReducer,
     ui: uiReducer,
+    events: eventReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(soundMiddleware),

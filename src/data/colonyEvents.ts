@@ -212,7 +212,7 @@ export const COLONY_EVENTS: ColonyEvent[] = [
     type: 'negative',
     category: 'technical',
     rarity: 'common',
-    icon: 'sparkles',
+    icon: 'triangle-alert',
     trigger: {
       minLevel: 2,
       probability: 0.20
