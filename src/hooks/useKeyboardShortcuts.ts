@@ -4,83 +4,87 @@
  */
 
 import { useEffect } from 'react';
-import { useAppDispatch } from '@/store/hooks';
-import { toggleMainMenu } from '@/store/slices/uiSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { toggleMainMenu, toggleSettings, toggleHelp } from '@/store/slices/uiSlice';
 import { openAnalytics } from '@/store/slices/analyticsSlice';
-import { toggleSessionBrowser } from '@/store/slices/multiplayerSlice';
+import { toggleSessionBrowser, toggleCreateModal } from '@/store/slices/multiplayerSlice';
 import { toggleAchievementProgress } from '@/store/slices/achievementSlice';
+
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable ||
+    Boolean(target.closest('.monaco-editor'))
+  );
+}
 
 export function useKeyboardShortcuts() {
   const dispatch = useAppDispatch();
+  const buildMode = useAppSelector((state) => state.building.buildMode);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      // Don't trigger shortcuts when typing in inputs
-      const target = event.target as HTMLElement;
-      if (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      ) {
-        return;
-      }
+      if (isTypingTarget(event.target)) return;
 
-      // ESC - Toggle main menu
+      // Esc: cancel build mode first; otherwise toggle main menu
       if (event.key === 'Escape') {
+        if (buildMode) {
+          // BuildingPreview owns cancelPlacement on Esc
+          return;
+        }
         event.preventDefault();
         dispatch(toggleMainMenu());
         return;
       }
 
-      // Check for modifier keys (Ctrl/Cmd + key)
       const isMod = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
 
       if (isMod) {
-        switch (event.key.toLowerCase()) {
+        switch (key) {
           case 'a':
             event.preventDefault();
             dispatch(openAnalytics());
             break;
-
           case 'h':
             event.preventDefault();
             dispatch(toggleAchievementProgress());
             break;
-
           case 'm':
             event.preventDefault();
             dispatch(toggleSessionBrowser());
             break;
-
+          case 'c':
+            if (event.shiftKey) {
+              event.preventDefault();
+              dispatch(toggleCreateModal());
+            }
+            break;
+          case ',':
+            event.preventDefault();
+            dispatch(toggleSettings());
+            break;
           case 'k':
             event.preventDefault();
-            // Toggle command palette (future feature)
+            // Command palette reserved
             break;
-
-          case '/':
-            event.preventDefault();
-            // Toggle search (future feature)
+          default:
             break;
         }
+        return;
       }
 
-      // Single key shortcuts (when not in editor)
-      if (!isMod) {
-        switch (event.key) {
-          case '?':
-            event.preventDefault();
-            // Show help modal
-            break;
-        }
+      if (event.key === '?' || (event.shiftKey && key === '/')) {
+        event.preventDefault();
+        dispatch(toggleHelp());
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [dispatch]);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [dispatch, buildMode]);
 }
 
 /**
@@ -91,9 +95,9 @@ export function getKeyboardShortcuts() {
     {
       category: 'Navigation',
       shortcuts: [
-        { key: 'ESC', description: 'Toggle main menu' },
-        { key: 'Ctrl/Cmd + K', description: 'Open command palette' },
+        { key: 'Esc', description: 'Toggle main menu (cancels build mode first)' },
         { key: '?', description: 'Show help' },
+        { key: 'Ctrl/Cmd + ,', description: 'Open settings' },
       ],
     },
     {
@@ -102,14 +106,14 @@ export function getKeyboardShortcuts() {
         { key: 'Ctrl/Cmd + A', description: 'Open analytics dashboard' },
         { key: 'Ctrl/Cmd + H', description: 'View achievements' },
         { key: 'Ctrl/Cmd + M', description: 'Open multiplayer browser' },
+        { key: 'Ctrl/Cmd + Shift + C', description: 'Create collaboration session' },
       ],
     },
     {
-      category: 'Editor',
+      category: 'Building',
       shortcuts: [
-        { key: 'Ctrl/Cmd + S', description: 'Save/format code' },
-        { key: 'Ctrl/Cmd + /', description: 'Toggle comment' },
-        { key: 'Ctrl/Cmd + D', description: 'Duplicate line' },
+        { key: 'R', description: 'Rotate building preview' },
+        { key: 'Esc', description: 'Cancel build mode' },
       ],
     },
   ];

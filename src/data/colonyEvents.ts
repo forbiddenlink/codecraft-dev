@@ -59,12 +59,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== POSITIVE EVENTS =====
   {
     id: 'resource-discovery',
-    title: '💎 Resource Discovery!',
+    title: 'Resource Discovery!',
     description: 'Your colonists discovered a hidden cache of resources while exploring!',
     type: 'positive',
     category: 'resource',
     rarity: 'uncommon',
-    icon: '💎',
+    icon: 'gem',
     trigger: {
       minLevel: 1,
       probability: 0.15
@@ -81,12 +81,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'code-inspiration',
-    title: '💡 Coding Breakthrough!',
+    title: 'Coding Breakthrough!',
     description: 'You suddenly understand a complex concept! Everything clicks!',
     type: 'positive',
     category: 'technical',
     rarity: 'rare',
-    icon: '💡',
+    icon: 'lightbulb',
     trigger: {
       minLevel: 3,
       probability: 0.08
@@ -100,12 +100,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'volunteer-arrival',
-    title: '👥 New Volunteers!',
+    title: 'New Volunteers!',
     description: 'A group of skilled volunteers wants to join your colony!',
     type: 'positive',
     category: 'social',
     rarity: 'uncommon',
-    icon: '👥',
+    icon: 'users',
     trigger: {
       minLevel: 5,
       requiredBuildings: ['livingQuarters'],
@@ -124,12 +124,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== NEGATIVE EVENTS =====
   {
     id: 'power-surge',
-    title: '⚡ Power Surge!',
+    title: 'Power Surge!',
     description: 'A massive power surge hits your energy grid! Some systems are damaged.',
     type: 'negative',
     category: 'technical',
     rarity: 'uncommon',
-    icon: '⚡',
+    icon: 'zap',
     trigger: {
       minLevel: 2,
       requiredBuildings: ['powerGrid'],
@@ -146,12 +146,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'solar-storm',
-    title: '☀️ Solar Storm Warning!',
+    title: 'Solar Storm Warning!',
     description: 'A solar storm is approaching! You need to protect your systems.',
     type: 'choice',
     category: 'environmental',
     rarity: 'rare',
-    icon: '☀️',
+    icon: 'sun',
     trigger: {
       minLevel: 3,
       weatherConditions: ['clear'],
@@ -207,12 +207,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'bug-infection',
-    title: '🐛 Bug Outbreak!',
+    title: 'Bug Outbreak!',
     description: 'A nasty bug has infected your codebase! Debug it quickly!',
     type: 'negative',
     category: 'technical',
     rarity: 'common',
-    icon: '🐛',
+    icon: 'sparkles',
     trigger: {
       minLevel: 2,
       probability: 0.20
@@ -226,12 +226,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== NEUTRAL/SOCIAL EVENTS =====
   {
     id: 'celebration-day',
-    title: '🎉 Colony Celebration!',
+    title: 'Colony Celebration!',
     description: 'The colonists want to throw a party to celebrate recent achievements!',
     type: 'choice',
     category: 'social',
     rarity: 'uncommon',
-    icon: '🎉',
+    icon: 'party-popper',
     trigger: {
       minLevel: 4,
       probability: 0.15
@@ -286,12 +286,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'tech-debate',
-    title: '💬 Great Debate',
+    title: 'Great Debate',
     description: 'Colonists are debating: Tabs vs Spaces! This could get heated...',
     type: 'neutral',
     category: 'social',
     rarity: 'common',
-    icon: '💬',
+    icon: 'sparkles',
     trigger: {
       minLevel: 2,
       probability: 0.18
@@ -340,12 +340,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== STORY EVENTS =====
   {
     id: 'mysterious-signal',
-    title: '📡 Mysterious Signal',
+    title: 'Mysterious Signal',
     description: 'You\'re receiving a strange coded message from deep space...',
     type: 'choice',
     category: 'story',
     rarity: 'rare',
-    icon: '📡',
+    icon: 'sparkles',
     trigger: {
       minLevel: 6,
       requiredBuildings: ['communicationBeacon'],
@@ -398,12 +398,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== HUMOROUS EVENTS =====
   {
     id: 'coffee-crisis',
-    title: '☕ COFFEE EMERGENCY',
+    title: 'COFFEE EMERGENCY',
     description: 'THE COFFEE MACHINE IS BROKEN! This is NOT a drill!',
     type: 'choice',
     category: 'humorous',
     rarity: 'uncommon',
-    icon: '☕',
+    icon: 'sparkles',
     trigger: {
       minLevel: 1,
       timeOfDay: 'morning',
@@ -454,12 +454,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'pixel-prank',
-    title: '🤖 Pixel\'s Prank',
+    title: 'Pixel\'s Prank',
     description: 'Pixel has hidden your semicolons. ALL of them. He thinks it\'s hilarious.',
     type: 'neutral',
     category: 'technical',
     rarity: 'rare',
-    icon: '🤖',
+    icon: 'bot',
     trigger: {
       minLevel: 3,
       probability: 0.05
@@ -474,12 +474,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
   // ===== RARE/LEGENDARY EVENTS =====
   {
     id: 'ancient-awakening',
-    title: '✨ Ancient Awakening',
+    title: 'Ancient Awakening',
     description: 'The ruins are glowing intensely! Something incredible is happening!',
     type: 'choice',
     category: 'story',
     rarity: 'legendary',
-    icon: '✨',
+    icon: 'sparkles',
     trigger: {
       minLevel: 8,
       requiredBuildings: ['ancient-ruins-access'],
@@ -518,12 +518,12 @@ export const COLONY_EVENTS: ColonyEvent[] = [
 
   {
     id: 'perfect-code',
-    title: '🏆 Perfect Code Day',
+    title: 'Perfect Code Day',
     description: 'Today, everything you write is PERFECT. Not a single bug. It\'s magical.',
     type: 'positive',
     category: 'technical',
     rarity: 'legendary',
-    icon: '🏆',
+    icon: 'trophy',
     trigger: {
       minLevel: 7,
       probability: 0.01

@@ -13,13 +13,13 @@ interface PhysicsResourceCollectorProps {
   collectionRadius?: number;
 }
 
-const RESOURCE_DISPLAY: Record<ResourceType, { color: string; icon: string; name: string }> = {
-  energy: { color: '#FFD700', icon: '', name: 'Energy' },
-  minerals: { color: '#8B4513', icon: '', name: 'Minerals' },
-  water: { color: '#4169E1', icon: '', name: 'Water' },
-  food: { color: '#32CD32', icon: '', name: 'Food' },
-  knowledge: { color: '#9370DB', icon: '', name: 'Knowledge' },
-  bytes: { color: '#00CED1', icon: '', name: 'Bytes' }
+const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; name: string }> = {
+  energy: { color: '#FBBF24', label: 'NRG', name: 'Energy' },
+  minerals: { color: '#3B82F6', label: 'MIN', name: 'Minerals' },
+  water: { color: '#60A5FA', label: 'H2O', name: 'Water' },
+  food: { color: '#10B981', label: 'FOOD', name: 'Food' },
+  knowledge: { color: '#38BDF8', label: 'KNW', name: 'Knowledge' },
+  bytes: { color: '#22D3EE', label: 'BYT', name: 'Bytes' }
 };
 
 /**
@@ -91,8 +91,8 @@ export default function PhysicsResourceCollector({
           boxShadow: '0 0 5px rgba(0,0,0,0.3)',
         }}
       >
-        <div style={{ fontSize: '1em', marginBottom: '2px' }}>
-          {resourceDisplay.icon} {resourceDisplay.name}
+        <div style={{ fontSize: '0.85em', marginBottom: '2px', letterSpacing: '0.04em' }}>
+          <strong>{resourceDisplay.label}</strong> · {resourceDisplay.name}
         </div>
       </Html>
     </RigidBody>
