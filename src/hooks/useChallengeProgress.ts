@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppDispatch } from '@/store/hooks';
 import { getChallengeById } from '@/data/challenges';
+import { resolveBuildingTemplateId } from '@/data/buildingIds';
 import { addResources } from '@/store/slices/resourceSlice';
 import { unlockBuilding } from '@/store/slices/buildingSlice';
 import { unlockVillager } from '@/store/slices/villagerSlice';
@@ -64,7 +65,7 @@ export function useChallengeProgress() {
           }
           break;
         case 'building':
-          dispatch(unlockBuilding(reward.id));
+          dispatch(unlockBuilding(resolveBuildingTemplateId(reward.id)));
           break;
         case 'villager':
           dispatch(unlockVillager(reward.id));

@@ -1,5 +1,5 @@
-import { TutorialStepTypes, TutorialStep } from '@/store/slices/tutorialSlice';
-import { Dispatch } from '@reduxjs/toolkit';
+import { TutorialStepTypes, type TutorialStep } from '@/store/slices/tutorialSlice';
+import type { Dispatch } from '@reduxjs/toolkit';
 
 interface TutorialRewards {
   xp: number;
@@ -17,93 +17,69 @@ interface Tutorial {
   rewards: TutorialRewards;
 }
 
+/**
+ * Welcome tutorial — challenge → unlock → place.
+ * All steps use MANUAL completion so Continue always works.
+ * Auto steps use a short timer handled by TutorialOverlay.
+ */
 export const WELCOME_TUTORIAL: Tutorial = {
   id: 'welcome-tutorial',
   title: 'Welcome to CodeCraft',
-  description: 'Learn the basics of the CodeCraft game interface',
+  description: 'Learn the core loop: code a challenge, unlock a structure, place it in the colony.',
   category: 'onboarding',
   difficulty: 'beginner',
   steps: [
     {
       id: 'welcome-step-1',
-      title: 'Welcome to CodeCraft',
-      description: 'Welcome to CodeCraft: Galactic Developer! In this tutorial, you\'ll learn how to navigate the game and start building your first space colony.',
-      pixelDialogue: 'Hi there! I\'m Pixel, your AI companion. I\'ll guide you through your journey as a galactic developer!',
+      title: 'Welcome, Commander',
+      description:
+        'CodeCraft teaches web development by building a space colony. You write real HTML, CSS, and JavaScript — then place structures that power your outpost.',
+      pixelDialogue:
+        "I'm Pixel, your AI companion. Clear challenges to unlock buildings, then place them on the ground.",
       focusArea: TutorialStepTypes.FOCUS_AREA.GAME,
-      action: {
-        type: TutorialStepTypes.ACTION.VIEW,
-      },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.MANUAL,
-      },
-      nextStepId: 'welcome-step-2'
+      action: { type: TutorialStepTypes.ACTION.VIEW },
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: 'welcome-step-2',
     },
     {
       id: 'welcome-step-2',
-      title: 'Game Controls',
-      description: 'You can navigate the game world using your mouse. Drag to rotate the camera, scroll to zoom, and right-click to pan.',
-      pixelDialogue: 'Take a moment to look around your colony site. This is where you\'ll build your amazing space colony!',
-      focusArea: TutorialStepTypes.FOCUS_AREA.GAME,
-      action: {
-        type: TutorialStepTypes.ACTION.WAIT,
-        duration: 5000,
-      },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.AUTO,
-      },
-      nextStepId: 'welcome-step-3'
+      title: 'Colony resources',
+      description:
+        'Energy, minerals, water, and food appear in the top-right HUD. Buildings cost resources — keep an eye on your stock before placing.',
+      pixelDialogue: 'Habitat Module needs 50 energy and 100 minerals. You start with enough for your first home.',
+      focusArea: TutorialStepTypes.FOCUS_AREA.RESOURCE_HUD,
+      action: { type: TutorialStepTypes.ACTION.VIEW },
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: 'welcome-step-3',
     },
     {
       id: 'welcome-step-3',
-      title: 'Resource Management',
-      description: 'Your colony needs resources to function. You can view your current resources in the Resource HUD in the top-right corner.',
-      pixelDialogue: 'Keep an eye on your energy and minerals! You\'ll need them to build and maintain your colony structures.',
-      focusArea: TutorialStepTypes.FOCUS_AREA.RESOURCE_HUD,
-      action: {
-        type: TutorialStepTypes.ACTION.VIEW,
-      },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.MANUAL,
-      },
-      nextStepId: 'welcome-step-4'
+      title: 'Your first challenge',
+      description:
+        'Open the challenge card on the left. Press Start Coding, write a <header> with an <h1> inside, then Check Solution.',
+      pixelDialogue: 'Completing "Build a Header" unlocks the Habitat Module blueprint.',
+      focusArea: TutorialStepTypes.FOCUS_AREA.GAME,
+      action: { type: TutorialStepTypes.ACTION.VIEW },
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: 'welcome-step-4',
     },
     {
       id: 'welcome-step-4',
-      title: 'Building Structures',
-      description: 'You can build various structures in your colony. Open the Building Menu to see what\'s available.',
-      pixelDialogue: 'Let\'s check out what we can build! Each structure serves a different purpose in your colony.',
+      title: 'Place your habitat',
+      description:
+        'After the challenge succeeds, open Buildings (bottom-right), select Habitat Module, then click the ground to place it.',
+      pixelDialogue: 'Press R to rotate the preview, Esc to cancel. Your colony grows with every structure you place.',
       focusArea: TutorialStepTypes.FOCUS_AREA.BUILDING_MENU,
-      action: {
-        type: TutorialStepTypes.ACTION.CLICK,
-        target: 'building-menu-button',
-      },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.MANUAL,
-      },
-      nextStepId: 'welcome-step-5'
+      action: { type: TutorialStepTypes.ACTION.VIEW },
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: null,
     },
-    {
-      id: 'welcome-step-5',
-      title: 'Your First Code',
-      description: 'In CodeCraft, you build your colony using real code! Let\'s open the code editor to write your first HTML structure.',
-      pixelDialogue: 'This is where the real magic happens! Your code directly shapes your colony. Let\'s start with a simple habitat module.',
-      focusArea: TutorialStepTypes.FOCUS_AREA.EDITOR,
-      action: {
-        type: TutorialStepTypes.ACTION.CODE,
-        value: '<habitat class="main-habitat">My First Habitat</habitat>',
-      },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.VALIDATION,
-        criteria: 'contains:<habitat',
-      },
-      nextStepId: null
-    }
   ],
   rewards: {
     xp: 100,
-    items: ['basic-habitat-blueprint'],
-    unlocks: ['html-basics-tutorial']
-  }
+    items: ['habitat-module'],
+    unlocks: ['html-basics-tutorial'],
+  },
 };
 
 export const HTML_BASICS_TUTORIAL: Tutorial = {
@@ -116,62 +92,57 @@ export const HTML_BASICS_TUTORIAL: Tutorial = {
     {
       id: 'html-basics-step-1',
       title: 'HTML Structure',
-      description: 'HTML uses elements with opening and closing tags to define structure. Let\'s create a simple colony layout.',
-      pixelDialogue: 'HTML is the foundation of your colony! Each element becomes a physical structure in your space colony.',
+      description:
+        'HTML uses elements with opening and closing tags to define structure. Create a simple colony layout in the editor.',
+      pixelDialogue: 'HTML is the foundation of your colony! Each element becomes a physical structure.',
       focusArea: TutorialStepTypes.FOCUS_AREA.EDITOR,
       action: {
         type: TutorialStepTypes.ACTION.CODE,
-        value: '<section class="colony-wing">\n  <header>Colony Entrance</header>\n  <div class="main-area"></div>\n  <footer>Support Systems</footer>\n</section>',
+        value:
+          '<section class="colony-wing">\n  <header>Colony Entrance</header>\n  <div class="main-area"></div>\n  <footer>Support Systems</footer>\n</section>',
       },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.VALIDATION,
-        criteria: 'structure:section>header+div+footer',
-      },
-      nextStepId: 'html-basics-step-2'
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: 'html-basics-step-2',
     },
     {
       id: 'html-basics-step-2',
       title: 'Adding Content',
-      description: 'Let\'s add some content to our colony wing. We\'ll create habitats inside the main area.',
-      pixelDialogue: 'Great structure! Now let\'s add some living quarters for your colonists.',
+      description: 'Add habitats inside the main area to give colonists a place to live.',
+      pixelDialogue: 'Great structure! Nesting elements adds detail to your colony.',
       focusArea: TutorialStepTypes.FOCUS_AREA.EDITOR,
       action: {
         type: TutorialStepTypes.ACTION.CODE,
-        value: '<div class="main-area">\n  <habitat class="crew-quarters">Crew Quarters</habitat>\n  <habitat class="science-lab">Science Lab</habitat>\n</div>',
+        value:
+          '<div class="main-area">\n  <habitat class="crew-quarters">Crew Quarters</habitat>\n  <habitat class="science-lab">Science Lab</habitat>\n</div>',
       },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.VALIDATION,
-        criteria: 'contains:habitat',
-      },
-      nextStepId: 'html-basics-step-3'
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: 'html-basics-step-3',
     },
     {
       id: 'html-basics-step-3',
       title: 'Nested Elements',
-      description: 'HTML elements can be nested inside each other. Let\'s add some details to our crew quarters.',
-      pixelDialogue: 'The more detailed your HTML structure, the more detailed your colony becomes!',
+      description: 'Nest headings and rooms inside a habitat for richer structure.',
+      pixelDialogue: 'The more detailed your HTML, the more detailed your colony becomes!',
       focusArea: TutorialStepTypes.FOCUS_AREA.EDITOR,
       action: {
         type: TutorialStepTypes.ACTION.CODE,
-        value: '<habitat class="crew-quarters">\n  <h2>Crew Quarters</h2>\n  <div class="bedroom">Captain\'s Room</div>\n  <div class="bedroom">Engineer\'s Room</div>\n</habitat>',
+        value:
+          '<habitat class="crew-quarters">\n  <h2>Crew Quarters</h2>\n  <div class="bedroom">Captain\'s Room</div>\n  <div class="bedroom">Engineer\'s Room</div>\n</habitat>',
       },
-      completion: {
-        type: TutorialStepTypes.COMPLETION.VALIDATION,
-        criteria: 'structure:habitat>h2+div+div',
-      },
-      nextStepId: null
-    }
+      completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
+      nextStepId: null,
+    },
   ],
   rewards: {
     xp: 200,
-    items: ['advanced-habitat-blueprint', 'basic-lab-blueprint'],
-    unlocks: ['css-basics-tutorial']
-  }
+    items: ['laboratory-module'],
+    unlocks: ['css-basics-tutorial'],
+  },
 };
 
 export const TUTORIALS: Record<string, Tutorial> = {
   'welcome-tutorial': WELCOME_TUTORIAL,
-  'html-basics-tutorial': HTML_BASICS_TUTORIAL
+  'html-basics-tutorial': HTML_BASICS_TUTORIAL,
 };
 
 export const getTutorialById = (id: string): Tutorial | null => {
@@ -184,11 +155,13 @@ export const startTutorial = (dispatch: Dispatch, tutorialId: string): void => {
     console.error(`Tutorial with ID ${tutorialId} not found`);
     return;
   }
-  
-  import('@/store/slices/tutorialSlice').then(({ startTutorial }) => {
-    dispatch(startTutorial({
-      tutorialId: tutorial.id,
-      steps: tutorial.steps
-    }));
+
+  void import('@/store/slices/tutorialSlice').then(({ startTutorial: startTutorialAction }) => {
+    dispatch(
+      startTutorialAction({
+        tutorialId: tutorial.id,
+        steps: tutorial.steps,
+      }),
+    );
   });
-}; 
+};

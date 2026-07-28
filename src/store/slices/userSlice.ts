@@ -43,7 +43,7 @@ const initialState: UserState = {
     level: 1,
     xp: 0,
     xpToNextLevel: 100,
-    unlockedBuildings: ['basicHabitat'],
+    unlockedBuildings: ['habitat-module'],
     unlockedFeatures: ['building', 'coding'],
     completedChallenges: [],
     achievements: {},

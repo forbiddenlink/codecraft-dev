@@ -90,6 +90,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
     },
     constructionTime: 30,
     requiredLevel: 1,
+    unlockRequirement: {
+      type: 'challenge',
+      value: 'intro-1',
+    },
     defaultStyles: {
       backgroundColor: '#7bb5d4',
       borderRadius: '15px'
@@ -118,10 +122,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
       depth: 2
     },
     constructionTime: 45,
-    requiredLevel: 2,
+    requiredLevel: 1,
     unlockRequirement: {
       type: 'challenge',
-      value: 'html-basics'
+      value: 'intro-1',
     },
     defaultStyles: {
       backgroundColor: '#a8c6d9',
@@ -151,6 +155,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
     },
     constructionTime: 60,
     requiredLevel: 1,
+    unlockRequirement: {
+      type: 'challenge',
+      value: 'intro-2',
+    },
     defaultStyles: {
       backgroundColor: '#4a5568',
       '--energy-level': 100
@@ -182,6 +190,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
     },
     constructionTime: 30,
     requiredLevel: 1,
+    unlockRequirement: {
+      type: 'challenge',
+      value: 'layout-1',
+    },
     defaultStyles: {
       backgroundColor: '#6b7280',
       borderRadius: '5px'
@@ -212,10 +224,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
       depth: 2
     },
     constructionTime: 45,
-    requiredLevel: 2,
+    requiredLevel: 1,
     unlockRequirement: {
       type: 'challenge',
-      value: 'css-basics'
+      value: 'intro-2',
     },
     defaultStyles: {
       backgroundColor: '#10b981',
@@ -245,6 +257,10 @@ export const buildingTemplates: Record<string, BuildingTemplate> = {
     },
     constructionTime: 15,
     requiredLevel: 1,
+    unlockRequirement: {
+      type: 'challenge',
+      value: 'intro-1',
+    },
     defaultStyles: {
       backgroundColor: '#5d8ca8'
     }

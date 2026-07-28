@@ -1,8 +1,12 @@
 'use client';
-import React, { useState } from 'react';
+
+import { useEffect, useState, type CSSProperties } from 'react';
+import { ChevronLeft, ChevronRight, SkipForward, CheckCircle2, Bot } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { nextStep, previousStep, endTutorial } from '@/store/slices/tutorialSlice';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Icon } from '@/components/ui/Icon';
+import { HudPanel } from '@/components/ui/HudPanel';
 
 interface HighlightOverlayProps {
   focusArea: string;
@@ -11,30 +15,25 @@ interface HighlightOverlayProps {
 interface TutorialOverlayProps {
   currentStep?: number;
   focusArea?: string;
+  /** When provided, parent owns step advancement — overlay will not also dispatch nextStep. */
   onComplete?: () => void;
 }
 
-/**
- * HighlightOverlay component to highlight specific areas of the UI
- */
-const HighlightOverlay: React.FC<HighlightOverlayProps> = ({ focusArea }) => {
-  // Get the position of the element to highlight
-  const getHighlightPosition = () => {
-    // In a real implementation, you would find the actual DOM element
-    // and calculate its position relative to the viewport
+const HighlightOverlay = ({ focusArea }: HighlightOverlayProps) => {
+  const getHighlightPosition = (): CSSProperties => {
     switch (focusArea) {
       case 'editor':
-        return { left: '0%', top: '50%', width: '40%', height: '80%' };
+        return { left: '20%', top: '50%', width: '36%', height: '70%' };
       case 'game':
-        return { left: '50%', top: '50%', width: '50%', height: '100%' };
+        return { left: '55%', top: '48%', width: '46%', height: '70%' };
       case 'header':
-        return { left: '50%', top: '0%', width: '100%', height: '10%' };
+        return { left: '50%', top: '8%', width: '90%', height: '12%' };
       case 'buildingMenu':
-        return { right: '0%', bottom: '0%', width: '300px', height: '300px' };
+        return { left: '82%', top: '72%', width: '320px', height: '340px' };
       case 'resourceHUD':
-        return { right: '0%', top: '0%', width: '300px', height: '200px' };
+        return { left: '82%', top: '12%', width: '320px', height: '120px' };
       case 'controls':
-        return { left: '50%', bottom: '0%', width: '50%', height: '15%' };
+        return { left: '50%', top: '88%', width: '50%', height: '14%' };
       default:
         return { left: '50%', top: '50%', width: '50%', height: '50%' };
     }
@@ -43,142 +42,165 @@ const HighlightOverlay: React.FC<HighlightOverlayProps> = ({ focusArea }) => {
   const position = getHighlightPosition();
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-40">
-      <div className="absolute inset-0 bg-black bg-opacity-70">
-        {/* Cutout for the highlighted area */}
-        <div
-          className="absolute bg-transparent border-2 border-cosmic-blue shadow-cosmic"
-          style={{
-            ...position,
-            transform: 'translate(-50%, -50%)',
-            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 15px rgba(30, 58, 138, 0.8)',
-            transition: 'all 0.3s ease-in-out',
-          }}
-        />
-      </div>
+    <div className="pointer-events-none fixed inset-0 z-40">
+      <div
+        className="absolute rounded-[var(--radius-md)] border-2 border-[rgb(var(--accent-subtle))]"
+        style={{
+          ...position,
+          transform: 'translate(-50%, -50%)',
+          boxShadow:
+            '0 0 0 9999px rgba(0, 0, 0, 0.72), 0 0 24px rgb(var(--accent) / 0.45)',
+          transition: 'all 0.3s ease-in-out',
+        }}
+      />
     </div>
   );
 };
 
-/**
- * TutorialOverlay component to guide users through tutorials
- */
-const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ currentStep, focusArea, onComplete }) => {
+const TutorialOverlay = ({ currentStep, focusArea, onComplete }: TutorialOverlayProps) => {
   const dispatch = useAppDispatch();
   const tutorialState = useAppSelector((state) => state.tutorial);
   const [showCompleteMessage, setShowCompleteMessage] = useState(false);
 
-  // Extract current step from Redux state if not provided via props
-  const step = currentStep !== undefined ? 
-    tutorialState.steps[currentStep] : 
-    (tutorialState.steps[tutorialState.currentStepIndex] || null);
-  const currentFocusArea = focusArea || (step?.focusArea || 'game');
+  const stepIndex = currentStep ?? tutorialState.currentStepIndex;
+  const step = tutorialState.steps[stepIndex] || null;
+  const currentFocusArea = focusArea || step?.focusArea || 'game';
+  const isLastStep = stepIndex >= tutorialState.steps.length - 1;
 
-  // Handle step completion
-  const handleStepComplete = () => {
+  const advance = () => {
     if (onComplete) {
       onComplete();
+      return;
     }
-    
-    dispatch(nextStep());
 
-    // Show completion message if this was the last step
-    if (tutorialState.currentStepIndex === tutorialState.steps.length - 1) {
+    if (isLastStep) {
       setShowCompleteMessage(true);
-      
-      // Hide completion message after a delay
-      setTimeout(() => {
-        setShowCompleteMessage(false);
-      }, 3000);
+      dispatch(endTutorial());
+      setTimeout(() => setShowCompleteMessage(false), 2500);
+      return;
     }
+
+    dispatch(nextStep());
   };
 
-  // Skip the tutorial entirely
-  const handleSkipTutorial = () => {
-    dispatch(endTutorial());
-  };
+  // Auto-advance timed steps
+  useEffect(() => {
+    if (!tutorialState.isActive || !step) return;
+    if (step.completion?.type !== 'auto') return;
+
+    const duration = step.action?.duration ?? 4000;
+    const timer = window.setTimeout(() => {
+      advance();
+    }, duration);
+
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- advance when step index changes
+  }, [tutorialState.isActive, stepIndex, step?.id]);
 
   if (!tutorialState.isActive || !step || !tutorialState.showTutorialUI) {
     return null;
   }
 
+  const showContinue =
+    step.completion?.type === 'manual' || step.completion?.type === 'validation';
+
   return (
-    <div className="fixed inset-0 pointer-events-none z-50">
-      {/* Highlight the focused area */}
+    <div className="pointer-events-none fixed inset-0 z-50">
       <HighlightOverlay focusArea={currentFocusArea} />
 
-      {/* Tutorial panel */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          key={step.id}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-96 bg-deep-space bg-opacity-95 border border-cosmic-blue rounded-lg p-4 pointer-events-auto"
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.25 }}
+          className="pointer-events-auto absolute bottom-8 left-1/2 w-[min(28rem,calc(100vw-2rem))] -translate-x-1/2"
         >
-          {showCompleteMessage ? (
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-terraforming-green mb-2">Tutorial Complete!</h3>
-              <p className="text-stellar-white mb-4">You&apos;ve completed this tutorial.</p>
-              <button 
-                onClick={() => setShowCompleteMessage(false)}
-                className="px-4 py-2 bg-cosmic-blue hover:bg-opacity-90 text-stellar-white rounded-md transition-all"
-              >
-                Continue
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-bold text-stellar-white">{step.title}</h3>
-                <span className="text-sm text-cosmic-dust">
-                  {tutorialState.currentStepIndex + 1} / {tutorialState.steps.length}
-                </span>
-              </div>
-              
-              <p className="text-stellar-white mb-4">{step.description}</p>
-              
-              {/* Pixel's dialogue if available */}
-              {step.pixelDialogue && (
-                <div className="bg-nebula-purple bg-opacity-20 p-2 rounded mb-4 border border-nebula-purple">
-                  <p className="text-stellar-white italic">{step.pixelDialogue}</p>
+          <HudPanel className="border-[rgb(var(--accent-subtle)/0.35)]">
+            {showCompleteMessage ? (
+              <div className="text-center">
+                <div className="mb-2 flex justify-center text-[rgb(var(--success))]">
+                  <Icon icon={CheckCircle2} size={28} />
                 </div>
-              )}
-              
-              <div className="flex justify-between">
-                {tutorialState.currentStepIndex > 0 && (
-                  <button 
-                    onClick={() => dispatch(previousStep())}
-                    className="px-3 py-1 border border-interface-blue text-interface-blue hover:bg-interface-blue hover:bg-opacity-20 rounded-md transition-all"
-                  >
-                    Previous
-                  </button>
+                <h3 className="mb-1 text-lg font-semibold text-[rgb(var(--text-primary))]">
+                  Tutorial complete
+                </h3>
+                <p className="text-sm text-[rgb(var(--text-secondary))]">
+                  Start Coding on the challenge card to begin.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <h3 className="text-base font-semibold text-[rgb(var(--text-primary))]">
+                    {step.title}
+                  </h3>
+                  <span className="text-[11px] uppercase tracking-wide text-[rgb(var(--text-muted))]">
+                    {stepIndex + 1} / {tutorialState.steps.length}
+                  </span>
+                </div>
+
+                <p className="mb-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                  {step.description}
+                </p>
+
+                {step.pixelDialogue && (
+                  <div className="mb-4 flex gap-2 rounded-[var(--radius-sm)] border border-white/[0.08] bg-white/[0.04] p-2.5">
+                    <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
+                      <Icon icon={Bot} size={14} />
+                    </span>
+                    <p className="text-sm italic text-[rgb(var(--text-secondary))]">
+                      {step.pixelDialogue}
+                    </p>
+                  </div>
                 )}
-                
-                <div className="flex gap-2 ml-auto">
-                  <button 
-                    onClick={handleSkipTutorial}
-                    className="px-3 py-1 text-cosmic-dust hover:text-stellar-white transition-all"
-                  >
-                    Skip Tutorial
-                  </button>
-                  
-                  {step.completion?.type === 'manual' && (
-                    <button 
-                      onClick={handleStepComplete}
-                      className="px-4 py-2 bg-cosmic-blue hover:bg-opacity-90 text-stellar-white rounded-md transition-all"
+
+                {step.completion?.type === 'auto' && (
+                  <p className="mb-3 text-xs text-[rgb(var(--text-muted))]">
+                    Continuing automatically…
+                  </p>
+                )}
+
+                <div className="flex items-center justify-between gap-2">
+                  {stepIndex > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => dispatch(previousStep())}
+                      className="btn-secondary gap-1"
                     >
-                      Continue
+                      <Icon icon={ChevronLeft} size={14} />
+                      Back
                     </button>
+                  ) : (
+                    <span />
                   )}
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => dispatch(endTutorial())}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 text-sm text-[rgb(var(--text-muted))] transition-colors hover:text-[rgb(var(--text-primary))]"
+                    >
+                      <Icon icon={SkipForward} size={14} />
+                      Skip
+                    </button>
+
+                    {showContinue && (
+                      <button type="button" onClick={advance} className="btn-primary gap-1">
+                        {isLastStep ? 'Finish' : 'Continue'}
+                        <Icon icon={isLastStep ? CheckCircle2 : ChevronRight} size={14} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </HudPanel>
         </motion.div>
       </AnimatePresence>
     </div>
   );
 };
 
-export default TutorialOverlay; 
+export default TutorialOverlay;

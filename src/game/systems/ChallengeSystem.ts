@@ -12,7 +12,9 @@ import {
 import { addResources } from '@/store/slices/resourceSlice';
 import { unlockVillager } from '@/store/slices/villagerSlice';
 import { getChallengeById } from '@/data/challenges';
+import { resolveBuildingTemplateId } from '@/data/buildingIds';
 import { Challenge } from '@/types/challenges';
+import { unlockBuilding as unlockBuildingTemplate } from '@/store/slices/buildingSlice';
 
 export interface ValidationResult {
   success: boolean;
@@ -91,9 +93,12 @@ export class ChallengeSystem {
     // Process rewards
     challenge.rewards.forEach(reward => {
       switch (reward.type) {
-        case 'building':
-          store.dispatch(unlockBuilding(reward.id));
+        case 'building': {
+          const templateId = resolveBuildingTemplateId(reward.id);
+          store.dispatch(unlockBuilding(templateId));
+          store.dispatch(unlockBuildingTemplate(templateId));
           break;
+        }
 
         case 'resource':
           if (reward.amount) {

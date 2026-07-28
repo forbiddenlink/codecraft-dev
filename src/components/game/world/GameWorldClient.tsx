@@ -7,7 +7,7 @@ import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive';
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setEditorVisible, setCode, setLanguage } from "@/store/slices/editorSlice";
 import { setTargetPosition } from "@/store/slices/playerSlice";
-import { selectBuilding, placeBuilding } from "@/store/slices/buildingSlice";
+import { selectBuilding, setSelectedTemplateId, toggleBuildMode, unlockBuilding } from "@/store/slices/buildingSlice";
 import { nextStep, endTutorial } from "@/store/slices/tutorialSlice";
 import { setCurrentChallenge } from "@/store/slices/challengeSlice";
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
@@ -28,7 +28,7 @@ import CodeExecutionVisualizer from "@/components/game/code/CodeExecutionVisuali
 import TutorialOverlay from "@/components/game/tutorial/TutorialOverlay";
 import ResourceHUD from "@/components/game/hud/ResourceHUD";
 import BuildingMenu from "@/components/game/buildings/BuildingMenu";
-import { getAvailableChallenges } from '@/data/challenges';
+import { getAvailableChallenges, getChallengeById } from '@/data/challenges';
 import Ground from "@/components/game/ground/Ground";
 import { PhysicsProvider, PhysicsGround, PhysicsCelebration } from "@/components/game/physics";
 import HintPanel from "@/components/game/challenges/HintPanel";
@@ -52,6 +52,7 @@ import {
   CheckCircle2,
   Target,
   Bot,
+  Home,
 } from 'lucide-react';
 import {
   trackChallengeStarted,
@@ -60,6 +61,7 @@ import {
   trackBuildingConstructed,
 } from '@/utils/analytics';
 import { buildingTemplates } from '@/data/buildingTemplates';
+import { buildingSystem } from '@/game/systems/BuildingSystem';
 import { Icon } from '@/components/ui/Icon';
 import { HudPanel } from '@/components/ui/HudPanel';
 
@@ -266,6 +268,11 @@ export default function GameWorldClient() {
     success: boolean;
     message: string;
   } | null>(null);
+  const [placementFeedback, setPlacementFeedback] = useState<string | null>(null);
+  const [placeBuildingCta, setPlaceBuildingCta] = useState<{
+    templateId: string;
+    name: string;
+  } | null>(null);
   const { completed, completeChallenge, pendingCelebration, clearCelebration } = useChallengeProgress();
   const controlsRef = useRef<OrbitControlsImpl>(null);
 
@@ -416,15 +423,21 @@ export default function GameWorldClient() {
         const snappedX = Math.round(point.x / gridSize) * gridSize;
         const snappedZ = Math.round(point.z / gridSize) * gridSize;
         if (!checkValidPlacement(snappedX, snappedZ)) {
+          setPlacementFeedback('That spot is blocked. Try another grid cell.');
           return;
         }
         const template = buildingTemplates[selectedBuildingTemplateId];
-        dispatch(placeBuilding({
-          templateId: selectedBuildingTemplateId,
-          position: { x: snappedX, y: 0, z: snappedZ },
-          rotation: 0,
-          effects: template?.effects,
-        }));
+        const placedId = buildingSystem.placeBuilding(
+          selectedBuildingTemplateId,
+          new THREE.Vector3(snappedX, 0, snappedZ),
+          0,
+        );
+        if (!placedId) {
+          setPlacementFeedback('Cannot place — check resources and collisions.');
+          return;
+        }
+        setPlacementFeedback(null);
+        setPlaceBuildingCta(null);
         void trackBuildingConstructed(
           selectedBuildingTemplateId,
           1,
@@ -471,6 +484,18 @@ export default function GameWorldClient() {
   const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
   const handleNext = () =>
     setChallengeIndex((i) => (i < availableChallenges.length - 1 ? i + 1 : i));
+
+  // Rehydrate building unlocks from completed challenges (Redux is session-only)
+  React.useEffect(() => {
+    completed.forEach((challengeId) => {
+      const challenge = getChallengeById(challengeId);
+      challenge?.rewards.forEach((reward) => {
+        if (reward.type === 'building') {
+          dispatch(unlockBuilding(reward.id));
+        }
+      });
+    });
+  }, [completed, dispatch]);
 
   // Keep challenge index in range when the available list shrinks after completion
   React.useEffect(() => {
@@ -580,12 +605,33 @@ export default function GameWorldClient() {
           ? 'Challenge complete — achievement unlocked!'
           : 'Challenge complete! Rewards unlocked.',
     });
+
+    const buildingReward = currentChallenge.rewards.find((r) => r.type === 'building');
+    if (buildingReward) {
+      const template = buildingTemplates[buildingReward.id];
+      if (template) {
+        setPlaceBuildingCta({ templateId: template.id, name: template.name });
+      }
+    }
+
     setTimeout(() => {
       setChallengeIndex(0);
       setValidationFeedback(null);
       setChallengeStartedAt(null);
       setAttemptCount(0);
-    }, 1600);
+    }, 2200);
+  };
+
+  const handlePlaceUnlockedBuilding = () => {
+    if (!placeBuildingCta) return;
+    dispatch(setSelectedTemplateId(placeBuildingCta.templateId));
+    dispatch(toggleBuildMode(true));
+    const template = buildingTemplates[placeBuildingCta.templateId];
+    if (template) {
+      dispatch(setLanguage('html'));
+      dispatch(setCode({ language: 'html', code: template.defaultHtml }));
+    }
+    setPlacementFeedback(`Select a clear grid cell to place ${placeBuildingCta.name}.`);
   };
   
   const handleTutorialStepComplete = React.useCallback(() => {
@@ -979,6 +1025,34 @@ export default function GameWorldClient() {
                     >
                       {validationFeedback.message}
                     </div>
+                  )}
+
+                  {placeBuildingCta && (
+                    <div className="mb-3 rounded-[var(--radius-sm)] border border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.15)] p-3">
+                      <p className="mb-2 text-sm text-[rgb(var(--text-primary))]">
+                        Blueprint unlocked: <span className="font-semibold">{placeBuildingCta.name}</span>
+                      </p>
+                      <button
+                        type="button"
+                        onClick={handlePlaceUnlockedBuilding}
+                        className="btn-primary w-full gap-2"
+                      >
+                        <Icon icon={Home} size={15} />
+                        Place {placeBuildingCta.name}
+                      </button>
+                    </div>
+                  )}
+
+                  {placementFeedback && (
+                    <p className="mb-3 text-xs text-[rgb(var(--energy))]" role="status">
+                      {placementFeedback}
+                    </p>
+                  )}
+
+                  {completed.length === 0 && !placeBuildingCta && (
+                    <p className="mb-3 text-xs text-[rgb(var(--text-muted))]">
+                      First mission: write a header, check your solution, then place your Habitat Module.
+                    </p>
                   )}
 
                   <div className="flex flex-col gap-2">
