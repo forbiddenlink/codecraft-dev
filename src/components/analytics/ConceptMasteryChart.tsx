@@ -3,8 +3,9 @@
  * Visualizes mastery level for each programming concept
  */
 
-import React from 'react';
+import { Target, Dumbbell, BookOpen } from 'lucide-react';
 import type { LearningAnalytics } from '@/utils/analyticsSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface ConceptMasteryChartProps {
   analytics: LearningAnalytics;
@@ -19,10 +20,9 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
       attempts: analytics.errorsPerConcept.get(concept) || 0,
       isStrong: analytics.strongConcepts.includes(concept),
       isWeak: analytics.weakConcepts.includes(concept),
-    })
+    }),
   );
 
-  // Sort by success rate descending
   concepts.sort((a, b) => b.successRate - a.successRate);
 
   const displayLimit = detailed ? concepts.length : 8;
@@ -46,12 +46,12 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-5">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-h3 mb-1">Concept Mastery</h3>
+          <h3 className="mb-1 text-h3">Concept Mastery</h3>
           <p className="text-body">Your proficiency across different topics</p>
         </div>
-        <div className="text-2xl opacity-70">🎯</div>
+        <Icon icon={Target} size={22} className="text-[rgb(var(--accent-subtle))] opacity-80" />
       </div>
 
       <div className="space-y-4">
@@ -61,20 +61,20 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
               <div className="flex items-center gap-2">
                 <span className="text-h4">{concept.name}</span>
                 {concept.isStrong && (
-                  <span className="px-2 py-0.5 bg-success/10 text-success text-xs rounded-[var(--radius-sm)] border border-success/20 font-medium">
-                    💪 Strong
+                  <span className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-success/20 bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
+                    <Icon icon={Dumbbell} size={11} />
+                    Strong
                   </span>
                 )}
                 {concept.isWeak && (
-                  <span className="px-2 py-0.5 bg-error/10 text-error text-xs rounded-[var(--radius-sm)] border border-error/20 font-medium">
-                    📚 Practice
+                  <span className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-error/20 bg-error/10 px-2 py-0.5 text-xs font-medium text-error">
+                    <Icon icon={BookOpen} size={11} />
+                    Practice
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-small">
-                  {getMasteryLabel(concept.successRate)}
-                </span>
+                <span className="text-small">{getMasteryLabel(concept.successRate)}</span>
                 <span className="text-body font-semibold">{concept.successRate}%</span>
               </div>
             </div>

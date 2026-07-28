@@ -1,9 +1,11 @@
-// File: /src/components/game/streaks/StreakDisplay.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Flame, Snowflake, ChevronDown, Gift } from 'lucide-react';
 import { useDailyStreak } from '@/hooks/useDailyStreak';
+import { Icon } from '@/components/ui/Icon';
+import { HudPanel } from '@/components/ui/HudPanel';
 
 interface StreakDisplayProps {
   className?: string;
@@ -28,14 +30,12 @@ export default function StreakDisplay({
   const [showMilestonePopup, setShowMilestonePopup] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Record activity on mount
   useEffect(() => {
     if (!isStreakUpdatedToday) {
       recordActivity();
     }
   }, [isStreakUpdatedToday, recordActivity]);
 
-  // Show popup if milestones available
   useEffect(() => {
     if (availableMilestones.length > 0) {
       setShowMilestonePopup(true);
@@ -50,57 +50,61 @@ export default function StreakDisplay({
     }
   };
 
-  // Progress to next milestone
   const progressPercent = nextMilestone
     ? ((currentStreak % nextMilestone.day) / nextMilestone.day) * 100
     : 100;
 
   return (
-    <div className={`bg-gray-800 bg-opacity-90 rounded-lg p-3 ${className}`}>
-      {/* Header */}
+    <HudPanel className={className} padding="sm">
       <button
+        type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between"
+        className="flex w-full items-center justify-between"
       >
         <div className="flex items-center gap-2">
           <motion.span
-            animate={currentStreak > 0 ? { scale: [1, 1.2, 1] } : {}}
+            animate={currentStreak > 0 ? { scale: [1, 1.08, 1] } : {}}
             transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 2 }}
-            className="text-xl"
+            className={`flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] ${
+              currentStreak > 0
+                ? 'bg-[rgb(var(--energy)/0.18)] text-[rgb(var(--energy))]'
+                : 'bg-white/[0.06] text-[rgb(var(--text-muted))]'
+            }`}
           >
-            {currentStreak > 0 ? '\u{1F525}' : '\u{2744}\u{FE0F}'}
+            <Icon icon={currentStreak > 0 ? Flame : Snowflake} size={16} />
           </motion.span>
           <div className="text-left">
-            <span className="text-lg font-bold text-white">{currentStreak}</span>
-            <span className="text-xs text-gray-400 ml-1">day streak</span>
+            <span className="text-lg font-semibold text-[rgb(var(--text-primary))]">
+              {currentStreak}
+            </span>
+            <span className="ml-1 text-xs text-[rgb(var(--text-muted))]">day streak</span>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           {availableMilestones.length > 0 && (
-            <span className="text-xs px-2 py-0.5 bg-yellow-500 rounded-full text-black font-semibold animate-pulse">
-              Reward!
+            <span className="animate-pulse rounded-full bg-[rgb(var(--energy))] px-2 py-0.5 text-[10px] font-semibold text-black">
+              Reward
             </span>
           )}
           <motion.span
             animate={{ rotate: isExpanded ? 180 : 0 }}
-            className="text-gray-400 text-sm"
+            className="text-[rgb(var(--text-muted))]"
           >
-            {'\u25BC'}
+            <Icon icon={ChevronDown} size={14} />
           </motion.span>
         </div>
       </button>
 
-      {/* Progress bar to next milestone */}
       {nextMilestone && (
         <div className="mt-2">
-          <div className="flex justify-between text-xs text-gray-400 mb-1">
+          <div className="mb-1 flex justify-between text-xs text-[rgb(var(--text-muted))]">
             <span>Next: Day {nextMilestone.day}</span>
             <span>{daysUntilNextMilestone} days left</span>
           </div>
-          <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
             <motion.div
-              className="h-full bg-orange-500"
+              className="h-full bg-[rgb(var(--energy))]"
               initial={{ width: 0 }}
               animate={{ width: `${progressPercent}%` }}
               transition={{ duration: 0.5 }}
@@ -109,7 +113,6 @@ export default function StreakDisplay({
         </div>
       )}
 
-      {/* Expanded details */}
       <AnimatePresence>
         {isExpanded && (
           <motion.div
@@ -118,36 +121,38 @@ export default function StreakDisplay({
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-2 text-center mb-3">
-                <div className="bg-gray-700 rounded p-2">
-                  <div className="text-lg font-bold text-yellow-400">{longestStreak}</div>
-                  <div className="text-xs text-gray-400">Best Streak</div>
+            <div className="mt-3 border-t border-white/[0.08] pt-3">
+              <div className="mb-3 grid grid-cols-2 gap-2 text-center">
+                <div className="rounded-[var(--radius-sm)] bg-white/[0.06] p-2">
+                  <div className="text-lg font-semibold text-[rgb(var(--energy))]">
+                    {longestStreak}
+                  </div>
+                  <div className="text-xs text-[rgb(var(--text-muted))]">Best streak</div>
                 </div>
-                <div className="bg-gray-700 rounded p-2">
-                  <div className="text-lg font-bold text-blue-400">{nextMilestone?.day || '\u2713'}</div>
-                  <div className="text-xs text-gray-400">Next Goal</div>
+                <div className="rounded-[var(--radius-sm)] bg-white/[0.06] p-2">
+                  <div className="text-lg font-semibold text-[rgb(var(--accent-subtle))]">
+                    {nextMilestone?.day || '—'}
+                  </div>
+                  <div className="text-xs text-[rgb(var(--text-muted))]">Next goal</div>
                 </div>
               </div>
 
-              {/* Week view */}
-              <div className="flex justify-between mb-2">
+              <div className="mb-2 flex justify-between">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => {
                   const today = new Date().getDay();
                   const isToday = i === today;
                   const isPast = i < today;
-                  const isInStreak = isPast && currentStreak >= (today - i);
+                  const isInStreak = isPast && currentStreak >= today - i;
 
                   return (
                     <div
-                      key={i}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                      key={`${day}-${i}`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium ${
                         isToday
-                          ? 'bg-orange-500 text-white'
+                          ? 'bg-[rgb(var(--energy))] text-black'
                           : isInStreak
-                          ? 'bg-orange-500/50 text-orange-200'
-                          : 'bg-gray-700 text-gray-400'
+                            ? 'bg-[rgb(var(--energy)/0.35)] text-[rgb(var(--energy))]'
+                            : 'bg-white/[0.06] text-[rgb(var(--text-muted))]'
                       }`}
                     >
                       {day}
@@ -156,9 +161,8 @@ export default function StreakDisplay({
                 })}
               </div>
 
-              {/* Next reward preview */}
               {nextMilestone && (
-                <div className="text-xs text-gray-400 text-center">
+                <div className="text-center text-xs text-[rgb(var(--text-muted))]">
                   Day {nextMilestone.day}: {nextMilestone.reward.label}
                 </div>
               )}
@@ -167,34 +171,35 @@ export default function StreakDisplay({
         )}
       </AnimatePresence>
 
-      {/* Milestone claim popup */}
       <AnimatePresence>
         {showMilestonePopup && availableMilestones.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="mt-3 p-3 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-lg"
+            className="mt-3 rounded-[var(--radius-md)] border border-[rgb(var(--energy)/0.35)] bg-[rgb(var(--energy)/0.12)] p-3"
           >
-            <div className="text-sm font-bold text-white mb-2">
-              {'\u{1F389}'} Milestone Reached!
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[rgb(var(--energy))]">
+              <Icon icon={Gift} size={14} />
+              Milestone reached
             </div>
-            {availableMilestones.map(milestone => (
+            {availableMilestones.map((milestone) => (
               <div
                 key={milestone.day}
-                className="flex items-center justify-between bg-black/20 rounded p-2 mb-1"
+                className="mb-1 flex items-center justify-between rounded-[var(--radius-sm)] bg-black/25 p-2 last:mb-0"
               >
                 <div>
-                  <div className="text-white text-sm font-medium">
+                  <div className="text-sm font-medium text-[rgb(var(--text-primary))]">
                     Day {milestone.day}
                   </div>
-                  <div className="text-yellow-200 text-xs">
+                  <div className="text-xs text-[rgb(var(--text-secondary))]">
                     {milestone.reward.label}
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => handleClaimMilestone(milestone.day, milestone.reward.label)}
-                  className="px-3 py-1 bg-white text-orange-600 rounded font-semibold text-sm hover:bg-yellow-100 transition-colors"
+                  className="rounded-[var(--radius-sm)] bg-[rgb(var(--energy))] px-3 py-1 text-sm font-semibold text-black transition-opacity hover:opacity-90"
                 >
                   Claim
                 </button>
@@ -203,6 +208,6 @@ export default function StreakDisplay({
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </HudPanel>
   );
 }

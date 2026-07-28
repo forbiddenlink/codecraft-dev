@@ -3,7 +3,10 @@
  * Compact notification for achievement unlocks
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { Icon } from '@/components/ui/Icon';
+import { getAchievementIcon } from '@/components/ui/achievementIcons';
 
 export interface AchievementToastProps {
   achievement: {
@@ -16,12 +19,11 @@ export interface AchievementToastProps {
   duration?: number;
 }
 
-// Keep gradients for toast celebrations - these are special moments
 const rarityGradients = {
   common: 'from-zinc-600 to-zinc-700',
-  rare: 'from-blue-600 to-blue-700',
-  epic: 'from-violet-600 to-violet-700',
-  legendary: 'from-amber-500 to-orange-600',
+  rare: 'from-[rgb(var(--accent))] to-[rgb(30_58_138)]',
+  epic: 'from-[rgb(var(--energy))] to-[rgb(217_119_6)]',
+  legendary: 'from-[rgb(var(--success))] to-[rgb(5_150_105)]',
 };
 
 export function AchievementToast({
@@ -58,29 +60,28 @@ export function AchievementToast({
         }}
       >
         <div className="p-4 flex items-center gap-3 cursor-pointer hover:bg-white/10 transition-colors">
-          {/* Icon */}
-          <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
-            {achievement.icon}
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-white">
+            <Icon icon={getAchievementIcon(achievement.id, achievement.icon)} size={22} />
           </div>
 
-          {/* Content */}
           <div className="flex-1">
-            <p className="text-white/80 text-xs font-medium uppercase tracking-wide">
-              Achievement Unlocked
+            <p className="text-xs font-medium uppercase tracking-wide text-white/80">
+              Achievement unlocked
             </p>
-            <p className="text-white font-semibold text-base">{achievement.title}</p>
+            <p className="text-base font-semibold text-white">{achievement.title}</p>
           </div>
 
-          {/* Close */}
           <button
-            className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors"
+            type="button"
+            className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-white/20 text-white transition-colors hover:bg-white/30"
             onClick={(e) => {
               e.stopPropagation();
               setIsVisible(false);
               setTimeout(onClose, 300);
             }}
+            aria-label="Dismiss"
           >
-            ✕
+            <Icon icon={X} size={14} />
           </button>
         </div>
 

@@ -1,108 +1,114 @@
 'use client';
+
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { processTick } from '@/store/slices/resourceSlice';
 import { motion } from 'framer-motion';
+import { Icon } from '@/components/ui/Icon';
+import {
+  RESOURCE_COLORS,
+  RESOURCE_ICONS,
+  type ColonyResource,
+} from '@/components/ui/resourceMeta';
 
-type ResourceType = 'energy' | 'minerals' | 'water' | 'food';
+type ResourceType = Extract<ColonyResource, 'energy' | 'minerals' | 'water' | 'food'>;
 
-const RESOURCE_METADATA: Record<ResourceType, {
-  name: string;
-  color: string;
-  icon: string;
-}> = {
-  energy: {
-    name: 'Energy',
-    color: '#FBBF24',
-    icon: '⚡'
-  },
-  minerals: {
-    name: 'Minerals',
-    color: '#3B82F6',
-    icon: '💎'
-  },
-  water: {
-    name: 'Water',
-    color: '#1E3A8A',
-    icon: '💧'
-  },
-  food: {
-    name: 'Food',
-    color: '#10B981',
-    icon: '🌾'
-  }
+const RESOURCE_ORDER: ResourceType[] = ['energy', 'minerals', 'water', 'food'];
+
+const RESOURCE_NAMES: Record<ResourceType, string> = {
+  energy: 'Energy',
+  minerals: 'Minerals',
+  water: 'Water',
+  food: 'Food',
 };
 
 export default function ResourceHUD() {
   const dispatch = useAppDispatch();
-  const storage = useAppSelector(state => state.resource.storage) as Record<ResourceType, number>;
-  const capacity = useAppSelector(state => state.resource.capacity) as Record<ResourceType, number>;
-  const productionRates = useAppSelector(state => state.resource.productionRates) as Record<ResourceType, number>;
+  const storage = useAppSelector((state) => state.resource.storage) as Record<ResourceType, number>;
+  const capacity = useAppSelector((state) => state.resource.capacity) as Record<ResourceType, number>;
+  const productionRates = useAppSelector(
+    (state) => state.resource.productionRates,
+  ) as Record<ResourceType, number>;
 
-  // Process resource generation every frame
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch(processTick(1)); // 1 second delta time
-    }, 1000); // Update every second
-
+      dispatch(processTick(1));
+    }, 1000);
     return () => clearInterval(interval);
   }, [dispatch]);
 
   return (
-    <div className="fixed top-4 right-4 flex gap-4">
-      {(Object.entries(storage) as [ResourceType, number][]).map(([resourceType, amount], index) => (
-        <motion.div
-          key={resourceType}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: index * 0.1 }}
-          className="w-16 h-16 relative group"
-        >
-          <div 
-            className="w-full h-full rounded-lg flex items-center justify-center text-2xl"
-            style={{ 
-              backgroundColor: `${RESOURCE_METADATA[resourceType].color}33`,
-              boxShadow: `0 0 20px ${RESOURCE_METADATA[resourceType].color}33`
-            }}
+    <div className="flex gap-2.5">
+      {RESOURCE_ORDER.map((resourceType, index) => {
+        const amount = storage[resourceType] ?? 0;
+        const color = RESOURCE_COLORS[resourceType];
+        const rate = productionRates[resourceType] ?? 0;
+
+        return (
+          <motion.div
+            key={resourceType}
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: index * 0.06 }}
+            className="group relative"
           >
-            {RESOURCE_METADATA[resourceType].icon}
-          </div>
-          
-          {/* Resource amount indicator */}
-          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-[#0A0E17] px-2 py-0.5 rounded text-xs font-bold text-[#F8FAFC]">
-            {Math.floor(amount)}
-          </div>
-
-          {/* Hover tooltip */}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-[#0A0E17] p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-            <div className="text-[#F8FAFC] text-xs">
-              {RESOURCE_METADATA[resourceType].name}
-              <br />
-              {Math.floor(amount)}/{capacity[resourceType]}
-              <br />
-              <span className={productionRates[resourceType] > 0 ? 'text-[#10B981]' : 'text-[#EF4444]'}>
-                {productionRates[resourceType] > 0 ? '+' : ''}{productionRates[resourceType].toFixed(1)}/s
-              </span>
-            </div>
-          </div>
-
-          {/* Production rate indicator */}
-          {productionRates[resourceType] !== 0 && (
-            <motion.div
-              className={`absolute -top-1 -right-1 w-3 h-3 rounded-full ${
-                productionRates[resourceType] > 0 ? 'bg-[#10B981]' : 'bg-[#EF4444]'
-              }`}
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1.2 }}
-              transition={{
-                repeat: Infinity,
-                repeatType: "reverse",
-                duration: 1
+            <div
+              className="relative flex h-14 w-14 items-center justify-center rounded-[var(--radius-md)] border border-white/[0.08]"
+              style={{
+                backgroundColor: `${color}22`,
+                boxShadow: `0 0 18px ${color}18`,
               }}
-            />
-          )}
-        </motion.div>
-      ))}
+            >
+              <Icon
+                icon={RESOURCE_ICONS[resourceType]}
+                size={20}
+                className="text-[rgb(var(--text-primary))]"
+                style={{ color }}
+              />
+
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 rounded px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-[rgb(var(--text-primary))] bg-[rgb(var(--bg-base))] border border-white/[0.08]">
+                {Math.floor(amount)}
+              </div>
+
+              {rate !== 0 && (
+                <motion.div
+                  className={`absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ${
+                    rate > 0 ? 'bg-[rgb(var(--success))]' : 'bg-[rgb(var(--error))]'
+                  }`}
+                  initial={{ scale: 0.85 }}
+                  animate={{ scale: 1.15 }}
+                  transition={{
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                    duration: 1,
+                  }}
+                />
+              )}
+            </div>
+
+            <div className="pointer-events-none absolute left-1/2 top-full z-50 mt-3 -translate-x-1/2 whitespace-nowrap rounded-[var(--radius-sm)] border border-white/[0.08] bg-[rgb(var(--bg-base)/0.95)] px-2.5 py-1.5 opacity-0 shadow-[var(--shadow-md)] transition-opacity group-hover:opacity-100">
+              <div className="text-xs text-[rgb(var(--text-primary))]">
+                <div className="font-medium">{RESOURCE_NAMES[resourceType]}</div>
+                <div className="text-[rgb(var(--text-muted))]">
+                  {Math.floor(amount)} / {capacity[resourceType]}
+                </div>
+                <div
+                  className={
+                    rate > 0
+                      ? 'text-[rgb(var(--success))]'
+                      : rate < 0
+                        ? 'text-[rgb(var(--error))]'
+                        : 'text-[rgb(var(--text-muted))]'
+                  }
+                >
+                  {rate > 0 ? '+' : ''}
+                  {rate.toFixed(1)}/s
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
     </div>
   );
-} 
+}

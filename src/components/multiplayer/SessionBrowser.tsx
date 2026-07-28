@@ -3,10 +3,12 @@
  * Browse and join active collaboration sessions
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
+import { Pencil, Eye, Target, Lock, Check } from 'lucide-react';
 import { getCollaborationSystem } from '@/utils/collaborationSystem';
 import type { CollaborationSession, User } from '@/utils/collaborationSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface SessionBrowserProps {
   currentUser: User;
@@ -187,36 +189,50 @@ export function SessionBrowser({
                       </p>
                     </div>
 
-                    {/* Settings */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <span className="px-2 py-1 bg-accent/10 text-accent text-xs rounded-[var(--radius-sm)] border border-accent/20">
-                        {session.settings.allowEditing === 'all' ? '✏️ All can edit' : '👁️ View only'}
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-accent/20 bg-accent/10 px-2 py-1 text-xs text-accent">
+                        <Icon
+                          icon={session.settings.allowEditing === 'all' ? Pencil : Eye}
+                          size={12}
+                        />
+                        {session.settings.allowEditing === 'all' ? 'All can edit' : 'View only'}
                       </span>
                       {session.challengeId && (
-                        <span className="px-2 py-1 bg-info/10 text-info text-xs rounded-[var(--radius-sm)] border border-info/20">
-                          🎯 Challenge mode
+                        <span className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-info/20 bg-info/10 px-2 py-1 text-xs text-info">
+                          <Icon icon={Target} size={12} />
+                          Challenge mode
                         </span>
                       )}
                       {isFull && (
-                        <span className="px-2 py-1 bg-error/10 text-error text-xs rounded-[var(--radius-sm)] border border-error/20">
-                          🔒 Full
+                        <span className="inline-flex items-center gap-1 rounded-[var(--radius-sm)] border border-error/20 bg-error/10 px-2 py-1 text-xs text-error">
+                          <Icon icon={Lock} size={12} />
+                          Full
                         </span>
                       )}
                     </div>
 
-                    {/* Join Button */}
                     <button
+                      type="button"
                       onClick={() => handleJoin(session.id)}
                       disabled={isFull && !isInSession}
-                      className={`w-full py-2.5 rounded-[var(--radius-sm)] font-medium text-body transition-colors focus-ring ${
+                      className={`focus-ring w-full rounded-[var(--radius-sm)] py-2.5 text-body font-medium transition-colors ${
                         isInSession
-                          ? 'bg-success hover:bg-success/90 text-white'
+                          ? 'bg-success text-white hover:bg-success/90'
                           : isFull
-                          ? 'bg-elevated cursor-not-allowed text-text-muted'
-                          : 'bg-accent hover:bg-accent-hover text-white'
+                            ? 'cursor-not-allowed bg-elevated text-text-muted'
+                            : 'bg-accent text-white hover:bg-accent-hover'
                       }`}
                     >
-                      {isInSession ? '✓ Joined' : isFull ? 'Session Full' : 'Join Session'}
+                      {isInSession ? (
+                        <span className="inline-flex items-center justify-center gap-1.5">
+                          <Icon icon={Check} size={14} />
+                          Joined
+                        </span>
+                      ) : isFull ? (
+                        'Session full'
+                      ) : (
+                        'Join session'
+                      )}
                     </button>
                   </div>
                 );

@@ -3,8 +3,10 @@
  * Shows learning speed trends over time
  */
 
-import React from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { Rocket, Zap, Sparkles, Turtle, Sprout, Lightbulb } from 'lucide-react';
 import type { LearningAnalytics } from '@/utils/analyticsSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface LearningVelocityChartProps {
   analytics: LearningAnalytics;
@@ -12,30 +14,31 @@ export interface LearningVelocityChartProps {
 
 export function LearningVelocityChart({ analytics }: LearningVelocityChartProps) {
   const velocity = analytics.learningVelocity;
-  const avgTime = analytics.averageChallengeTime / 60000; // Convert to minutes
+  const avgTime = analytics.averageChallengeTime / 60000;
 
-  const getVelocityRating = (vel: number) => {
-    if (vel >= 3) return { label: 'Exceptional', color: 'text-green-400', emoji: '🚀' };
-    if (vel >= 2) return { label: 'Great', color: 'text-blue-400', emoji: '⚡' };
-    if (vel >= 1) return { label: 'Good', color: 'text-yellow-400', emoji: '✨' };
-    if (vel >= 0.5) return { label: 'Steady', color: 'text-orange-400', emoji: '🐢' };
-    return { label: 'Take Your Time', color: 'text-gray-400', emoji: '🌱' };
+  const getVelocityRating = (
+    vel: number,
+  ): { label: string; color: string; icon: LucideIcon } => {
+    if (vel >= 3) return { label: 'Exceptional', color: 'text-green-400', icon: Rocket };
+    if (vel >= 2) return { label: 'Great', color: 'text-blue-400', icon: Zap };
+    if (vel >= 1) return { label: 'Good', color: 'text-yellow-400', icon: Sparkles };
+    if (vel >= 0.5) return { label: 'Steady', color: 'text-orange-400', icon: Turtle };
+    return { label: 'Take your time', color: 'text-gray-400', icon: Sprout };
   };
 
   const rating = getVelocityRating(velocity);
 
-  // Create visual bars for velocity representation
   const maxBars = 10;
   const filledBars = Math.min(Math.ceil((velocity / 3) * maxBars), maxBars);
 
   return (
     <div className="card">
-      <div className="flex items-center justify-between mb-5">
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h3 className="text-h3 mb-1">Learning Velocity</h3>
+          <h3 className="mb-1 text-h3">Learning Velocity</h3>
           <p className="text-body">Your learning pace and efficiency</p>
         </div>
-        <div className="text-2xl opacity-70">{rating.emoji}</div>
+        <Icon icon={rating.icon} size={22} className={`opacity-80 ${rating.color}`} />
       </div>
 
       {/* Velocity Display */}
@@ -84,14 +87,16 @@ export function LearningVelocityChart({ analytics }: LearningVelocityChartProps)
       </div>
 
       {/* Insights */}
-      <div className="mt-4 p-4 bg-info/10 border border-info/20 rounded-[var(--radius-md)]">
-        <p className="text-info text-body">
-          💡 {velocity >= 2
-            ? "You're learning at an excellent pace! Keep up the momentum."
-            : velocity >= 1
-            ? "Steady progress! Consider setting aside dedicated learning time to boost velocity."
-            : "Remember, quality matters more than speed. Focus on understanding concepts deeply."
-          }
+      <div className="mt-4 rounded-[var(--radius-md)] border border-info/20 bg-info/10 p-4">
+        <p className="inline-flex items-start gap-2 text-body text-info">
+          <Icon icon={Lightbulb} size={15} className="mt-0.5 shrink-0" />
+          <span>
+            {velocity >= 2
+              ? "You're learning at an excellent pace. Keep the momentum."
+              : velocity >= 1
+                ? 'Steady progress. Dedicated practice blocks can boost velocity.'
+                : 'Quality matters more than speed. Focus on understanding concepts deeply.'}
+          </span>
         </p>
       </div>
     </div>

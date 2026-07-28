@@ -3,8 +3,9 @@
  * Shows what concepts the user excels at and struggles with
  */
 
-import React from 'react';
+import { Dumbbell, BookOpen } from 'lucide-react';
 import type { LearningAnalytics } from '@/utils/analyticsSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface StrengthsWeaknessesPanelProps {
   analytics: LearningAnalytics;
@@ -20,16 +21,15 @@ export function StrengthsWeaknessesPanel({
   const weakConcepts = analytics.weakConcepts.slice(0, displayLimit);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      {/* Strengths */}
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="card border-success/20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-success/10 rounded-[var(--radius-sm)] flex items-center justify-center text-xl">
-            💪
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-success/10 text-success">
+            <Icon icon={Dumbbell} size={18} />
           </div>
           <div>
             <h3 className="text-h3">Your Strengths</h3>
-            <p className="text-success text-body">Concepts you&apos;ve mastered</p>
+            <p className="text-body text-success">Concepts you&apos;ve mastered</p>
           </div>
         </div>
 
@@ -77,15 +77,14 @@ export function StrengthsWeaknessesPanel({
         )}
       </div>
 
-      {/* Weaknesses */}
       <div className="card border-error/20">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-error/10 rounded-[var(--radius-sm)] flex items-center justify-center text-xl">
-            📚
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-error/10 text-error">
+            <Icon icon={BookOpen} size={18} />
           </div>
           <div>
             <h3 className="text-h3">Areas to Improve</h3>
-            <p className="text-error text-body">Concepts that need practice</p>
+            <p className="text-body text-error">Concepts that need practice</p>
           </div>
         </div>
 

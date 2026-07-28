@@ -60,7 +60,7 @@ export function FeatureHub() {
         id: 'first_challenge',
         title: 'First Steps',
         description: 'Complete your first coding challenge',
-        icon: '🎯',
+        icon: 'target',
         rarity: 'common' as const,
         xpReward: 50,
         isUnlocked: false,
@@ -71,7 +71,7 @@ export function FeatureHub() {
         id: 'five_challenges',
         title: 'Getting Started',
         description: 'Complete 5 coding challenges',
-        icon: '🚀',
+        icon: 'rocket',
         rarity: 'common' as const,
         xpReward: 100,
         isUnlocked: false,
@@ -82,7 +82,7 @@ export function FeatureHub() {
         id: 'perfect_score',
         title: 'Perfectionist',
         description: 'Get a perfect score on a challenge',
-        icon: '⭐',
+        icon: 'star',
         rarity: 'rare' as const,
         xpReward: 200,
         isUnlocked: false,
@@ -93,7 +93,7 @@ export function FeatureHub() {
         id: 'speed_demon',
         title: 'Speed Demon',
         description: 'Complete a challenge in under 2 minutes',
-        icon: '⚡',
+        icon: 'zap',
         rarity: 'rare' as const,
         xpReward: 150,
         isUnlocked: false,
@@ -104,7 +104,7 @@ export function FeatureHub() {
         id: 'master_builder',
         title: 'Master Builder',
         description: 'Place 10 buildings in your colony',
-        icon: '🏗️',
+        icon: 'building',
         rarity: 'epic' as const,
         xpReward: 300,
         isUnlocked: false,
@@ -115,7 +115,7 @@ export function FeatureHub() {
         id: 'code_master',
         title: 'Code Master',
         description: 'Complete all beginner challenges',
-        icon: '👑',
+        icon: 'crown',
         rarity: 'epic' as const,
         xpReward: 500,
         isUnlocked: false,
@@ -126,7 +126,7 @@ export function FeatureHub() {
         id: 'legend',
         title: 'Living Legend',
         description: 'Reach level 20',
-        icon: '🌟',
+        icon: 'sparkles',
         rarity: 'legendary' as const,
         xpReward: 1000,
         isUnlocked: false,
@@ -155,7 +155,7 @@ export function FeatureHub() {
   const currentUser = {
     id: userState.id || 'user_1',
     username: userState.username || 'Player',
-    color: '#6366f1',
+    color: '#1E3A8A',
     level: userState.progress.level || 1,
     xp: userState.progress.xp || 0,
   };
@@ -199,10 +199,11 @@ export function FeatureHub() {
               }))}
               onAchievementClick={(id) => console.log('Achievement clicked:', id)}
             />
-            <div className="flex justify-center mt-4">
+            <div className="mt-4 flex justify-center">
               <button
+                type="button"
                 onClick={() => dispatch({ type: 'achievement/toggleAchievementProgress' })}
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors"
+                className="btn-primary px-6 py-3"
               >
                 Close
               </button>
