@@ -46,12 +46,22 @@ import CameraFocusManager from '@/components/game/camera/CameraFocusManager';
 import * as THREE from 'three';
 import confetti from 'canvas-confetti';
 import {
+  ChevronLeft,
+  ChevronRight,
+  Code2,
+  CheckCircle2,
+  Target,
+  Bot,
+} from 'lucide-react';
+import {
   trackChallengeStarted,
   trackChallengeCompleted,
   trackCodeSubmitted,
   trackBuildingConstructed,
 } from '@/utils/analytics';
 import { buildingTemplates } from '@/data/buildingTemplates';
+import { Icon } from '@/components/ui/Icon';
+import { HudPanel } from '@/components/ui/HudPanel';
 
 // Environment settings
 const ENVIRONMENT_CONFIG = {
@@ -896,45 +906,60 @@ export default function GameWorldClient() {
           {/* Challenge UI - Left Side */}
           <div className="absolute left-4 top-4 z-50 pointer-events-auto">
             {!currentChallenge && (
-              <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm text-white">
-                <h2 className="text-xl font-bold mb-2">Colony status</h2>
-                <p className="text-sm text-gray-300 mb-3">
+              <HudPanel className="max-w-sm">
+                <h2 className="mb-2 text-lg font-semibold text-[rgb(var(--text-primary))]">
+                  Colony status
+                </h2>
+                <p className="mb-3 text-sm text-[rgb(var(--text-secondary))]">
                   {completed.length === 0
-                    ? 'Challenges are loading… if this persists, refresh the page.'
+                    ? 'Challenges are loading. If this persists, refresh the page.'
                     : 'You cleared the available challenges. Keep building, or open Help for the playground.'}
                 </p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[rgb(var(--text-muted))]">
                   Completed: {completed.length}
                 </p>
-              </div>
+              </HudPanel>
             )}
             {currentChallenge && (
-              <div className="flex flex-col gap-3">
-                {/* Challenge Card */}
-                <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-gray-400">
-                      Challenge {challengeIndex + 1} of {availableChallenges.length}
+              <div className="flex max-w-sm flex-col gap-3">
+                <HudPanel>
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-[rgb(var(--text-muted))]">
+                      <Icon icon={Target} size={12} />
+                      Challenge {challengeIndex + 1} / {availableChallenges.length}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      currentChallenge.difficulty === 1 ? 'bg-green-600' :
-                      currentChallenge.difficulty === 2 ? 'bg-yellow-600' : 'bg-red-600'
-                    }`}>
-                      {currentChallenge.difficulty === 1 ? 'Beginner' :
-                       currentChallenge.difficulty === 2 ? 'Intermediate' : 'Advanced'}
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        currentChallenge.difficulty === 1
+                          ? 'bg-[rgb(var(--success)/0.2)] text-[rgb(var(--success))]'
+                          : currentChallenge.difficulty === 2
+                            ? 'bg-[rgb(var(--energy)/0.2)] text-[rgb(var(--energy))]'
+                            : 'bg-[rgb(var(--error)/0.2)] text-[rgb(var(--error))]'
+                      }`}
+                    >
+                      {currentChallenge.difficulty === 1
+                        ? 'Beginner'
+                        : currentChallenge.difficulty === 2
+                          ? 'Intermediate'
+                          : 'Advanced'}
                     </span>
                   </div>
-                  <h2 className="text-white text-xl font-bold mb-2">{currentChallenge.title}</h2>
-                  <p className="text-gray-300 text-sm mb-3">{currentChallenge.description}</p>
+                  <h2 className="mb-2 text-xl font-semibold tracking-tight text-[rgb(var(--text-primary))]">
+                    {currentChallenge.title}
+                  </h2>
+                  <p className="mb-3 text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                    {currentChallenge.description}
+                  </p>
 
-                  {/* Objectives */}
                   {currentChallenge.objectives && currentChallenge.objectives.length > 0 && (
                     <div className="mb-3">
-                      <h4 className="text-xs font-semibold text-gray-400 mb-1">Objectives:</h4>
-                      <ul className="text-sm text-gray-300 space-y-1">
+                      <h4 className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-[rgb(var(--text-muted))]">
+                        Objectives
+                      </h4>
+                      <ul className="space-y-1.5 text-sm text-[rgb(var(--text-secondary))]">
                         {currentChallenge.objectives.map((obj, i) => (
-                          <li key={i} className="flex items-start gap-1">
-                            <span className="text-blue-400">•</span>
+                          <li key={i} className="flex items-start gap-2">
+                            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[rgb(var(--accent-subtle))]" />
                             <span>{obj}</span>
                           </li>
                         ))}
@@ -944,10 +969,10 @@ export default function GameWorldClient() {
 
                   {validationFeedback && (
                     <div
-                      className={`mb-3 p-3 rounded text-sm ${
+                      className={`mb-3 rounded-[var(--radius-sm)] p-3 text-sm ${
                         validationFeedback.success
-                          ? 'bg-green-900/50 text-green-200'
-                          : 'bg-red-900/50 text-red-200'
+                          ? 'bg-[rgb(var(--success)/0.15)] text-[rgb(var(--success))]'
+                          : 'bg-[rgb(var(--error)/0.15)] text-[rgb(var(--error))]'
                       }`}
                       role="status"
                       aria-live="polite"
@@ -962,73 +987,78 @@ export default function GameWorldClient() {
                         type="button"
                         onClick={handlePrev}
                         disabled={challengeIndex === 0}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-secondary flex-1 gap-1 disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        Previous
+                        <Icon icon={ChevronLeft} size={14} />
+                        Prev
                       </button>
                       <button
                         type="button"
                         onClick={handleNext}
                         disabled={challengeIndex === availableChallenges.length - 1}
-                        className="flex-1 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-secondary flex-1 gap-1 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Next
+                        <Icon icon={ChevronRight} size={14} />
                       </button>
                     </div>
                     <button
                       type="button"
                       onClick={handleEditorOpen}
-                      className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[rgb(var(--success))] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[rgb(22_163_74)]"
                     >
+                      <Icon icon={Code2} size={15} />
                       Start Coding
                     </button>
                     <button
                       type="button"
                       onClick={handleCheckSolution}
-                      className="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
+                      className="btn-primary w-full gap-2"
                     >
+                      <Icon icon={CheckCircle2} size={15} />
                       Check Solution
                     </button>
                   </div>
-                </div>
+                </HudPanel>
 
-                {/* Progressive Hints Panel */}
                 {!completed.includes(currentChallenge.id) && (
-                  <HintPanel challenge={currentChallenge} className="max-w-sm" />
+                  <HintPanel challenge={currentChallenge} />
                 )}
 
-                {/* Mastery Dashboard */}
-                <MasteryDashboard className="max-w-sm mt-2" />
-
-                {/* Daily Streak */}
-                <StreakDisplay className="max-w-sm mt-2" />
+                <MasteryDashboard />
+                <StreakDisplay />
               </div>
             )}
           </div>
 
           {/* Pixel Dialog - Bottom Left */}
-          <div className="absolute left-4 bottom-4 z-50 pointer-events-auto">
-            <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg max-w-sm">
-              <div className="text-white">
-                <h3 className="text-lg font-bold mb-2">Pixel</h3>
-                <p className="text-sm opacity-80">{contextualTip}</p>
-                <div className="mt-2 text-xs opacity-60">Current mood: {pixelMood}</div>
+          <div className="absolute bottom-4 left-4 z-50 pointer-events-auto">
+            <HudPanel className="max-w-sm">
+              <div className="mb-2 flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
+                  <Icon icon={Bot} size={16} />
+                </span>
+                <h3 className="text-sm font-semibold text-[rgb(var(--text-primary))]">Pixel</h3>
               </div>
-            </div>
+              <p className="text-sm leading-relaxed text-[rgb(var(--text-secondary))]">
+                {contextualTip}
+              </p>
+              <div className="mt-2 text-[11px] uppercase tracking-wide text-[rgb(var(--text-muted))]">
+                Mood: {pixelMood}
+              </div>
+            </HudPanel>
           </div>
 
           {/* Resource HUD - Top Right */}
           <div className="absolute right-4 top-4 z-50 pointer-events-auto">
-            <div className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg">
+            <HudPanel>
               <ResourceHUD />
-            </div>
+            </HudPanel>
           </div>
 
           {/* Building Menu - Bottom Right */}
           <div className="absolute right-4 bottom-4 z-50 pointer-events-auto">
-            <div className="bg-gray-900 bg-opacity-90 rounded-lg shadow-lg">
-              <BuildingMenu />
-            </div>
+            <BuildingMenu />
           </div>
           
           {/* Tutorial Overlay */}

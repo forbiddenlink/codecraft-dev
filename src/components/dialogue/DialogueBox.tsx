@@ -3,8 +3,24 @@
  * Visual novel-style dialogue interface
  */
 
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Smile,
+  Meh,
+  Frown,
+  Sparkles,
+  Angry,
+  HelpCircle,
+  Award,
+  Lock,
+  ArrowRight,
+  X,
+} from 'lucide-react';
 import type { DialogueNode, DialogueChoice } from '@/utils/dialogueSystem';
+import { Icon } from '@/components/ui/Icon';
 
 export interface DialogueBoxProps {
   npcName: string;
@@ -17,23 +33,23 @@ export interface DialogueBoxProps {
 }
 
 const emotionColors = {
-  happy: 'from-green-600/20 to-green-800/20 border-green-500/30',
-  neutral: 'from-gray-600/20 to-gray-800/20 border-gray-500/30',
-  sad: 'from-blue-600/20 to-blue-800/20 border-blue-500/30',
-  excited: 'from-yellow-600/20 to-yellow-800/20 border-yellow-500/30',
+  happy: 'from-emerald-600/20 to-emerald-800/20 border-emerald-500/30',
+  neutral: 'from-zinc-600/20 to-zinc-800/20 border-zinc-500/30',
+  sad: 'from-sky-600/20 to-sky-800/20 border-sky-500/30',
+  excited: 'from-amber-600/20 to-amber-800/20 border-amber-500/30',
   angry: 'from-red-600/20 to-red-800/20 border-red-500/30',
-  confused: 'from-purple-600/20 to-purple-800/20 border-purple-500/30',
+  confused: 'from-slate-600/20 to-slate-800/20 border-slate-500/30',
   proud: 'from-orange-600/20 to-orange-800/20 border-orange-500/30',
 };
 
-const emotionEmojis = {
-  happy: '😊',
-  neutral: '😐',
-  sad: '😔',
-  excited: '🤩',
-  angry: '😠',
-  confused: '😕',
-  proud: '😤',
+const emotionIcons: Record<keyof typeof emotionColors, LucideIcon> = {
+  happy: Smile,
+  neutral: Meh,
+  sad: Frown,
+  excited: Sparkles,
+  angry: Angry,
+  confused: HelpCircle,
+  proud: Award,
 };
 
 export function DialogueBox({
@@ -94,24 +110,25 @@ export function DialogueBox({
                 className="w-12 h-12 rounded-full border-2 border-purple-500"
               />
             ) : (
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[rgb(var(--accent))] to-[rgb(30_58_138)] text-xl font-bold text-white">
                 {npcName.charAt(0)}
               </div>
             )}
             <div>
-              <p className="text-white font-bold">{npcName}</p>
-              <p className="text-gray-400 text-sm flex items-center gap-1">
-                <span>{emotionEmojis[emotion]}</span>
+              <p className="font-bold text-white">{npcName}</p>
+              <p className="flex items-center gap-1.5 text-sm text-zinc-400">
+                <Icon icon={emotionIcons[emotion]} size={14} />
                 <span className="capitalize">{emotion}</span>
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 bg-gray-700 hover:bg-gray-600 rounded-lg flex items-center justify-center text-gray-300 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-700 text-zinc-300 transition-colors hover:bg-zinc-600"
             aria-label="Close dialogue"
           >
-            ✕
+            <Icon icon={X} size={14} />
           </button>
         </div>
 
@@ -142,17 +159,18 @@ export function DialogueBox({
                         key={choice.id}
                         onClick={() => isAvailable && onChoice(choice.id)}
                         disabled={!isAvailable}
-                        className={`w-full text-left p-4 rounded-lg font-medium transition-all ${
+                        className={`w-full rounded-lg p-4 text-left font-medium transition-all ${
                           isAvailable
-                            ? 'bg-purple-600/20 hover:bg-purple-600/40 text-white border border-purple-500/30 hover:border-purple-500/60'
-                            : 'bg-gray-800/50 text-gray-500 border border-gray-700 cursor-not-allowed'
+                            ? 'border border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.2)] text-white hover:bg-[rgb(var(--accent)/0.35)]'
+                            : 'cursor-not-allowed border border-zinc-700 bg-zinc-800/50 text-zinc-500'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <span className="flex-1">{choice.text}</span>
                           {!isAvailable && (
-                            <span className="text-xs text-red-400 bg-red-500/20 px-2 py-1 rounded">
-                              🔒 {choice.requirementText}
+                            <span className="inline-flex items-center gap-1 rounded bg-red-500/20 px-2 py-1 text-xs text-red-400">
+                              <Icon icon={Lock} size={12} />
+                              {choice.requirementText}
                             </span>
                           )}
                         </div>
@@ -162,11 +180,12 @@ export function DialogueBox({
                 </div>
               ) : (
                 <button
+                  type="button"
                   onClick={onContinue}
-                  className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[rgb(var(--accent))] py-3 font-medium text-white transition-colors hover:bg-[rgb(30_64_175)]"
                 >
                   <span>Continue</span>
-                  <span>→</span>
+                  <Icon icon={ArrowRight} size={16} />
                 </button>
               )}
             </div>

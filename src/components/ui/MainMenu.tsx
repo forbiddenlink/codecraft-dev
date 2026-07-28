@@ -1,11 +1,21 @@
-/**
- * Main Menu Component
- * Central navigation hub for all CodeCraft features
- */
-
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import {
+  BarChart3,
+  Trophy,
+  Users,
+  Sparkles,
+  Factory,
+  Settings,
+  CircleHelp,
+  Menu,
+  X,
+  ChevronRight,
+  Scale,
+  Terminal,
+} from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   toggleMainMenu,
@@ -15,17 +25,27 @@ import {
 import { openAnalytics } from '@/store/slices/analyticsSlice';
 import { toggleSessionBrowser, toggleCreateModal } from '@/store/slices/multiplayerSlice';
 import { toggleAchievementProgress } from '@/store/slices/achievementSlice';
-import Link from 'next/link';
+import { Icon } from '@/components/ui/Icon';
+import type { LucideIcon } from 'lucide-react';
+
+type MenuItem = {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+  description: string;
+  action: () => void;
+  hotkey: string;
+};
 
 export function MainMenu() {
   const dispatch = useAppDispatch();
   const isOpen = useAppSelector((state) => state.ui.showMainMenu);
   const [showQuickActions, setShowQuickActions] = useState(false);
 
-  const menuItems = [
+  const menuItems: MenuItem[] = [
     {
       id: 'analytics',
-      icon: '📊',
+      icon: BarChart3,
       label: 'Analytics Dashboard',
       description: 'View your learning progress',
       action: () => {
@@ -36,7 +56,7 @@ export function MainMenu() {
     },
     {
       id: 'achievements',
-      icon: '🏆',
+      icon: Trophy,
       label: 'Achievements',
       description: 'Track your accomplishments',
       action: () => {
@@ -47,7 +67,7 @@ export function MainMenu() {
     },
     {
       id: 'multiplayer',
-      icon: '👥',
+      icon: Users,
       label: 'Multiplayer',
       description: 'Join or create coding sessions',
       action: () => {
@@ -58,7 +78,7 @@ export function MainMenu() {
     },
     {
       id: 'create-session',
-      icon: '✨',
+      icon: Sparkles,
       label: 'Create Session',
       description: 'Start a new collaboration',
       action: () => {
@@ -69,18 +89,17 @@ export function MainMenu() {
     },
     {
       id: 'resources',
-      icon: '🏭',
+      icon: Factory,
       label: 'Resource Management',
       description: 'Manage colony resources',
       action: () => {
-        // Resource panel is already visible, just highlight it
         dispatch(toggleMainMenu());
       },
       hotkey: 'R',
     },
     {
       id: 'settings',
-      icon: '⚙️',
+      icon: Settings,
       label: 'Settings',
       description: 'Configure your experience',
       action: () => {
@@ -91,7 +110,7 @@ export function MainMenu() {
     },
     {
       id: 'help',
-      icon: '❓',
+      icon: CircleHelp,
       label: 'Help & Tutorials',
       description: 'Learn how to play',
       action: () => {
@@ -104,96 +123,106 @@ export function MainMenu() {
 
   return (
     <>
-      {/* Menu Button - Keep gradient as the single accent element */}
       <button
+        type="button"
         onClick={() => dispatch(toggleMainMenu())}
         onMouseEnter={() => setShowQuickActions(true)}
         onMouseLeave={() => setShowQuickActions(false)}
-        className="fixed top-4 left-4 z-50 w-12 h-12 bg-accent hover:bg-accent-hover rounded-[var(--radius-md)] shadow-lg flex items-center justify-center text-xl text-white transition-all duration-150 hover:scale-105 focus-ring"
-        aria-label="Main Menu"
+        className="fixed top-4 left-4 z-50 flex h-12 w-12 items-center justify-center rounded-[var(--radius-md)] bg-[rgb(var(--accent))] text-white shadow-[var(--shadow-md)] transition-all duration-150 hover:bg-[rgb(var(--accent-hover))] hover:scale-[1.03] focus-ring"
+        aria-label={isOpen ? 'Close main menu' : 'Open main menu'}
         title="Main Menu (Esc)"
       >
-        <span className={`transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
-          ☰
-        </span>
-
-        {/* Quick Action Indicators */}
+        <Icon icon={isOpen ? X : Menu} size={22} />
         {showQuickActions && !isOpen && (
-          <div className="absolute -right-1 -top-1 flex gap-0.5">
-            <div className="w-2 h-2 bg-success rounded-full" title="Achievements" />
-            <div className="w-2 h-2 bg-info rounded-full" title="Analytics" />
-            <div className="w-2 h-2 bg-accent rounded-full" title="Multiplayer" />
-          </div>
+          <span className="absolute -right-1 -top-1 flex gap-0.5">
+            <span className="h-2 w-2 rounded-full bg-[rgb(var(--success))]" title="Achievements" />
+            <span className="h-2 w-2 rounded-full bg-[rgb(var(--info))]" title="Analytics" />
+            <span className="h-2 w-2 rounded-full bg-[rgb(var(--energy))]" title="Multiplayer" />
+          </span>
         )}
       </button>
 
-      {/* Menu Panel */}
       {isOpen && (
         <div className="fixed inset-0 z-40 flex items-start justify-start p-4 pointer-events-none">
-          {/* Backdrop */}
-          <div
-            className="modal-backdrop absolute inset-0 pointer-events-auto"
+          <button
+            type="button"
+            className="modal-backdrop absolute inset-0 pointer-events-auto cursor-default"
+            aria-label="Close menu"
             onClick={() => dispatch(toggleMainMenu())}
           />
 
-          {/* Menu Content */}
-          <div className="relative mt-20 ml-4 w-full max-w-md panel overflow-hidden pointer-events-auto animate-slide-up">
-            {/* Header */}
-            <div className="bg-accent px-6 py-5">
-              <h2 className="text-h2 text-white mb-1">CodeCraft Menu</h2>
-              <p className="text-white/80 text-body">Access all features and settings</p>
+          <div className="relative mt-20 ml-4 w-full max-w-md overflow-hidden pointer-events-auto animate-slide-up panel">
+            <div className="border-b border-white/[0.08] bg-gradient-to-br from-[rgb(var(--accent))] to-[rgb(20_40_100)] px-6 py-5">
+              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/70">
+                CodeCraft
+              </p>
+              <h2 className="mt-1 text-xl font-semibold text-white">Command Menu</h2>
+              <p className="mt-1 text-sm text-white/75">Colony tools, learning, and collaboration</p>
             </div>
 
-            {/* Menu Items */}
-            <div className="p-4 space-y-2 max-h-[70vh] overflow-y-auto">
+            <div className="max-h-[70vh] space-y-1.5 overflow-y-auto p-3">
               {menuItems.map((item) => (
                 <button
                   key={item.id}
+                  type="button"
                   onClick={item.action}
-                  className="w-full group bg-surface hover:bg-elevated border border-[rgb(var(--border-subtle))] hover:border-accent/30 rounded-[var(--radius-md)] p-4 transition-all duration-150 text-left focus-ring"
+                  className="group flex w-full items-center gap-3 rounded-[var(--radius-md)] border border-transparent bg-[rgb(var(--bg-elevated)/0.35)] px-3 py-3 text-left transition-all duration-150 hover:border-[rgb(var(--accent-subtle)/0.35)] hover:bg-[rgb(var(--bg-elevated))] focus-ring"
                 >
-                  <div className="flex items-center gap-4">
-                    {/* Icon */}
-                    <div className="w-11 h-11 bg-elevated rounded-[var(--radius-sm)] flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
-                      {item.icon}
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-h4">{item.label}</h3>
-                        <span className="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-[var(--radius-sm)] border border-accent/20 font-medium">
-                          {item.hotkey}
-                        </span>
-                      </div>
-                      <p className="text-small">{item.description}</p>
-                    </div>
-
-                    {/* Arrow */}
-                    <div className="text-text-muted group-hover:text-accent transition-colors">
-                      →
-                    </div>
-                  </div>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.18)] text-[rgb(var(--accent-subtle))] transition-transform group-hover:scale-105">
+                    <Icon icon={item.icon} size={18} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="mb-0.5 flex items-center gap-2">
+                      <span className="text-sm font-medium text-[rgb(var(--text-primary))]">
+                        {item.label}
+                      </span>
+                      <kbd className="rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[10px] text-[rgb(var(--text-muted))]">
+                        {item.hotkey}
+                      </kbd>
+                    </span>
+                    <span className="block text-xs text-[rgb(var(--text-muted))]">
+                      {item.description}
+                    </span>
+                  </span>
+                  <Icon
+                    icon={ChevronRight}
+                    size={16}
+                    className="text-[rgb(var(--text-muted))] transition-colors group-hover:text-[rgb(var(--accent-subtle))]"
+                  />
                 </button>
               ))}
             </div>
 
-            {/* Footer */}
-            <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4">
-              <div className="flex items-center justify-between gap-3 mb-3 text-xs text-text-muted">
-                <Link href="/privacy" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+            <div className="border-t border-white/[0.08] bg-[rgb(var(--bg-elevated)/0.45)] px-5 py-3">
+              <div className="mb-3 flex items-center gap-4 text-xs text-[rgb(var(--text-muted))]">
+                <Link
+                  href="/privacy"
+                  className="inline-flex items-center gap-1.5 hover:text-[rgb(var(--accent-subtle))]"
+                  onClick={() => dispatch(toggleMainMenu())}
+                >
+                  <Icon icon={Scale} size={13} />
                   Privacy
                 </Link>
-                <Link href="/terms" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+                <Link
+                  href="/terms"
+                  className="inline-flex items-center gap-1.5 hover:text-[rgb(var(--accent-subtle))]"
+                  onClick={() => dispatch(toggleMainMenu())}
+                >
                   Terms
                 </Link>
-                <Link href="/playground" className="hover:text-accent pointer-events-auto" onClick={() => dispatch(toggleMainMenu())}>
+                <Link
+                  href="/playground"
+                  className="inline-flex items-center gap-1.5 hover:text-[rgb(var(--accent-subtle))]"
+                  onClick={() => dispatch(toggleMainMenu())}
+                >
+                  <Icon icon={Terminal} size={13} />
                   Playground
                 </Link>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-small">Press ESC to close</span>
+                <span className="text-xs text-[rgb(var(--text-muted))]">Press Esc to close</span>
                 <button
+                  type="button"
                   onClick={() => dispatch(toggleMainMenu())}
                   className="btn-primary focus-ring"
                 >

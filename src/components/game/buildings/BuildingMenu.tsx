@@ -1,177 +1,179 @@
 'use client';
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Home,
+  Cog,
+  Package,
+  FlaskConical,
+  Sparkles,
+  Building2,
+  Zap,
+  Gem,
+  Droplets,
+  Wind,
+  Wheat,
+  Users,
+  Microscope,
+  Box,
+} from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { buildingTemplates } from '@/data/buildingTemplates';
-import { 
-  toggleBuildMode,
-  setSelectedTemplateId
-} from '@/store/slices/buildingSlice';
+import { toggleBuildMode, setSelectedTemplateId } from '@/store/slices/buildingSlice';
 import { setCode, setLanguage } from '@/store/slices/editorSlice';
+import { Icon } from '@/components/ui/Icon';
+import { HudPanel } from '@/components/ui/HudPanel';
 
-// Building categories
-const CATEGORIES = [
-  { id: 'habitat', name: 'Habitat', icon: '🏠' },
-  { id: 'production', name: 'Production', icon: '⚙️' },
-  { id: 'storage', name: 'Storage', icon: '📦' },
-  { id: 'research', name: 'Research', icon: '🧪' },
-  { id: 'special', name: 'Special', icon: '✨' }
+const CATEGORIES: { id: string; name: string; icon: LucideIcon }[] = [
+  { id: 'habitat', name: 'Habitat', icon: Home },
+  { id: 'production', name: 'Production', icon: Cog },
+  { id: 'storage', name: 'Storage', icon: Package },
+  { id: 'research', name: 'Research', icon: FlaskConical },
+  { id: 'special', name: 'Special', icon: Sparkles },
 ];
+
+const TEMPLATE_ICONS: Record<string, LucideIcon> = {
+  'habitat-module': Home,
+  'connection-corridor': Box,
+};
 
 export default function BuildingMenu() {
   const dispatch = useAppDispatch();
-  const selectedTemplateId = useAppSelector(state => state.building.selectedTemplateId);
-  const isBuildModeActive = useAppSelector(state => state.building.buildMode);
-  const playerLevel = useAppSelector(state => state.user.progress.level);
-  const completedChallenges = useAppSelector(state => state.user.progress.completedChallenges);
-  
-  const [activeCategory, setActiveCategory] = useState('habitat');
-  
-  // Filter buildings by category and player level
-  const availableBuildings = Object.entries(buildingTemplates)
-    .filter(([, template]) => {
-      // Check category
-      if (template.category !== activeCategory) return false;
-      
-      // Check player level
-      if (template.requiredLevel > playerLevel) return false;
-      
-      // Check unlock requirement if any
-      if (template.unlockRequirement) {
-        if (template.unlockRequirement.type === 'level') {
-          if ((template.unlockRequirement.value as number) > playerLevel) return false;
-        }
-        else if (template.unlockRequirement.type === 'challenge') {
-          if (!completedChallenges.includes(template.unlockRequirement.value as string)) return false;
-        }
-      }
-      
-      return true;
-    });
+  const selectedTemplateId = useAppSelector((state) => state.building.selectedTemplateId);
+  const isBuildModeActive = useAppSelector((state) => state.building.buildMode);
+  const playerLevel = useAppSelector((state) => state.user.progress.level);
+  const completedChallenges = useAppSelector((state) => state.user.progress.completedChallenges);
 
-  // Handle building selection
+  const [activeCategory, setActiveCategory] = useState('habitat');
+
+  const availableBuildings = Object.entries(buildingTemplates).filter(([, template]) => {
+    if (template.category !== activeCategory) return false;
+    if (template.requiredLevel > playerLevel) return false;
+    if (template.unlockRequirement) {
+      if (template.unlockRequirement.type === 'level') {
+        if ((template.unlockRequirement.value as number) > playerLevel) return false;
+      } else if (template.unlockRequirement.type === 'challenge') {
+        if (!completedChallenges.includes(template.unlockRequirement.value as string)) return false;
+      }
+    }
+    return true;
+  });
+
   const handleBuildingSelect = (templateId: string) => {
-    // Toggle if already selected
     if (selectedTemplateId === templateId) {
       dispatch(setSelectedTemplateId(null));
       dispatch(toggleBuildMode(false));
       return;
     }
-    
-    // Set selected template
+
     dispatch(setSelectedTemplateId(templateId));
     dispatch(toggleBuildMode(true));
-    
-    // Get building template
+
     const template = buildingTemplates[templateId];
-    
-    // Insert template code into editor
     if (template) {
-      // Set HTML editor and insert template code
       dispatch(setLanguage('html'));
       dispatch(setCode({ language: 'html', code: template.defaultHtml }));
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-gray-900 bg-opacity-90 p-4 rounded-lg shadow-lg text-white w-[300px]"
-    >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xl">🏗️</span>
-        <h2 className="text-lg font-bold">Buildings</h2>
+    <HudPanel className="w-[300px] text-[rgb(var(--text-primary))]">
+      <div className="mb-4 flex items-center gap-2">
+        <Icon icon={Building2} size={18} className="text-[rgb(var(--accent-subtle))]" />
+        <h2 className="text-base font-semibold">Buildings</h2>
       </div>
 
-      {/* Building Categories */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {CATEGORIES.map(category => (
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {CATEGORIES.map((category) => (
           <button
             key={category.id}
-            className={`flex-1 min-w-[90px] px-3 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 text-sm ${
+            type="button"
+            className={`inline-flex min-w-[88px] flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-2.5 py-2 text-xs transition-colors ${
               activeCategory === category.id
-                ? 'bg-blue-700'
-                : 'bg-gray-700 hover:bg-gray-600'
+                ? 'bg-[rgb(var(--accent))] text-white'
+                : 'bg-white/[0.06] text-[rgb(var(--text-secondary))] hover:bg-white/[0.1]'
             }`}
             onClick={() => setActiveCategory(category.id)}
           >
-            <span>{category.icon}</span>
+            <Icon icon={category.icon} size={13} />
             <span className="whitespace-nowrap">{category.name}</span>
           </button>
         ))}
       </div>
 
-      {/* Building List */}
-      <div className="space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+      <div className="custom-scrollbar max-h-[400px] space-y-2 overflow-y-auto pr-1">
         {availableBuildings.length === 0 ? (
-          <div className="text-center text-gray-400 py-4">
-            No buildings available in this category yet.
-            <div className="mt-2 text-sm">
-              Complete more challenges to unlock buildings!
-            </div>
+          <div className="py-6 text-center text-sm text-[rgb(var(--text-muted))]">
+            No buildings in this category yet.
+            <div className="mt-2 text-xs">Complete challenges to unlock more structures.</div>
           </div>
         ) : (
-          availableBuildings.map(([id, template]) => (
-            <motion.div
-              key={id}
-              className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                selectedTemplateId === id
-                  ? 'bg-blue-600'
-                  : 'bg-gray-800 hover:bg-gray-700'
-              }`}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleBuildingSelect(id)}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{template.icon}</span>
-                <div className="flex-1">
-                  <h3 className="font-semibold">{template.name}</h3>
-                  <p className="text-sm text-gray-300">{template.description}</p>
-                </div>
-              </div>
-
-              {/* Resource Costs */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                {template.costs.map((cost, index) => (
-                  <span 
-                    key={`${cost.resourceId}-${index}`} 
-                    className="px-2 py-1 bg-gray-700 rounded-md text-sm flex items-center gap-1"
-                    title={`${cost.resourceId.charAt(0).toUpperCase() + cost.resourceId.slice(1)}`}
+          availableBuildings.map(([id, template]) => {
+            const TemplateIcon = TEMPLATE_ICONS[id] || Building2;
+            return (
+              <motion.button
+                key={id}
+                type="button"
+                className={`w-full rounded-[var(--radius-md)] p-3 text-left transition-colors ${
+                  selectedTemplateId === id
+                    ? 'bg-[rgb(var(--accent))] text-white'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08]'
+                }`}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={() => handleBuildingSelect(id)}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] ${
+                      selectedTemplateId === id ? 'bg-white/15' : 'bg-[rgb(var(--accent)/0.18)]'
+                    }`}
                   >
-                    {getResourceIcon(cost.resourceId)} {cost.amount}
+                    <Icon
+                      icon={TemplateIcon}
+                      size={16}
+                      className={selectedTemplateId === id ? 'text-white' : 'text-[rgb(var(--accent-subtle))]'}
+                    />
                   </span>
-                ))}
-              </div>
-              
-              {/* Building Effects */}
-              {template.effects?.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {template.effects.map((effect, index) => (
-                    <span 
-                      key={`${effect.type}-${effect.target}-${index}`} 
-                      className="px-2 py-1 bg-gray-700 rounded-md text-sm flex items-center gap-1"
-                      title={`${effect.type === 'resource' ? 'Produces' : effect.type}`}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-sm font-medium">{template.name}</h3>
+                    <p
+                      className={`text-xs ${
+                        selectedTemplateId === id ? 'text-white/80' : 'text-[rgb(var(--text-muted))]'
+                      }`}
                     >
-                      {effect.type === 'resource' && effect.value > 0 && '+'}
-                      {effect.value}
-                      {effect.type === 'efficiency' && 'x'} {getResourceIcon(effect.target)}
+                      {template.description}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {template.costs.map((cost, index) => (
+                    <span
+                      key={`${cost.resourceId}-${index}`}
+                      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] ${
+                        selectedTemplateId === id ? 'bg-black/20' : 'bg-black/30'
+                      }`}
+                      title={cost.resourceId}
+                    >
+                      <Icon icon={getResourceIcon(cost.resourceId)} size={11} />
+                      {cost.amount}
                     </span>
                   ))}
                 </div>
-              )}
-            </motion.div>
-          ))
+              </motion.button>
+            );
+          })
         )}
       </div>
-      
-      {/* Build Mode Indicator */}
+
       {isBuildModeActive && selectedTemplateId && (
-        <div className="mt-4 bg-blue-800 p-2 rounded text-center">
-          <div className="font-semibold">Build Mode Active</div>
-          <div className="text-sm">Click on the ground to place building</div>
-          <div className="text-xs mt-1">Press [R] to rotate • [ESC] to cancel</div>
+        <div className="mt-4 rounded-[var(--radius-md)] border border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.25)] p-3 text-center">
+          <div className="text-sm font-medium">Build mode active</div>
+          <div className="mt-1 text-xs text-white/75">Click the ground to place</div>
+          <div className="mt-1 font-mono text-[10px] text-white/55">R rotate · Esc cancel</div>
         </div>
       )}
 
@@ -180,31 +182,35 @@ export default function BuildingMenu() {
           width: 6px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(0, 0, 0, 0.1);
+          background: rgba(0, 0, 0, 0.15);
           border-radius: 4px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(59, 130, 246, 0.5);
+          background: rgb(var(--accent-subtle) / 0.45);
           border-radius: 4px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(59, 130, 246, 0.7);
-        }
       `}</style>
-    </motion.div>
+    </HudPanel>
   );
 }
 
-// Helper function to get resource icon
-function getResourceIcon(resourceId: string): string {
+function getResourceIcon(resourceId: string): LucideIcon {
   switch (resourceId) {
-    case 'energy': return '⚡';
-    case 'minerals': return '💎';
-    case 'water': return '💧';
-    case 'oxygen': return '🫧';
-    case 'food': return '🌾';
-    case 'colonists': return '👤';
-    case 'research': return '🔬';
-    default: return '📦';
+    case 'energy':
+      return Zap;
+    case 'minerals':
+      return Gem;
+    case 'water':
+      return Droplets;
+    case 'oxygen':
+      return Wind;
+    case 'food':
+      return Wheat;
+    case 'colonists':
+      return Users;
+    case 'research':
+      return Microscope;
+    default:
+      return Package;
   }
-} 
+}

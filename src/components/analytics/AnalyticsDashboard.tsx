@@ -3,7 +3,26 @@
  * Comprehensive visualization of player progress and learning metrics
  */
 
-import React, { useState, useEffect } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import type { LucideIcon } from 'lucide-react';
+import {
+  BarChart3,
+  Target,
+  Clock,
+  Code2,
+  Lightbulb,
+  X,
+  Rocket,
+  Flame,
+  Star,
+  Dumbbell,
+  BookOpen,
+  Calendar,
+  RefreshCw,
+  LineChart,
+} from 'lucide-react';
 import { getAnalytics } from '@/utils/analyticsSystem';
 import { StatsCard } from './StatsCard';
 import { ConceptMasteryChart } from './ConceptMasteryChart';
@@ -12,6 +31,7 @@ import { TimeDistributionChart } from './TimeDistributionChart';
 import { StrengthsWeaknessesPanel } from './StrengthsWeaknessesPanel';
 import { RecommendationsPanel } from './RecommendationsPanel';
 import { CodeMetricsPanel } from './CodeMetricsPanel';
+import { Icon } from '@/components/ui/Icon';
 
 export interface AnalyticsDashboardProps {
   playerId: string;
@@ -21,22 +41,21 @@ export interface AnalyticsDashboardProps {
 type TabType = 'overview' | 'concepts' | 'time' | 'code' | 'recommendations';
 
 export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProps) {
+  void playerId;
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [analytics, setAnalytics] = useState(getAnalytics());
 
   useEffect(() => {
-    // Refresh analytics every 30 seconds
     const interval = setInterval(() => {
       setAnalytics(getAnalytics());
     }, 30000);
-
     return () => clearInterval(interval);
   }, []);
 
   const stats = {
     totalChallenges: analytics.challengesCompleted,
-    totalTime: Math.round(analytics.totalPlayTime / 60000), // minutes
-    averageTime: Math.round(analytics.averageChallengeTime / 60000), // minutes
+    totalTime: Math.round(analytics.totalPlayTime / 60000),
+    averageTime: Math.round(analytics.averageChallengeTime / 60000),
     learningVelocity: analytics.learningVelocity.toFixed(1),
     streak: analytics.streakDays,
     perfectScores: analytics.perfectScores,
@@ -44,83 +63,81 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
     weakConcepts: analytics.weakConcepts.length,
   };
 
-  const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'concepts', label: 'Concept Mastery', icon: '🎯' },
-    { id: 'time', label: 'Time Management', icon: '⏱️' },
-    { id: 'code', label: 'Code Metrics', icon: '💻' },
-    { id: 'recommendations', label: 'Recommendations', icon: '💡' },
+  const tabs: { id: TabType; label: string; icon: LucideIcon }[] = [
+    { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'concepts', label: 'Concept Mastery', icon: Target },
+    { id: 'time', label: 'Time Management', icon: Clock },
+    { id: 'code', label: 'Code Metrics', icon: Code2 },
+    { id: 'recommendations', label: 'Recommendations', icon: Lightbulb },
   ];
 
   return (
-    <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
-      <div className="modal-content max-w-7xl w-full max-h-[90vh] overflow-hidden animate-slide-up">
-        {/* Header */}
-        <div className="bg-accent px-6 py-5 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+      <div className="modal-content animate-slide-up max-h-[90vh] w-full max-w-7xl overflow-hidden">
+        <div className="flex items-center justify-between bg-[rgb(var(--accent))] px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-[var(--radius-sm)] flex items-center justify-center text-2xl">
-              📈
+            <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-white/20 text-white">
+              <Icon icon={LineChart} size={20} />
             </div>
             <div>
               <h2 className="text-h2 text-white">Learning Analytics</h2>
-              <p className="text-white/80 text-body">Track your progress and insights</p>
+              <p className="text-body text-white/80">Track your progress and insights</p>
             </div>
           </div>
           {onClose && (
             <button
+              type="button"
               onClick={onClose}
-              className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-[var(--radius-sm)] flex items-center justify-center text-white transition-colors focus-ring"
+              className="focus-ring flex h-10 w-10 items-center justify-center rounded-[var(--radius-sm)] bg-white/20 text-white transition-colors hover:bg-white/30"
               aria-label="Close dashboard"
             >
-              ✕
+              <Icon icon={X} size={18} />
             </button>
           )}
         </div>
 
-        {/* Tab Navigation */}
-        <div className="bg-elevated/50 border-b border-[rgb(var(--border-subtle))] px-6">
-          <div className="flex gap-1 -mb-px">
+        <div className="border-b border-[rgb(var(--border-subtle))] bg-elevated/50 px-6">
+          <div className="-mb-px flex gap-1 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 text-body font-medium transition-all focus-ring rounded-t-[var(--radius-sm)] ${
+                className={`focus-ring inline-flex items-center gap-2 whitespace-nowrap rounded-t-[var(--radius-sm)] px-4 py-3 text-body font-medium transition-all ${
                   activeTab === tab.id
-                    ? 'text-accent border-b-2 border-accent bg-surface'
+                    ? 'border-b-2 border-accent bg-surface text-accent'
                     : 'text-text-muted hover:text-text-secondary'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <Icon icon={tab.icon} size={15} />
                 {tab.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-160px)] p-6 bg-surface">
+        <div className="max-h-[calc(90vh-160px)] overflow-y-auto bg-surface p-6">
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              {/* Key Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <StatsCard
                   title="Challenges Completed"
                   value={stats.totalChallenges}
-                  icon="🎯"
-                  color="purple"
+                  icon={Target}
+                  color="blue"
                   subtitle="Total completed"
                 />
                 <StatsCard
                   title="Total Learning Time"
                   value={`${stats.totalTime}m`}
-                  icon="⏱️"
+                  icon={Clock}
                   color="blue"
                   subtitle="Time invested"
                 />
                 <StatsCard
                   title="Learning Velocity"
                   value={`${stats.learningVelocity}/hr`}
-                  icon="🚀"
+                  icon={Rocket}
                   color="green"
                   trend={Number(stats.learningVelocity) > 2 ? 'up' : 'stable'}
                   subtitle="Challenges per hour"
@@ -128,45 +145,42 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
                 <StatsCard
                   title="Current Streak"
                   value={`${stats.streak} days`}
-                  icon="🔥"
+                  icon={Flame}
                   color="orange"
                   trend={stats.streak >= 7 ? 'up' : 'stable'}
-                  subtitle="Keep it going!"
+                  subtitle="Keep it going"
                 />
               </div>
 
-              {/* Secondary Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <StatsCard
                   title="Perfect Scores"
                   value={stats.perfectScores}
-                  icon="⭐"
+                  icon={Star}
                   color="yellow"
                   subtitle="100% completions"
                 />
                 <StatsCard
                   title="Strong Concepts"
                   value={stats.strongConcepts}
-                  icon="💪"
+                  icon={Dumbbell}
                   color="green"
                   subtitle="Mastered topics"
                 />
                 <StatsCard
                   title="Areas to Improve"
                   value={stats.weakConcepts}
-                  icon="📚"
+                  icon={BookOpen}
                   color="red"
                   subtitle="Practice recommended"
                 />
               </div>
 
-              {/* Charts */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <LearningVelocityChart analytics={analytics} />
                 <ConceptMasteryChart analytics={analytics} />
               </div>
 
-              {/* Strengths & Weaknesses */}
               <StrengthsWeaknessesPanel analytics={analytics} />
             </div>
           )}
@@ -180,19 +194,19 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
 
           {activeTab === 'time' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <StatsCard
                   title="Average Challenge Time"
                   value={`${stats.averageTime}m`}
-                  icon="⏰"
+                  icon={Clock}
                   color="blue"
                   subtitle="Per challenge"
                 />
                 <StatsCard
                   title="Total Sessions"
                   value={analytics.challengesCompleted}
-                  icon="📅"
-                  color="purple"
+                  icon={Calendar}
+                  color="blue"
                   subtitle="Learning sessions"
                 />
               </div>
@@ -200,25 +214,20 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
             </div>
           )}
 
-          {activeTab === 'code' && (
-            <CodeMetricsPanel analytics={analytics} />
-          )}
+          {activeTab === 'code' && <CodeMetricsPanel analytics={analytics} />}
 
-          {activeTab === 'recommendations' && (
-            <RecommendationsPanel analytics={analytics} />
-          )}
+          {activeTab === 'recommendations' && <RecommendationsPanel analytics={analytics} />}
         </div>
 
-        {/* Footer */}
-        <div className="bg-elevated/50 border-t border-[rgb(var(--border-subtle))] px-6 py-4 flex items-center justify-between">
-          <p className="text-small">
-            Last updated: {new Date().toLocaleTimeString()}
-          </p>
+        <div className="flex items-center justify-between border-t border-[rgb(var(--border-subtle))] bg-elevated/50 px-6 py-4">
+          <p className="text-small">Last updated: {new Date().toLocaleTimeString()}</p>
           <button
+            type="button"
             onClick={() => setAnalytics(getAnalytics())}
-            className="btn-primary focus-ring"
+            className="btn-primary focus-ring inline-flex items-center gap-2"
           >
-            🔄 Refresh Data
+            <Icon icon={RefreshCw} size={14} />
+            Refresh data
           </button>
         </div>
       </div>

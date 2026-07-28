@@ -3,8 +3,10 @@
  * Beautiful reveal animation for unlocking achievements
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
+import { Icon } from '@/components/ui/Icon';
+import { getAchievementIcon } from '@/components/ui/achievementIcons';
 
 export interface Achievement {
   id: string;
@@ -24,36 +26,32 @@ export interface AchievementUnlockProps {
 
 const rarityConfig = {
   common: {
-    gradient: 'from-gray-600 to-gray-800',
-    border: 'border-gray-500',
-    glow: 'shadow-gray-500/50',
-    particles: '#9CA3AF',
+    gradient: 'from-zinc-600 to-zinc-800',
+    border: 'border-zinc-500',
+    glow: 'shadow-zinc-500/40',
+    particles: '#A1A1AA',
     label: 'Common',
-    emoji: '⚪',
   },
   rare: {
-    gradient: 'from-blue-600 to-blue-800',
-    border: 'border-blue-500',
-    glow: 'shadow-blue-500/50',
+    gradient: 'from-[rgb(var(--accent))] to-[rgb(30_58_138)]',
+    border: 'border-[rgb(var(--accent-subtle))]',
+    glow: 'shadow-blue-500/40',
     particles: '#3B82F6',
     label: 'Rare',
-    emoji: '🔵',
   },
   epic: {
-    gradient: 'from-purple-600 to-purple-800',
-    border: 'border-purple-500',
-    glow: 'shadow-purple-500/50',
-    particles: '#A855F7',
+    gradient: 'from-[rgb(var(--energy))] to-[rgb(180_83_9)]',
+    border: 'border-[rgb(var(--energy))]',
+    glow: 'shadow-amber-500/40',
+    particles: '#FBBF24',
     label: 'Epic',
-    emoji: '🟣',
   },
   legendary: {
-    gradient: 'from-yellow-600 to-orange-600',
-    border: 'border-yellow-500',
-    glow: 'shadow-yellow-500/50',
-    particles: '#EAB308',
+    gradient: 'from-[rgb(var(--success))] to-[rgb(5_150_105)]',
+    border: 'border-[rgb(var(--success))]',
+    glow: 'shadow-emerald-500/40',
+    particles: '#10B981',
     label: 'Legendary',
-    emoji: '🟡',
   },
 };
 
@@ -159,28 +157,30 @@ export function AchievementUnlock({
           {/* Content */}
           <div className="relative p-8">
             {/* Header */}
-            <div className="text-center mb-6">
-              <p className="text-gray-400 text-sm uppercase tracking-wider mb-2">
-                Achievement Unlocked!
+            <div className="mb-6 text-center">
+              <p className="mb-2 text-sm uppercase tracking-wider text-[rgb(var(--text-muted))]">
+                Achievement unlocked
               </p>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span>{config.emoji}</span>
-                <span className={`text-sm font-bold ${config.border} px-3 py-1 rounded-full`}>
+              <div className="mb-2 flex items-center justify-center">
+                <span
+                  className={`rounded-full border px-3 py-1 text-sm font-semibold text-white ${config.border}`}
+                >
                   {config.label}
                 </span>
-                <span>{config.emoji}</span>
               </div>
             </div>
 
-            {/* Icon */}
-            <div className="flex justify-center mb-6">
+            <div className="mb-6 flex justify-center">
               <div
-                className={`relative w-32 h-32 bg-gradient-to-br ${config.gradient} rounded-full flex items-center justify-center text-6xl animate-bounce border-4 ${config.border} ${config.glow}`}
+                className={`relative flex h-32 w-32 animate-bounce items-center justify-center rounded-full border-4 bg-gradient-to-br text-white ${config.gradient} ${config.border} ${config.glow}`}
               >
-                {achievement.icon}
-                {/* Rotating ring */}
+                <Icon
+                  icon={getAchievementIcon(achievement.id, achievement.icon)}
+                  size={48}
+                  strokeWidth={1.5}
+                />
                 <div
-                  className={`absolute inset-0 border-4 ${config.border} rounded-full animate-spin`}
+                  className={`absolute inset-0 animate-spin rounded-full border-4 ${config.border}`}
                   style={{ animationDuration: '3s' }}
                 />
               </div>

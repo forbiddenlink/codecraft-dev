@@ -1,27 +1,28 @@
 /**
  * Stats Card Component
- * Displays individual statistics with clean, minimal styling
+ * Displays individual statistics with Lucide icons
  */
 
-import React from 'react';
+import type { LucideIcon } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Icon } from '@/components/ui/Icon';
 
 export interface StatsCardProps {
   title: string;
   value: string | number;
-  icon: string;
+  icon: LucideIcon;
   color: 'purple' | 'blue' | 'green' | 'orange' | 'red' | 'yellow';
   subtitle?: string;
   trend?: 'up' | 'down' | 'stable';
 }
 
-// Simplified color mapping - just accent colors for the value
 const colorClasses = {
-  purple: 'text-violet-400',
-  blue: 'text-blue-400',
-  green: 'text-emerald-400',
-  orange: 'text-orange-400',
-  red: 'text-red-400',
-  yellow: 'text-amber-400',
+  purple: 'text-[rgb(var(--accent-subtle))]',
+  blue: 'text-[rgb(var(--accent-subtle))]',
+  green: 'text-[rgb(var(--success))]',
+  orange: 'text-[rgb(var(--energy))]',
+  red: 'text-[rgb(var(--error))]',
+  yellow: 'text-[rgb(var(--energy))]',
 };
 
 export function StatsCard({ title, value, icon, color, subtitle, trend }: StatsCardProps) {
@@ -29,21 +30,29 @@ export function StatsCard({ title, value, icon, color, subtitle, trend }: StatsC
 
   return (
     <div className="card card-interactive hover:scale-[1.02]">
-      <div className="flex items-start justify-between mb-3">
+      <div className="mb-3 flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-small mb-1">{title}</p>
+          <p className="mb-1 text-small">{title}</p>
           <div className="flex items-baseline gap-2">
             <p className={`text-2xl font-semibold ${valueColor}`}>{value}</p>
             {trend && (
               <span className="text-sm">
-                {trend === 'up' && <span className="text-success">↗</span>}
-                {trend === 'down' && <span className="text-error">↘</span>}
-                {trend === 'stable' && <span className="text-text-muted">→</span>}
+                {trend === 'up' && (
+                  <Icon icon={TrendingUp} size={14} className="text-[rgb(var(--success))]" />
+                )}
+                {trend === 'down' && (
+                  <Icon icon={TrendingDown} size={14} className="text-[rgb(var(--error))]" />
+                )}
+                {trend === 'stable' && (
+                  <Icon icon={Minus} size={14} className="text-[rgb(var(--text-muted))]" />
+                )}
               </span>
             )}
           </div>
         </div>
-        <div className="text-3xl opacity-70">{icon}</div>
+        <span className={`opacity-80 ${valueColor}`}>
+          <Icon icon={icon} size={22} />
+        </span>
       </div>
       {subtitle && <p className="text-small">{subtitle}</p>}
     </div>

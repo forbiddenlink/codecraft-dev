@@ -1,52 +1,32 @@
 'use client';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { buildingTemplates } from '@/data/buildingTemplates';
-import { 
-  demolishBuilding, 
-  setBuildingStatus, 
-  updateBuildingEfficiency 
+import {
+  demolishBuilding,
+  setBuildingStatus,
+  updateBuildingEfficiency,
 } from '@/store/slices/buildingSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import { setLanguage, setCode } from '@/store/slices/editorSlice';
 import { Html } from '@react-three/drei';
+import type { LucideIcon } from 'lucide-react';
+import { Icon } from '@/components/ui/Icon';
+import {
+  RESOURCE_COLORS,
+  RESOURCE_ICONS,
+} from '@/components/ui/resourceMeta';
 
-// Resource metadata for display
-const RESOURCE_METADATA = {
-  energy: {
-    name: 'Energy',
-    color: '#FFD700',
-    icon: '⚡'
-  },
-  minerals: {
-    name: 'Minerals',
-    color: '#A0522D',
-    icon: '💎'
-  },
-  water: {
-    name: 'Water',
-    color: '#4169E1',
-    icon: '💧'
-  },
-  oxygen: {
-    name: 'Oxygen',
-    color: '#87CEEB',
-    icon: '🫧'
-  },
-  food: {
-    name: 'Food',
-    color: '#32CD32',
-    icon: '🌾'
-  },
-  colonists: {
-    name: 'Colonists',
-    color: '#FF6347',
-    icon: '👤'
-  },
-  research: {
-    name: 'Research',
-    color: '#9370DB',
-    icon: '🔬'
-  }
+const RESOURCE_METADATA: Record<
+  string,
+  { name: string; color: string; icon: LucideIcon }
+> = {
+  energy: { name: 'Energy', color: RESOURCE_COLORS.energy, icon: RESOURCE_ICONS.energy },
+  minerals: { name: 'Minerals', color: RESOURCE_COLORS.minerals, icon: RESOURCE_ICONS.minerals },
+  water: { name: 'Water', color: RESOURCE_COLORS.water, icon: RESOURCE_ICONS.water },
+  oxygen: { name: 'Oxygen', color: RESOURCE_COLORS.oxygen, icon: RESOURCE_ICONS.oxygen },
+  food: { name: 'Food', color: RESOURCE_COLORS.food, icon: RESOURCE_ICONS.food },
+  colonists: { name: 'Colonists', color: RESOURCE_COLORS.colonists, icon: RESOURCE_ICONS.colonists },
+  research: { name: 'Research', color: RESOURCE_COLORS.research, icon: RESOURCE_ICONS.research },
 };
 
 interface BuildingDetailsPanelProps {
@@ -136,15 +116,18 @@ export default function BuildingDetailsPanel({
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{template.icon}</span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
+            <Icon icon={RESOURCE_ICONS.energy} size={18} />
+          </span>
           <h2 className="text-h3">{template.name}</h2>
         </div>
         <button
+          type="button"
           onClick={onClose}
           className="btn-icon focus-ring"
           aria-label="Close"
         >
-          ✕
+          ×
         </button>
       </div>
 
@@ -193,7 +176,7 @@ export default function BuildingDetailsPanel({
                   key={`${effect.type}-${effect.target}-${index}`}
                   className="flex items-center gap-2 bg-elevated p-2 rounded-md text-body"
                 >
-                  <span>{resourceMeta.icon}</span>
+                  <Icon icon={resourceMeta.icon} size={14} style={{ color: resourceMeta.color }} />
                   <span>
                     {effect.type === 'resource' && effect.value > 0 && '+'}
                     {effect.value}

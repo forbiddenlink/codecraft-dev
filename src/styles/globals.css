@@ -17,10 +17,11 @@
   --text-secondary: 161 161 170; /* #a1a1aa - Body text */
   --text-muted: 113 113 122;     /* #71717a - Hints, captions */
 
-  /* Accent (Violet) */
-  --accent: 139 92 246;          /* #8b5cf6 - violet-500 */
-  --accent-hover: 124 58 237;    /* #7c3aed - violet-600 */
-  --accent-subtle: 139 92 246;   /* Used with /15 opacity */
+  /* Accent — Cosmic Blue (design system), not violet */
+  --accent: 30 58 138;           /* #1E3A8A - cosmic blue */
+  --accent-hover: 37 99 235;     /* #2563EB - brighter interactive */
+  --accent-subtle: 59 130 246;   /* #3B82F6 - info/highlight tint */
+  --energy: 251 191 36;          /* #FBBF24 - energy yellow */
 
   /* Semantic Colors */
   --success: 34 197 94;          /* #22c55e - green-500 */
@@ -67,8 +68,8 @@
   --color-info: rgb(var(--info));
 
   /* Typography */
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-sans: var(--font-space-grotesk), "Segoe UI", sans-serif;
+  --font-mono: var(--font-jetbrains-mono), "Fira Code", monospace;
 
   /* Spacing (8px base) */
   --spacing-panel: 24px;
