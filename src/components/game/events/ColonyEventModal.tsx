@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { COLONY_EVENTS, type ColonyEvent } from '@/data/colonyEvents';
 import { markEventResolved, clearColonyEvent } from '@/store/slices/eventSlice';
 import { addResources, consumeResources } from '@/store/slices/resourceSlice';
+import { gainXP } from '@/store/slices/userSlice';
 import { Icon } from '@/components/ui/Icon';
 import { getColonyEventIcon } from '@/components/ui/eventIcons';
 
@@ -19,14 +20,21 @@ function applyEffects(
   dispatch: ReturnType<typeof useAppDispatch>,
   effects?: EffectBag,
 ) {
-  if (!effects?.resources) return;
-  Object.entries(effects.resources).forEach(([resource, amount]) => {
-    if (amount > 0) {
-      dispatch(addResources({ type: resource as any, amount }));
-    } else if (amount < 0) {
-      dispatch(consumeResources({ type: resource as any, amount: Math.abs(amount) }));
-    }
-  });
+  if (!effects) return;
+
+  if (effects.xp && effects.xp > 0) {
+    dispatch(gainXP(effects.xp));
+  }
+
+  if (effects.resources) {
+    Object.entries(effects.resources).forEach(([resource, amount]) => {
+      if (amount > 0) {
+        dispatch(addResources({ type: resource as any, amount }));
+      } else if (amount < 0) {
+        dispatch(consumeResources({ type: resource as any, amount: Math.abs(amount) }));
+      }
+    });
+  }
 }
 
 function typeStyles(type: ColonyEvent['type']) {
