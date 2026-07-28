@@ -5,8 +5,15 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { getRandomEvent, shouldTriggerEvent } from '@/data/colonyEvents';
 import { triggerColonyEvent, forceColonyEvent } from '@/store/slices/eventSlice';
 
-const CHECK_INTERVAL_MS = 45_000;
-const TRIGGER_CHANCE = 0.12;
+/** How often we consider rolling for an event once eligible. */
+const CHECK_INTERVAL_MS = 60_000;
+/** Chance to spawn when a check fires. */
+const TRIGGER_CHANCE = 0.1;
+/**
+ * After the player finishes the first challenge + places a building,
+ * wait this long before the first roll so the core loop stays clear.
+ */
+const FIRST_EVENT_GRACE_MS = 90_000;
 
 /**
  * Periodically rolls for a colony event when the player is past onboarding
@@ -18,7 +25,9 @@ export function useColonyEvents() {
   const tutorialActive = useAppSelector((state) => state.tutorial.isActive);
   const playerLevel = useAppSelector((state) => state.user.progress.level);
   const placedBuildings = useAppSelector((state) => state.building.placedBuildings);
+  const completedChallenges = useAppSelector((state) => state.challenges.completed);
   const lastCheckRef = useRef(0);
+  const eligibleSinceRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -49,7 +58,20 @@ export function useColonyEvents() {
     const id = window.setInterval(() => {
       if (activeEventId || tutorialActive) return;
 
+      // Keep the first-run challenge → place path free of random interruptions.
+      const coreLoopReady =
+        completedChallenges.length > 0 && placedBuildings.length > 0;
+      if (!coreLoopReady) {
+        eligibleSinceRef.current = null;
+        return;
+      }
+
       const now = Date.now();
+      if (eligibleSinceRef.current === null) {
+        eligibleSinceRef.current = now;
+      }
+      if (now - eligibleSinceRef.current < FIRST_EVENT_GRACE_MS) return;
+
       if (now - lastCheckRef.current < CHECK_INTERVAL_MS) return;
       lastCheckRef.current = now;
 
@@ -67,5 +89,12 @@ export function useColonyEvents() {
     }, 5_000);
 
     return () => window.clearInterval(id);
-  }, [activeEventId, tutorialActive, playerLevel, placedBuildings, dispatch]);
+  }, [
+    activeEventId,
+    tutorialActive,
+    playerLevel,
+    placedBuildings,
+    completedChallenges,
+    dispatch,
+  ]);
 }
