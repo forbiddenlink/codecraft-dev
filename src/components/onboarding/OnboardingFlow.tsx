@@ -3,7 +3,9 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppDispatch } from '@/store/hooks';
 import { startTutorial } from '@/store/slices/tutorialSlice';
+import { setUser } from '@/store/slices/userSlice';
 import { WELCOME_TUTORIAL } from '@/data/tutorialData';
+import { trackEvent, identifyUser } from '@/utils/analytics';
 
 interface OnboardingStep {
   id: string;
@@ -77,11 +79,14 @@ export default function OnboardingFlow() {
 
   const currentStepData = steps[currentStep];
 
+  const [nameError, setNameError] = useState('');
+
   const handleNext = () => {
     if (currentStep === 1 && !username.trim()) {
-      alert('Please enter your name, Commander!');
+      setNameError('Please enter your name, Commander.');
       return;
     }
+    setNameError('');
 
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -91,27 +96,28 @@ export default function OnboardingFlow() {
   };
 
   const handleSkip = () => {
-    if (confirm('Are you sure you want to skip the introduction? You can always replay it later.')) {
-      completeOnboarding();
-    }
+    completeOnboarding();
   };
 
   const completeOnboarding = () => {
-    // Save username if provided
-    if (username.trim()) {
-      localStorage.setItem('codecraft_username', username);
-    }
-
-    // Mark onboarding as complete
+    const name = username.trim() || 'Commander';
+    localStorage.setItem('codecraft_username', name);
     localStorage.setItem('codecraft_onboarding_complete', 'true');
 
-    // Start the welcome tutorial
+    const userId =
+      localStorage.getItem('codecraft_user_id') ||
+      `player_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem('codecraft_user_id', userId);
+
+    dispatch(setUser({ id: userId, username: name }));
+    void identifyUser(userId, { username: name });
+    void trackEvent({ name: 'onboarding_completed', properties: { username: name } });
+
     dispatch(startTutorial({
       tutorialId: WELCOME_TUTORIAL.id,
       steps: WELCOME_TUTORIAL.steps
     }));
 
-    // Hide onboarding
     setIsVisible(false);
   };
 
@@ -223,12 +229,20 @@ export default function OnboardingFlow() {
                 <input
                   type="text"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (nameError) setNameError('');
+                  }}
                   placeholder="Enter your commander name..."
                   className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-blue-500 transition-colors text-center text-xl"
                   maxLength={20}
                   autoFocus
                 />
+                {nameError ? (
+                  <p className="mt-2 text-center text-sm text-red-300" role="alert">
+                    {nameError}
+                  </p>
+                ) : null}
               </motion.div>
             )}
 

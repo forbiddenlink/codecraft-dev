@@ -1,82 +1,31 @@
 import challengeReducer, {
-  setAvailableChallenges,
   setCurrentChallenge,
   startChallenge,
   completeChallenge,
+  hydrateCompletedChallenges,
   resetChallenges,
-  Challenge,
 } from '../slices/challengeSlice';
 
 describe('challengeSlice', () => {
   const initialState = {
-    availableChallenges: [],
     currentIndex: 0,
     completed: [],
     inProgress: null,
     lastCompletedAt: null,
   };
 
-  const mockChallenges: Challenge[] = [
-    {
-      id: 'challenge-1',
-      title: 'Build a Header',
-      description: 'Create an HTML header',
-      type: 'coding',
-      requirements: {
-        code: {
-          language: 'html',
-          template: '<header></header>',
-          tests: [{ description: 'Has header element', test: 'document.querySelector("header")' }],
-        },
-      },
-      rewards: { xp: 100 },
-    },
-    {
-      id: 'challenge-2',
-      title: 'Style the Header',
-      description: 'Add CSS styling',
-      type: 'coding',
-      requirements: {
-        code: {
-          language: 'css',
-          template: 'header { }',
-          tests: [],
-        },
-      },
-      rewards: { xp: 150 },
-    },
-  ];
-
   it('should return the initial state', () => {
     expect(challengeReducer(undefined, { type: 'unknown' })).toEqual(initialState);
   });
 
-  describe('setAvailableChallenges', () => {
-    it('should set available challenges', () => {
-      const actual = challengeReducer(initialState, setAvailableChallenges(mockChallenges));
-      expect(actual.availableChallenges).toHaveLength(2);
-      expect(actual.availableChallenges[0].id).toBe('challenge-1');
-    });
-  });
-
   describe('setCurrentChallenge', () => {
-    const stateWithChallenges = {
-      ...initialState,
-      availableChallenges: mockChallenges,
-    };
-
     it('should set current challenge index', () => {
-      const actual = challengeReducer(stateWithChallenges, setCurrentChallenge(1));
+      const actual = challengeReducer(initialState, setCurrentChallenge(1));
       expect(actual.currentIndex).toBe(1);
     });
 
     it('should not set invalid index (negative)', () => {
-      const actual = challengeReducer(stateWithChallenges, setCurrentChallenge(-1));
-      expect(actual.currentIndex).toBe(0);
-    });
-
-    it('should not set invalid index (out of bounds)', () => {
-      const actual = challengeReducer(stateWithChallenges, setCurrentChallenge(10));
+      const actual = challengeReducer(initialState, setCurrentChallenge(-1));
       expect(actual.currentIndex).toBe(0);
     });
   });
@@ -114,23 +63,31 @@ describe('challengeSlice', () => {
     });
   });
 
+  describe('hydrateCompletedChallenges', () => {
+    it('should merge ids without duplicates', () => {
+      const state = {
+        ...initialState,
+        completed: ['intro-1'],
+      };
+      const actual = challengeReducer(
+        state,
+        hydrateCompletedChallenges(['intro-1', 'intro-2']),
+      );
+      expect(actual.completed).toEqual(['intro-1', 'intro-2']);
+    });
+  });
+
   describe('resetChallenges', () => {
     it('should reset all progress', () => {
       const progressState = {
         ...initialState,
-        availableChallenges: mockChallenges,
-        currentIndex: 1,
         completed: ['challenge-1'],
         inProgress: 'challenge-2',
-        lastCompletedAt: Date.now(),
+        currentIndex: 2,
+        lastCompletedAt: 123,
       };
       const actual = challengeReducer(progressState, resetChallenges());
-      expect(actual.completed).toEqual([]);
-      expect(actual.inProgress).toBeNull();
-      expect(actual.currentIndex).toBe(0);
-      expect(actual.lastCompletedAt).toBeNull();
-      // Should preserve available challenges
-      expect(actual.availableChallenges).toHaveLength(2);
+      expect(actual).toEqual(initialState);
     });
   });
 });
