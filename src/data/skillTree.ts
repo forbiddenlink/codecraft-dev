@@ -39,7 +39,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'html-basics',
     name: 'HTML Fundamentals',
     description: 'Master the basics of HTML structure',
-    icon: '📝',
+    icon: 'file-code',
     category: 'html',
     requirements: {
       level: 1,
@@ -61,7 +61,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'semantic-html',
     name: 'Semantic Structure',
     description: 'Use meaningful HTML elements',
-    icon: '🏗️',
+    icon: 'building-2',
     category: 'html',
     requirements: {
       level: 3,
@@ -84,7 +84,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'forms-master',
     name: 'Form Master',
     description: 'Expert in creating user-friendly forms',
-    icon: '📋',
+    icon: 'sparkles',
     category: 'html',
     requirements: {
       level: 5,
@@ -108,7 +108,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'html-architect',
     name: 'HTML Architect',
     description: 'Design complex, scalable structures',
-    icon: '🏛️',
+    icon: 'landmark',
     category: 'html',
     requirements: {
       level: 8,
@@ -134,7 +134,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'css-basics',
     name: 'CSS Fundamentals',
     description: 'Learn the art of styling',
-    icon: '🎨',
+    icon: 'palette',
     category: 'css',
     requirements: {
       level: 2,
@@ -156,7 +156,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'layout-master',
     name: 'Layout Master',
     description: 'Master Grid and Flexbox',
-    icon: '📐',
+    icon: 'sparkles',
     category: 'css',
     requirements: {
       level: 4,
@@ -179,7 +179,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'animation-wizard',
     name: 'Animation Wizard',
     description: 'Bring designs to life with animations',
-    icon: '✨',
+    icon: 'sparkles',
     category: 'css',
     requirements: {
       level: 6,
@@ -203,7 +203,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'css-architect',
     name: 'CSS Architect',
     description: 'Design systems and methodologies',
-    icon: '🏰',
+    icon: 'sparkles',
     category: 'css',
     requirements: {
       level: 9,
@@ -230,7 +230,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'js-basics',
     name: 'JavaScript Fundamentals',
     description: 'Bring interactivity to your colony',
-    icon: '⚡',
+    icon: 'zap',
     category: 'javascript',
     requirements: {
       level: 4,
@@ -252,7 +252,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'dom-master',
     name: 'DOM Master',
     description: 'Manipulate the DOM with ease',
-    icon: '🎭',
+    icon: 'sparkles',
     category: 'javascript',
     requirements: {
       level: 6,
@@ -276,7 +276,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'event-specialist',
     name: 'Event Specialist',
     description: 'Handle complex user interactions',
-    icon: '🎯',
+    icon: 'target',
     category: 'javascript',
     requirements: {
       level: 8,
@@ -300,7 +300,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'js-architect',
     name: 'JavaScript Architect',
     description: 'Build complex, scalable applications',
-    icon: '🏗️',
+    icon: 'building-2',
     category: 'javascript',
     requirements: {
       level: 10,
@@ -327,7 +327,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'fast-learner',
     name: 'Fast Learner',
     description: 'Gain experience more quickly',
-    icon: '🚀',
+    icon: 'rocket',
     category: 'general',
     requirements: {
       level: 2,
@@ -348,7 +348,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'efficiency-expert',
     name: 'Efficiency Expert',
     description: 'Optimize resource generation',
-    icon: '⚙️',
+    icon: 'sparkles',
     category: 'resource',
     requirements: {
       level: 5,
@@ -372,7 +372,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'multitasker',
     name: 'Multitasker',
     description: 'Work on multiple challenges simultaneously',
-    icon: '🔄',
+    icon: 'refresh-cw',
     category: 'general',
     requirements: {
       level: 7,
@@ -397,7 +397,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'charismatic',
     name: 'Charismatic Leader',
     description: 'Improve colony morale',
-    icon: '😊',
+    icon: 'sparkles',
     category: 'social',
     requirements: {
       level: 3,
@@ -418,7 +418,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'mentor',
     name: 'Master Mentor',
     description: 'Teach others and learn faster',
-    icon: '👨‍🏫',
+    icon: '‍',
     category: 'social',
     requirements: {
       level: 6,
@@ -441,7 +441,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'diplomat',
     name: 'Galactic Diplomat',
     description: 'Master negotiations and relationships',
-    icon: '🤝',
+    icon: 'sparkles',
     category: 'social',
     requirements: {
       level: 9,
@@ -465,7 +465,7 @@ export const SKILL_TREE: SkillNode[] = [
     id: 'code-master',
     name: 'Code Master',
     description: 'Master of all coding disciplines',
-    icon: '👑',
+    icon: 'crown',
     category: 'general',
     requirements: {
       level: 15,

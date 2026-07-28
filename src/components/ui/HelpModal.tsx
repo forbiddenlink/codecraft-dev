@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleHelp } from '@/store/slices/uiSlice';
 import { startTutorial } from '@/store/slices/tutorialSlice';
 import { WELCOME_TUTORIAL } from '@/data/tutorialData';
+import { getKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Icon } from '@/components/ui/Icon';
 
 const STEPS = [
@@ -113,6 +114,34 @@ export function HelpModal() {
             </li>
           ))}
         </ol>
+
+        <div className="border-t border-white/[0.08] px-4 py-3">
+          <h3 className="mb-2 text-[11px] font-medium uppercase tracking-wide text-[rgb(var(--text-muted))]">
+            Keyboard shortcuts
+          </h3>
+          <div className="space-y-3">
+            {getKeyboardShortcuts().map((group) => (
+              <div key={group.category}>
+                <p className="mb-1 text-xs font-medium text-[rgb(var(--text-secondary))]">
+                  {group.category}
+                </p>
+                <ul className="space-y-1">
+                  {group.shortcuts.map((shortcut) => (
+                    <li
+                      key={`${group.category}-${shortcut.key}`}
+                      className="flex items-center justify-between gap-3 text-xs text-[rgb(var(--text-muted))]"
+                    >
+                      <span>{shortcut.description}</span>
+                      <kbd className="shrink-0 rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[10px]">
+                        {shortcut.key}
+                      </kbd>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="space-y-2 border-t border-white/[0.08] p-4">
           <button

@@ -52,7 +52,7 @@ export function MainMenu() {
         dispatch(openAnalytics());
         dispatch(toggleMainMenu());
       },
-      hotkey: 'A',
+      hotkey: '⌘A',
     },
     {
       id: 'achievements',
@@ -63,7 +63,7 @@ export function MainMenu() {
         dispatch(toggleAchievementProgress());
         dispatch(toggleMainMenu());
       },
-      hotkey: 'H',
+      hotkey: '⌘H',
     },
     {
       id: 'multiplayer',
@@ -74,7 +74,7 @@ export function MainMenu() {
         dispatch(toggleSessionBrowser());
         dispatch(toggleMainMenu());
       },
-      hotkey: 'M',
+      hotkey: '⌘M',
     },
     {
       id: 'create-session',
@@ -85,17 +85,17 @@ export function MainMenu() {
         dispatch(toggleCreateModal());
         dispatch(toggleMainMenu());
       },
-      hotkey: 'C',
+      hotkey: '⌘⇧C',
     },
     {
       id: 'resources',
       icon: Factory,
       label: 'Resource Management',
-      description: 'Manage colony resources',
+      description: 'Track colony resources in the top-right HUD',
       action: () => {
         dispatch(toggleMainMenu());
       },
-      hotkey: 'R',
+      hotkey: '',
     },
     {
       id: 'settings',
@@ -106,7 +106,7 @@ export function MainMenu() {
         dispatch(toggleSettings());
         dispatch(toggleMainMenu());
       },
-      hotkey: 'S',
+      hotkey: '⌘,',
     },
     {
       id: 'help',
@@ -176,9 +176,11 @@ export function MainMenu() {
                       <span className="text-sm font-medium text-[rgb(var(--text-primary))]">
                         {item.label}
                       </span>
-                      <kbd className="rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[10px] text-[rgb(var(--text-muted))]">
-                        {item.hotkey}
-                      </kbd>
+                      {item.hotkey ? (
+                        <kbd className="rounded border border-white/10 bg-black/30 px-1.5 py-0.5 font-mono text-[10px] text-[rgb(var(--text-muted))]">
+                          {item.hotkey}
+                        </kbd>
+                      ) : null}
                     </span>
                     <span className="block text-xs text-[rgb(var(--text-muted))]">
                       {item.description}

@@ -106,8 +106,7 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
           }}
         >
           <div className="flex flex-col items-center gap-1">
-            <div className="flex items-center gap-1">
-              <span>{template.icon}</span>
+            <div className="flex items-center gap-1.5 font-medium tracking-wide">
               <span>{template.name}</span>
             </div>
             {building.status === 'construction' && (
@@ -118,27 +117,27 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
             {building.status === 'active' && (
               <div className="flex flex-wrap gap-2 justify-center">
                 {building.effects.map((effect, index) => {
-                  // Only show effects for resources that exist in storage
                   if (!effect.target || !(effect.target in resources)) return null;
-                  
-                  const resourceIcons: Record<string, string> = {
-                    energy: '⚡',
-                    minerals: '💎',
-                    water: '💧',
-                    food: '🌾'
+
+                  const resourceLabels: Record<string, string> = {
+                    energy: 'NRG',
+                    minerals: 'MIN',
+                    water: 'H2O',
+                    food: 'FOOD',
                   };
-                  const resourceIcon = resourceIcons[effect.target];
-                  if (!resourceIcon) return null;
+                  const resourceLabel = resourceLabels[effect.target];
+                  if (!resourceLabel) return null;
 
                   return (
-                    <div 
+                    <div
                       key={`${effect.type}-${effect.target}-${index}`}
                       className="flex items-center gap-1 text-sm"
                     >
                       {effect.type === 'resource' && effect.value > 0 && '+'}
                       {effect.value}
                       {effect.type === 'efficiency' && 'x '}
-                      {resourceIcon}
+                      {' '}
+                      {resourceLabel}
                     </div>
                   );
                 })}
