@@ -3,45 +3,45 @@
  * Provides tools for measuring and monitoring 3D scene performance
  */
 
-import type { WebGLRenderer } from 'three';
+import type { WebGLRenderer } from 'three'
 
 export interface WebGLMetrics {
-  fps: number;
-  drawCalls: number;
-  triangles: number;
-  textures: number;
-  geometries: number;
-  programs: number;
-  timestamp: number;
+  fps: number
+  drawCalls: number
+  triangles: number
+  textures: number
+  geometries: number
+  programs: number
+  timestamp: number
 }
 
 export interface PerformanceSnapshot {
-  metrics: WebGLMetrics;
-  frameTime: number;
-  memoryUsage?: MemoryInfo;
+  metrics: WebGLMetrics
+  frameTime: number
+  memoryUsage?: MemoryInfo
 }
 
 export interface MemoryInfo {
-  usedJSHeapSize: number;
-  totalJSHeapSize: number;
-  jsHeapSizeLimit: number;
+  usedJSHeapSize: number
+  totalJSHeapSize: number
+  jsHeapSizeLimit: number
 }
 
 export interface PerformanceBaseline {
-  avgFps: number;
-  minFps: number;
-  maxFps: number;
-  avgDrawCalls: number;
-  avgTriangles: number;
-  sampleCount: number;
-  duration: number;
+  avgFps: number
+  minFps: number
+  maxFps: number
+  avgDrawCalls: number
+  avgTriangles: number
+  sampleCount: number
+  duration: number
 }
 
 /**
  * Extracts WebGL metrics from a Three.js renderer
  */
 export function getWebGLMetrics(renderer: WebGLRenderer): WebGLMetrics {
-  const info = renderer.info;
+  const info = renderer.info
   return {
     fps: 0, // FPS must be calculated externally
     drawCalls: info.render?.calls ?? 0,
@@ -50,7 +50,7 @@ export function getWebGLMetrics(renderer: WebGLRenderer): WebGLMetrics {
     geometries: info.memory?.geometries ?? 0,
     programs: info.programs?.length ?? 0,
     timestamp: performance.now(),
-  };
+  }
 }
 
 /**
@@ -58,40 +58,40 @@ export function getWebGLMetrics(renderer: WebGLRenderer): WebGLMetrics {
  */
 export function getMemoryInfo(): MemoryInfo | undefined {
   if (typeof window !== 'undefined' && 'memory' in performance) {
-    const memory = (performance as Performance & { memory?: MemoryInfo }).memory;
+    const memory = (performance as Performance & { memory?: MemoryInfo }).memory
     if (memory) {
       return {
         usedJSHeapSize: memory.usedJSHeapSize,
         totalJSHeapSize: memory.totalJSHeapSize,
         jsHeapSizeLimit: memory.jsHeapSizeLimit,
-      };
+      }
     }
   }
-  return undefined;
+  return undefined
 }
 
 /**
  * Performance monitor class for tracking WebGL metrics over time
  */
 export class PerformanceMonitor {
-  private samples: PerformanceSnapshot[] = [];
-  private lastFrameTime: number = 0;
-  private frameCount: number = 0;
-  private fpsUpdateInterval: number = 1000; // Update FPS every second
-  private lastFpsUpdate: number = 0;
-  private currentFps: number = 0;
-  private isRunning: boolean = false;
-  private onSample?: (snapshot: PerformanceSnapshot) => void;
+  private samples: PerformanceSnapshot[] = []
+  private lastFrameTime: number = 0
+  private frameCount: number = 0
+  private fpsUpdateInterval: number = 1000 // Update FPS every second
+  private lastFpsUpdate: number = 0
+  private currentFps: number = 0
+  private isRunning: boolean = false
+  private onSample?: (snapshot: PerformanceSnapshot) => void
 
   constructor(options?: {
-    fpsUpdateInterval?: number;
-    onSample?: (snapshot: PerformanceSnapshot) => void;
+    fpsUpdateInterval?: number
+    onSample?: (snapshot: PerformanceSnapshot) => void
   }) {
     if (options?.fpsUpdateInterval) {
-      this.fpsUpdateInterval = options.fpsUpdateInterval;
+      this.fpsUpdateInterval = options.fpsUpdateInterval
     }
     if (options?.onSample) {
-      this.onSample = options.onSample;
+      this.onSample = options.onSample
     }
   }
 
@@ -99,106 +99,101 @@ export class PerformanceMonitor {
    * Start monitoring - call this in your animation loop
    */
   start(): void {
-    this.isRunning = true;
-    this.lastFrameTime = performance.now();
-    this.lastFpsUpdate = performance.now();
+    this.isRunning = true
+    this.lastFrameTime = performance.now()
+    this.lastFpsUpdate = performance.now()
   }
 
   /**
    * Stop monitoring
    */
   stop(): void {
-    this.isRunning = false;
+    this.isRunning = false
   }
 
   /**
    * Record a frame - call this at the end of each render
    */
   recordFrame(renderer: WebGLRenderer): PerformanceSnapshot | null {
-    if (!this.isRunning) return null;
+    if (!this.isRunning) return null
 
-    const now = performance.now();
-    const frameTime = now - this.lastFrameTime;
-    this.lastFrameTime = now;
-    this.frameCount++;
+    const now = performance.now()
+    const frameTime = now - this.lastFrameTime
+    this.lastFrameTime = now
+    this.frameCount++
 
     // Update FPS calculation
     if (now - this.lastFpsUpdate >= this.fpsUpdateInterval) {
-      this.currentFps = Math.round(
-        (this.frameCount * 1000) / (now - this.lastFpsUpdate)
-      );
-      this.frameCount = 0;
-      this.lastFpsUpdate = now;
+      this.currentFps = Math.round((this.frameCount * 1000) / (now - this.lastFpsUpdate))
+      this.frameCount = 0
+      this.lastFpsUpdate = now
     }
 
-    const metrics = getWebGLMetrics(renderer);
-    metrics.fps = this.currentFps;
+    const metrics = getWebGLMetrics(renderer)
+    metrics.fps = this.currentFps
 
     const snapshot: PerformanceSnapshot = {
       metrics,
       frameTime,
       memoryUsage: getMemoryInfo(),
-    };
+    }
 
-    this.samples.push(snapshot);
-    this.onSample?.(snapshot);
+    this.samples.push(snapshot)
+    this.onSample?.(snapshot)
 
-    return snapshot;
+    return snapshot
   }
 
   /**
    * Get the baseline from collected samples
    */
   getBaseline(): PerformanceBaseline | null {
-    if (this.samples.length === 0) return null;
+    if (this.samples.length === 0) return null
 
-    const fpsValues = this.samples.map((s) => s.metrics.fps).filter((f) => f > 0);
-    const drawCallValues = this.samples.map((s) => s.metrics.drawCalls);
-    const triangleValues = this.samples.map((s) => s.metrics.triangles);
+    const fpsValues = this.samples.map((s) => s.metrics.fps).filter((f) => f > 0)
+    const drawCallValues = this.samples.map((s) => s.metrics.drawCalls)
+    const triangleValues = this.samples.map((s) => s.metrics.triangles)
 
-    const firstTimestamp = this.samples[0].metrics.timestamp;
-    const lastTimestamp = this.samples[this.samples.length - 1].metrics.timestamp;
+    const firstTimestamp = this.samples[0].metrics.timestamp
+    const lastTimestamp = this.samples[this.samples.length - 1].metrics.timestamp
 
     return {
-      avgFps: fpsValues.length > 0
-        ? Math.round(fpsValues.reduce((a, b) => a + b, 0) / fpsValues.length)
-        : 0,
+      avgFps:
+        fpsValues.length > 0
+          ? Math.round(fpsValues.reduce((a, b) => a + b, 0) / fpsValues.length)
+          : 0,
       minFps: fpsValues.length > 0 ? Math.min(...fpsValues) : 0,
       maxFps: fpsValues.length > 0 ? Math.max(...fpsValues) : 0,
-      avgDrawCalls: Math.round(
-        drawCallValues.reduce((a, b) => a + b, 0) / drawCallValues.length
-      ),
-      avgTriangles: Math.round(
-        triangleValues.reduce((a, b) => a + b, 0) / triangleValues.length
-      ),
+      avgDrawCalls: Math.round(drawCallValues.reduce((a, b) => a + b, 0) / drawCallValues.length),
+      avgTriangles: Math.round(triangleValues.reduce((a, b) => a + b, 0) / triangleValues.length),
       sampleCount: this.samples.length,
       duration: lastTimestamp - firstTimestamp,
-    };
+    }
   }
 
   /**
    * Clear all collected samples
    */
   clear(): void {
-    this.samples = [];
-    this.frameCount = 0;
-    this.currentFps = 0;
+    this.samples = []
+    this.frameCount = 0
+    this.currentFps = 0
   }
 
   /**
    * Get raw samples
    */
   getSamples(): PerformanceSnapshot[] {
-    return [...this.samples];
+    return [...this.samples]
   }
 
   /**
    * Check if performance meets target
    */
   meetsTarget(targetFps: number = 30): boolean {
-    const baseline = this.getBaseline();
-    if (!baseline) return false;
-    return baseline.avgFps >= targetFps;
+    const baseline = this.getBaseline()
+    if (!baseline) return false
+    return baseline.avgFps >= targetFps
   }
 }
 
@@ -213,7 +208,7 @@ export function formatMetrics(metrics: WebGLMetrics): string {
     `Textures: ${metrics.textures}`,
     `Geometries: ${metrics.geometries}`,
     `Programs: ${metrics.programs}`,
-  ].join(' | ');
+  ].join(' | ')
 }
 
 /**
@@ -225,7 +220,7 @@ export function formatBaseline(baseline: PerformanceBaseline): string {
     `  FPS: ${baseline.avgFps} avg (${baseline.minFps}-${baseline.maxFps})`,
     `  Draw calls: ${baseline.avgDrawCalls} avg`,
     `  Triangles: ${baseline.avgTriangles.toLocaleString()} avg`,
-  ].join('\n');
+  ].join('\n')
 }
 
 /**
@@ -247,7 +242,7 @@ export const PERFORMANCE_THRESHOLDS = {
     maxDrawCalls: 50,
     maxTriangles: 50000,
   },
-} as const;
+} as const
 
 /**
  * Determine device tier based on metrics
@@ -257,13 +252,13 @@ export function getDeviceTier(metrics: WebGLMetrics): 'high' | 'medium' | 'low' 
     metrics.fps >= PERFORMANCE_THRESHOLDS.high.minFps &&
     metrics.drawCalls <= PERFORMANCE_THRESHOLDS.high.maxDrawCalls
   ) {
-    return 'high';
+    return 'high'
   }
   if (
     metrics.fps >= PERFORMANCE_THRESHOLDS.medium.minFps &&
     metrics.drawCalls <= PERFORMANCE_THRESHOLDS.medium.maxDrawCalls
   ) {
-    return 'medium';
+    return 'medium'
   }
-  return 'low';
+  return 'low'
 }

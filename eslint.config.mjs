@@ -18,4 +18,4 @@ export default [
   },
   // TODO: Add typescript-eslint when pnpm store is resolved
   // See: https://github.com/vercel/next.js/issues/64409
-];
+]

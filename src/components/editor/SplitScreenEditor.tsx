@@ -1,40 +1,41 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import MonacoEditor from './MonacoEditor';
-import { CodePreview } from './CodePreview';
-import { useAppSelector } from '@/store/hooks';
+import { AnimatePresence, motion } from 'framer-motion'
+import type React from 'react'
+import { useState } from 'react'
+import { useAppSelector } from '@/store/hooks'
+import { CodePreview } from './CodePreview'
+import MonacoEditor from './MonacoEditor'
 
 interface SplitScreenEditorProps {
-  onClose?: () => void;
+  onClose?: () => void
 }
 
 export function SplitScreenEditor({ onClose }: SplitScreenEditorProps) {
-  const [layout, setLayout] = useState<'split' | 'code' | 'preview'>('split');
-  const [splitRatio, setSplitRatio] = useState(50); // Percentage for left panel
+  const [layout, setLayout] = useState<'split' | 'code' | 'preview'>('split')
+  const [splitRatio, setSplitRatio] = useState(50) // Percentage for left panel
 
-  const editorState = useAppSelector((state) => state.editor);
-  const { html, css, javascript } = editorState.code;
+  const editorState = useAppSelector((state) => state.editor)
+  const { html, css, javascript } = editorState.code
 
   const handleDrag = (e: React.MouseEvent) => {
-    const container = e.currentTarget.parentElement;
-    if (!container) return;
+    const container = e.currentTarget.parentElement
+    if (!container) return
 
     const onMouseMove = (moveEvent: MouseEvent) => {
-      const containerRect = container.getBoundingClientRect();
-      const newRatio = ((moveEvent.clientX - containerRect.left) / containerRect.width) * 100;
-      setSplitRatio(Math.max(20, Math.min(80, newRatio))); // Limit between 20-80%
-    };
+      const containerRect = container.getBoundingClientRect()
+      const newRatio = ((moveEvent.clientX - containerRect.left) / containerRect.width) * 100
+      setSplitRatio(Math.max(20, Math.min(80, newRatio))) // Limit between 20-80%
+    }
 
     const onMouseUp = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-  };
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-gray-900 flex flex-col">
@@ -124,12 +125,7 @@ export function SplitScreenEditor({ onClose }: SplitScreenEditorProps) {
               style={{ width: layout === 'split' ? `${100 - splitRatio}%` : '100%' }}
               className="flex flex-col"
             >
-              <CodePreview
-                html={html}
-                css={css}
-                javascript={javascript}
-                isVisible={true}
-              />
+              <CodePreview html={html} css={css} javascript={javascript} isVisible={true} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -151,10 +147,8 @@ export function SplitScreenEditor({ onClose }: SplitScreenEditorProps) {
             <kbd className="px-2 py-1 bg-gray-700 rounded text-xs">Esc</kbd> Close
           </span>
         </div>
-        <div>
-          Ready to code
-        </div>
+        <div>Ready to code</div>
       </div>
     </div>
-  );
+  )
 }

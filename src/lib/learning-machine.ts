@@ -2,43 +2,43 @@
  * XState learning machine for CodeCraft Dev.
  * Models the user's coding challenge progression: idle → challenge → coding → reviewing → complete.
  */
-import { createMachine, assign } from "xstate";
+import { assign, createMachine } from 'xstate'
 
 export interface ChallengeContext {
-  challengeId: string | null;
-  language: string | null;
-  code: string;
-  attempts: number;
-  hints: string[];
-  testResults: TestResult[];
-  timeStarted: number | null;
+  challengeId: string | null
+  language: string | null
+  code: string
+  attempts: number
+  hints: string[]
+  testResults: TestResult[]
+  timeStarted: number | null
 }
 
 export interface TestResult {
-  passed: boolean;
-  testName: string;
-  expected: string;
-  actual: string;
+  passed: boolean
+  testName: string
+  expected: string
+  actual: string
 }
 
 type ChallengeEvent =
-  | { type: "START_CHALLENGE"; challengeId: string; language: string }
-  | { type: "UPDATE_CODE"; code: string }
-  | { type: "REQUEST_HINT"; hint: string }
-  | { type: "RUN_TESTS"; results: TestResult[] }
-  | { type: "SUBMIT" }
-  | { type: "PASS" }
-  | { type: "FAIL" }
-  | { type: "RESET" };
+  | { type: 'START_CHALLENGE'; challengeId: string; language: string }
+  | { type: 'UPDATE_CODE'; code: string }
+  | { type: 'REQUEST_HINT'; hint: string }
+  | { type: 'RUN_TESTS'; results: TestResult[] }
+  | { type: 'SUBMIT' }
+  | { type: 'PASS' }
+  | { type: 'FAIL' }
+  | { type: 'RESET' }
 
 export const learningMachine = createMachine({
-  id: "codecraft",
-  initial: "idle",
+  id: 'codecraft',
+  initial: 'idle',
   types: {} as { context: ChallengeContext; events: ChallengeEvent },
   context: {
     challengeId: null,
     language: null,
-    code: "",
+    code: '',
     attempts: 0,
     hints: [],
     testResults: [],
@@ -48,11 +48,11 @@ export const learningMachine = createMachine({
     idle: {
       on: {
         START_CHALLENGE: {
-          target: "coding",
+          target: 'coding',
           actions: assign(({ event }) => ({
             challengeId: event.challengeId,
             language: event.language,
-            code: "",
+            code: '',
             attempts: 0,
             hints: [],
             testResults: [],
@@ -72,13 +72,13 @@ export const learningMachine = createMachine({
           })),
         },
         RUN_TESTS: {
-          target: "reviewing",
+          target: 'reviewing',
           actions: assign(({ context, event }) => ({
             testResults: event.results,
             attempts: context.attempts + 1,
           })),
         },
-        RESET: "idle",
+        RESET: 'idle',
       },
     },
     reviewing: {
@@ -86,20 +86,20 @@ export const learningMachine = createMachine({
         SUBMIT: [
           {
             guard: ({ context }) => context.testResults.every((r) => r.passed),
-            target: "complete",
+            target: 'complete',
           },
-          { target: "coding" },
+          { target: 'coding' },
         ],
-        RESET: "idle",
+        RESET: 'idle',
       },
     },
     complete: {
-      type: "final",
+      type: 'final',
     },
   },
-});
+})
 
 export function getElapsedSeconds(timeStarted: number | null): number {
-  if (!timeStarted) return 0;
-  return Math.floor((Date.now() - timeStarted) / 1000);
+  if (!timeStarted) return 0
+  return Math.floor((Date.now() - timeStarted) / 1000)
 }

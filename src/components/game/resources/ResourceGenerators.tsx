@@ -1,22 +1,22 @@
-'use client';
-import { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Trail, Html } from '@react-three/drei';
-import { Vector3 } from 'three';
+'use client'
+import { Html, Trail } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useRef } from 'react'
+import { Vector3 } from 'three'
 
 interface ResourceGenerator {
-  id: string;
-  position: [number, number, number];
-  isActive: boolean;
+  id: string
+  position: [number, number, number]
+  isActive: boolean
   resources: Array<{
-    resourceId: string;
-    amount: number;
-  }>;
+    resourceId: string
+    amount: number
+  }>
 }
 
 interface ResourceGeneratorsProps {
-  generators: ResourceGenerator[];
-  showProductionEffects?: boolean;
+  generators: ResourceGenerator[]
+  showProductionEffects?: boolean
 }
 
 const RESOURCE_COLORS: Record<string, string> = {
@@ -24,70 +24,70 @@ const RESOURCE_COLORS: Record<string, string> = {
   minerals: '#3B82F6',
   water: '#1E3A8A',
   food: '#10B981',
-  default: '#F8FAFC'
-};
+  default: '#F8FAFC',
+}
 
 const RESOURCE_ICONS: Record<string, string> = {
   energy: '⚡',
   minerals: '💎',
   water: '💧',
   food: '🌾',
-  default: '📦'
-};
+  default: '📦',
+}
 
 const RESOURCE_NAMES: Record<string, string> = {
   energy: 'Energy',
   minerals: 'Minerals',
   water: 'Water',
   food: 'Food',
-  default: 'Resource'
-};
+  default: 'Resource',
+}
 
-export default function ResourceGenerators({ 
-  generators, 
-  showProductionEffects = true 
+export default function ResourceGenerators({
+  generators,
+  showProductionEffects = true,
 }: ResourceGeneratorsProps) {
-  const particlesRef = useRef<{ [key: string]: Vector3[] }>({});
+  const particlesRef = useRef<{ [key: string]: Vector3[] }>({})
 
   useFrame((state) => {
-    if (!showProductionEffects) return;
+    if (!showProductionEffects) return
 
-    const time = state.clock.getElapsedTime();
+    const time = state.clock.getElapsedTime()
 
     generators.forEach((generator) => {
-      if (!generator.isActive) return;
+      if (!generator.isActive) return
 
       generator.resources.forEach((resource) => {
-        const key = `${generator.id}-${resource.resourceId}`;
+        const key = `${generator.id}-${resource.resourceId}`
         if (!particlesRef.current[key]) {
-          particlesRef.current[key] = [];
+          particlesRef.current[key] = []
         }
 
         if (Math.sin(time * 2) > 0.9) {
-          const startPos = new Vector3(...generator.position);
-          particlesRef.current[key].push(startPos.clone());
+          const startPos = new Vector3(...generator.position)
+          particlesRef.current[key].push(startPos.clone())
         }
 
         particlesRef.current[key] = particlesRef.current[key].filter((particle) => {
-          particle.y += 0.05;
-          particle.x += Math.sin(time + particle.y) * 0.02;
-          particle.z += Math.cos(time + particle.y) * 0.02;
-          return particle.y < generator.position[1] + 5;
-        });
-      });
-    });
-  });
+          particle.y += 0.05
+          particle.x += Math.sin(time + particle.y) * 0.02
+          particle.z += Math.cos(time + particle.y) * 0.02
+          return particle.y < generator.position[1] + 5
+        })
+      })
+    })
+  })
 
   return (
     <group>
       {generators.map((generator) =>
         generator.resources.map((resource) => {
-          const key = `${generator.id}-${resource.resourceId}`;
-          const color = RESOURCE_COLORS[resource.resourceId] || RESOURCE_COLORS.default;
-          const icon = RESOURCE_ICONS[resource.resourceId] || RESOURCE_ICONS.default;
-          const name = RESOURCE_NAMES[resource.resourceId] || RESOURCE_NAMES.default;
+          const key = `${generator.id}-${resource.resourceId}`
+          const color = RESOURCE_COLORS[resource.resourceId] || RESOURCE_COLORS.default
+          const icon = RESOURCE_ICONS[resource.resourceId] || RESOURCE_ICONS.default
+          const name = RESOURCE_NAMES[resource.resourceId] || RESOURCE_NAMES.default
 
-          if (!generator.isActive || !showProductionEffects) return null;
+          if (!generator.isActive || !showProductionEffects) return null
 
           return (
             <group key={key} position={generator.position}>
@@ -139,9 +139,9 @@ export default function ResourceGenerators({
                 </Trail>
               ))}
             </group>
-          );
+          )
         })
       )}
     </group>
-  );
-} 
+  )
+}

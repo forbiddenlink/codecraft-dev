@@ -3,9 +3,9 @@
  * Displays resource status and production rates
  */
 
-import React, { useState, useEffect } from 'react';
-import { getResourceManager } from '@/utils/resourceManagement';
-import type { Resource, ResourceForecast } from '@/utils/resourceManagement';
+import React, { useEffect, useState } from 'react'
+import type { Resource, ResourceForecast } from '@/utils/resourceManagement'
+import { getResourceManager } from '@/utils/resourceManagement'
 
 const resourceIcons: Record<string, string> = {
   energy: '⚡',
@@ -14,7 +14,7 @@ const resourceIcons: Record<string, string> = {
   food: '🍎',
   knowledge: '📚',
   bytes: '💾',
-};
+}
 
 const resourceColors: Record<string, string> = {
   energy: 'from-yellow-500 to-orange-500',
@@ -23,27 +23,27 @@ const resourceColors: Record<string, string> = {
   food: 'from-green-500 to-emerald-500',
   knowledge: 'from-indigo-500 to-violet-500',
   bytes: 'from-gray-500 to-slate-500',
-};
+}
 
 export function ResourcePanel() {
-  const [resources, setResources] = useState<Resource[]>([]);
-  const [forecasts, setForecasts] = useState<ResourceForecast[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [expanded, setExpanded] = useState(false);
+  const [resources, setResources] = useState<Resource[]>([])
+  const [forecasts, setForecasts] = useState<ResourceForecast[]>([])
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [expanded, setExpanded] = useState(false)
 
-  const resourceManager = getResourceManager();
+  const resourceManager = getResourceManager()
 
   useEffect(() => {
-    updateData();
-    const interval = setInterval(updateData, 5000); // Update every 5 seconds
-    return () => clearInterval(interval);
-  }, []);
+    updateData()
+    const interval = setInterval(updateData, 5000) // Update every 5 seconds
+    return () => clearInterval(interval)
+  }, [])
 
   const updateData = () => {
-    setResources(resourceManager.getAllResources());
-    setForecasts(resourceManager.getAllForecasts());
-    setSuggestions(resourceManager.getOptimizationSuggestions());
-  };
+    setResources(resourceManager.getAllResources())
+    setForecasts(resourceManager.getAllForecasts())
+    setSuggestions(resourceManager.getOptimizationSuggestions())
+  }
 
   return (
     <div className="card">
@@ -64,9 +64,9 @@ export function ResourcePanel() {
       {/* Resource Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {resources.map((resource) => {
-          const forecast = forecasts.find((f) => f.resource === resource.type);
-          const percentage = (resource.amount / resource.capacity) * 100;
-          const netRate = resource.productionRate - resource.consumptionRate;
+          const forecast = forecasts.find((f) => f.resource === resource.type)
+          const percentage = (resource.amount / resource.capacity) * 100
+          const netRate = resource.productionRate - resource.consumptionRate
 
           return (
             <div
@@ -76,9 +76,7 @@ export function ResourcePanel() {
               {/* Icon & Name */}
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xl">{resourceIcons[resource.type]}</span>
-                <span className="text-body font-medium capitalize">
-                  {resource.type}
-                </span>
+                <span className="text-body font-medium capitalize">{resource.type}</span>
               </div>
 
               {/* Amount */}
@@ -109,7 +107,7 @@ export function ResourcePanel() {
                 {!forecast?.isOptimal && <span className="text-warning">⚠️</span>}
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -190,5 +188,5 @@ export function ResourcePanel() {
         </div>
       )}
     </div>
-  );
+  )
 }

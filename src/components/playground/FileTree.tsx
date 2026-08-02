@@ -1,26 +1,26 @@
 // File: /src/components/playground/FileTree.tsx
-'use client';
+'use client'
 
-import { useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useState } from 'react'
 
 export interface FileNode {
-  name: string;
-  type: 'file' | 'directory';
-  path: string;
-  children?: FileNode[];
-  content?: string;
-  language?: string;
+  name: string
+  type: 'file' | 'directory'
+  path: string
+  children?: FileNode[]
+  content?: string
+  language?: string
 }
 
 interface FileTreeProps {
-  files: FileNode[];
-  selectedFile: string | null;
-  onSelectFile: (path: string) => void;
-  onCreateFile?: (parentPath: string, name: string, type: 'file' | 'directory') => void;
-  onDeleteFile?: (path: string) => void;
-  onRenameFile?: (path: string, newName: string) => void;
-  className?: string;
+  files: FileNode[]
+  selectedFile: string | null
+  onSelectFile: (path: string) => void
+  onCreateFile?: (parentPath: string, name: string, type: 'file' | 'directory') => void
+  onDeleteFile?: (path: string) => void
+  onRenameFile?: (path: string, newName: string) => void
+  className?: string
 }
 
 // Icon components
@@ -40,11 +40,9 @@ function FolderIcon({ isOpen }: { isOpen: boolean }) {
       ) : (
         <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
       )}
-      {isOpen && (
-        <path d="M2 9h14v5a2 2 0 01-2 2H4a2 2 0 01-2-2V9z" />
-      )}
+      {isOpen && <path d="M2 9h14v5a2 2 0 01-2 2H4a2 2 0 01-2-2V9z" />}
     </svg>
-  );
+  )
 }
 
 function FileIcon({ language }: { language?: string }) {
@@ -52,29 +50,29 @@ function FileIcon({ language }: { language?: string }) {
     switch (language) {
       case 'javascript':
       case 'js':
-        return 'text-yellow-400';
+        return 'text-yellow-400'
       case 'typescript':
       case 'ts':
       case 'tsx':
-        return 'text-blue-400';
+        return 'text-blue-400'
       case 'python':
       case 'py':
-        return 'text-green-400';
+        return 'text-green-400'
       case 'json':
-        return 'text-orange-400';
+        return 'text-orange-400'
       case 'html':
-        return 'text-red-400';
+        return 'text-red-400'
       case 'css':
-        return 'text-purple-400';
+        return 'text-purple-400'
       case 'go':
-        return 'text-cyan-400';
+        return 'text-cyan-400'
       case 'rust':
       case 'rs':
-        return 'text-orange-500';
+        return 'text-orange-500'
       default:
-        return 'text-gray-400';
+        return 'text-gray-400'
     }
-  };
+  }
 
   return (
     <svg className={`w-4 h-4 ${getColor()}`} fill="currentColor" viewBox="0 0 20 20">
@@ -84,7 +82,7 @@ function FileIcon({ language }: { language?: string }) {
         clipRule="evenodd"
       />
     </svg>
-  );
+  )
 }
 
 function ChevronIcon({ isOpen }: { isOpen: boolean }) {
@@ -100,17 +98,17 @@ function ChevronIcon({ isOpen }: { isOpen: boolean }) {
     >
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </motion.svg>
-  );
+  )
 }
 
 interface FileTreeItemProps {
-  node: FileNode;
-  depth: number;
-  selectedFile: string | null;
-  onSelectFile: (path: string) => void;
-  onCreateFile?: (parentPath: string, name: string, type: 'file' | 'directory') => void;
-  onDeleteFile?: (path: string) => void;
-  onRenameFile?: (path: string, newName: string) => void;
+  node: FileNode
+  depth: number
+  selectedFile: string | null
+  onSelectFile: (path: string) => void
+  onCreateFile?: (parentPath: string, name: string, type: 'file' | 'directory') => void
+  onDeleteFile?: (path: string) => void
+  onRenameFile?: (path: string, newName: string) => void
 }
 
 function FileTreeItem({
@@ -122,43 +120,43 @@ function FileTreeItem({
   onDeleteFile,
   onRenameFile,
 }: FileTreeItemProps) {
-  const [isOpen, setIsOpen] = useState(depth === 0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [newName, setNewName] = useState(node.name);
+  const [isOpen, setIsOpen] = useState(depth === 0)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isRenaming, setIsRenaming] = useState(false)
+  const [newName, setNewName] = useState(node.name)
 
-  const isSelected = selectedFile === node.path;
-  const isDirectory = node.type === 'directory';
+  const isSelected = selectedFile === node.path
+  const isDirectory = node.type === 'directory'
 
   const handleClick = useCallback(() => {
     if (isDirectory) {
-      setIsOpen(!isOpen);
+      setIsOpen(!isOpen)
     } else {
-      onSelectFile(node.path);
+      onSelectFile(node.path)
     }
-  }, [isDirectory, isOpen, node.path, onSelectFile]);
+  }, [isDirectory, isOpen, node.path, onSelectFile])
 
   const handleRename = useCallback(() => {
     if (newName && newName !== node.name && onRenameFile) {
-      onRenameFile(node.path, newName);
+      onRenameFile(node.path, newName)
     }
-    setIsRenaming(false);
-  }, [newName, node.name, node.path, onRenameFile]);
+    setIsRenaming(false)
+  }, [newName, node.name, node.path, onRenameFile])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
-        handleRename();
+        handleRename()
       } else if (e.key === 'Escape') {
-        setNewName(node.name);
-        setIsRenaming(false);
+        setNewName(node.name)
+        setIsRenaming(false)
       }
     },
     [handleRename, node.name]
-  );
+  )
 
   const getLanguageFromName = (name: string): string | undefined => {
-    const ext = name.split('.').pop()?.toLowerCase();
+    const ext = name.split('.').pop()?.toLowerCase()
     const extToLang: Record<string, string> = {
       js: 'javascript',
       mjs: 'javascript',
@@ -174,9 +172,9 @@ function FileTreeItem({
       c: 'c',
       cpp: 'cpp',
       java: 'java',
-    };
-    return ext ? extToLang[ext] : undefined;
-  };
+    }
+    return ext ? extToLang[ext] : undefined
+  }
 
   return (
     <div>
@@ -224,9 +222,9 @@ function FileTreeItem({
               <>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    const name = prompt('Enter file name:');
-                    if (name) onCreateFile(node.path, name, 'file');
+                    e.stopPropagation()
+                    const name = prompt('Enter file name:')
+                    if (name) onCreateFile(node.path, name, 'file')
                   }}
                   className="p-0.5 hover:bg-gray-600 rounded"
                   title="New file"
@@ -242,9 +240,9 @@ function FileTreeItem({
                 </button>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    const name = prompt('Enter folder name:');
-                    if (name) onCreateFile(node.path, name, 'directory');
+                    e.stopPropagation()
+                    const name = prompt('Enter folder name:')
+                    if (name) onCreateFile(node.path, name, 'directory')
                   }}
                   className="p-0.5 hover:bg-gray-600 rounded"
                   title="New folder"
@@ -263,9 +261,9 @@ function FileTreeItem({
             {onDeleteFile && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation()
                   if (confirm(`Delete ${node.name}?`)) {
-                    onDeleteFile(node.path);
+                    onDeleteFile(node.path)
                   }
                 }}
                 className="p-0.5 hover:bg-red-600 rounded"
@@ -310,7 +308,7 @@ function FileTreeItem({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }
 
 export function FileTree({
@@ -331,8 +329,8 @@ export function FileTree({
           <div className="flex items-center gap-1">
             <button
               onClick={() => {
-                const name = prompt('Enter file name:');
-                if (name) onCreateFile('', name, 'file');
+                const name = prompt('Enter file name:')
+                if (name) onCreateFile('', name, 'file')
               }}
               className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors"
               title="New file"
@@ -348,8 +346,8 @@ export function FileTree({
             </button>
             <button
               onClick={() => {
-                const name = prompt('Enter folder name:');
-                if (name) onCreateFile('', name, 'directory');
+                const name = prompt('Enter folder name:')
+                if (name) onCreateFile('', name, 'directory')
               }}
               className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors"
               title="New folder"
@@ -389,25 +387,23 @@ export function FileTree({
         )}
       </div>
     </div>
-  );
+  )
 }
 
 // Helper function to create a file tree from a flat list of paths
-export function buildFileTree(
-  files: Array<{ path: string; content?: string }>
-): FileNode[] {
-  const root: FileNode[] = [];
+export function buildFileTree(files: Array<{ path: string; content?: string }>): FileNode[] {
+  const root: FileNode[] = []
 
   for (const file of files) {
-    const parts = file.path.split('/').filter(Boolean);
-    let current = root;
+    const parts = file.path.split('/').filter(Boolean)
+    let current = root
 
     for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      const isLast = i === parts.length - 1;
-      const currentPath = parts.slice(0, i + 1).join('/');
+      const part = parts[i]
+      const isLast = i === parts.length - 1
+      const currentPath = parts.slice(0, i + 1).join('/')
 
-      let node = current.find((n) => n.name === part);
+      let node = current.find((n) => n.name === part)
 
       if (!node) {
         node = {
@@ -416,12 +412,12 @@ export function buildFileTree(
           path: currentPath,
           children: isLast ? undefined : [],
           content: isLast ? file.content : undefined,
-        };
-        current.push(node);
+        }
+        current.push(node)
       }
 
       if (!isLast && node.children) {
-        current = node.children;
+        current = node.children
       }
     }
   }
@@ -431,17 +427,17 @@ export function buildFileTree(
     return nodes
       .sort((a, b) => {
         if (a.type !== b.type) {
-          return a.type === 'directory' ? -1 : 1;
+          return a.type === 'directory' ? -1 : 1
         }
-        return a.name.localeCompare(b.name);
+        return a.name.localeCompare(b.name)
       })
       .map((node) => ({
         ...node,
         children: node.children ? sortNodes(node.children) : undefined,
-      }));
-  };
+      }))
+  }
 
-  return sortNodes(root);
+  return sortNodes(root)
 }
 
-export default FileTree;
+export default FileTree

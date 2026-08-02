@@ -1,13 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import {
-  Home,
-  FlaskConical,
-  Zap,
-  Package,
-  Leaf,
-  Box,
-  LayoutDashboard,
-} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
+import { Box, FlaskConical, Home, LayoutDashboard, Leaf, Package, Zap } from 'lucide-react'
 
 /** Maps legacy challenge reward IDs → real building template IDs. */
 export const BUILDING_REWARD_TO_TEMPLATE: Record<string, string> = {
@@ -26,10 +18,10 @@ export const BUILDING_REWARD_TO_TEMPLATE: Record<string, string> = {
   'energy-generator': 'energy-generator',
   'nav-corridor': 'nav-corridor',
   'laboratory-module': 'laboratory-module',
-};
+}
 
 export function resolveBuildingTemplateId(rewardOrTemplateId: string): string {
-  return BUILDING_REWARD_TO_TEMPLATE[rewardOrTemplateId] ?? rewardOrTemplateId;
+  return BUILDING_REWARD_TO_TEMPLATE[rewardOrTemplateId] ?? rewardOrTemplateId
 }
 
 export const BUILDING_TEMPLATE_ICONS: Record<string, LucideIcon> = {
@@ -40,4 +32,4 @@ export const BUILDING_TEMPLATE_ICONS: Record<string, LucideIcon> = {
   'greenhouse-module': Leaf,
   'nav-corridor': Box,
   'command-center': LayoutDashboard,
-};
+}

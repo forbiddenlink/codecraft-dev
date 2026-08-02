@@ -1,27 +1,27 @@
-import '@/styles/globals.css';
-import type { Metadata, Viewport } from 'next';
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
-import { Providers } from '@/store/Providers';
-import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { PostHogProvider } from '@/components/PostHogProvider';
+import '@/styles/globals.css'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/next'
+import type { Metadata, Viewport } from 'next'
+import { JetBrains_Mono, Space_Grotesk } from 'next/font/google'
+import { PostHogProvider } from '@/components/PostHogProvider'
+import { Providers } from '@/store/Providers'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
   display: 'swap',
-});
+})
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
-});
+})
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  'https://codecraft-dev.vercel.app';
+  'https://codecraft-dev.vercel.app'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-};
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -60,7 +60,7 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#0A0E17' },
   ],
   colorScheme: 'dark',
-};
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const jsonLd = {
@@ -72,11 +72,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       'Educational coding game where you build a space colony by writing real HTML, CSS, and JavaScript.',
     applicationCategory: 'EducationalApplication',
     operatingSystem: 'Web',
-  };
+  }
 
   return (
     <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
-      <body className={`${spaceGrotesk.className} bg-[rgb(var(--bg-base))] text-[rgb(var(--text-primary))] antialiased`}>
+      <body
+        className={`${spaceGrotesk.className} bg-[rgb(var(--bg-base))] text-[rgb(var(--text-primary))] antialiased`}
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -96,5 +98,5 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SpeedInsights />
       </body>
     </html>
-  );
+  )
 }

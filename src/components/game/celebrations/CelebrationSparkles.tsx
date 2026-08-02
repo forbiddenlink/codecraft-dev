@@ -1,15 +1,15 @@
 // File: /src/components/game/celebrations/CelebrationSparkles.tsx
-'use client';
+'use client'
 
-import { useRef, useState, useEffect, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Sparkles } from '@react-three/drei';
-import * as THREE from 'three';
+import { Sparkles } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 
 interface CelebrationSparklesProps {
-  position?: [number, number, number];
-  type?: 'success' | 'levelUp' | 'achievement' | 'mastery' | 'streak';
-  onComplete?: () => void;
+  position?: [number, number, number]
+  type?: 'success' | 'levelUp' | 'achievement' | 'mastery' | 'streak'
+  onComplete?: () => void
 }
 
 const CELEBRATION_CONFIGS = {
@@ -53,36 +53,36 @@ const CELEBRATION_CONFIGS = {
     speed: 1,
     duration: 2000,
   },
-};
+}
 
 export default function CelebrationSparkles({
   position = [0, 0, 0],
   type = 'success',
   onComplete,
 }: CelebrationSparklesProps) {
-  const [visible, setVisible] = useState(true);
-  const [opacity, setOpacity] = useState(1);
-  const config = CELEBRATION_CONFIGS[type];
+  const [visible, setVisible] = useState(true)
+  const [opacity, setOpacity] = useState(1)
+  const config = CELEBRATION_CONFIGS[type]
 
   useEffect(() => {
     // Fade out near end
     const fadeTimer = setTimeout(() => {
-      setOpacity(0);
-    }, config.duration - 500);
+      setOpacity(0)
+    }, config.duration - 500)
 
     // Remove after duration
     const removeTimer = setTimeout(() => {
-      setVisible(false);
-      onComplete?.();
-    }, config.duration);
+      setVisible(false)
+      onComplete?.()
+    }, config.duration)
 
     return () => {
-      clearTimeout(fadeTimer);
-      clearTimeout(removeTimer);
-    };
-  }, [config.duration, onComplete]);
+      clearTimeout(fadeTimer)
+      clearTimeout(removeTimer)
+    }
+  }, [config.duration, onComplete])
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <group position={position}>
@@ -96,15 +96,15 @@ export default function CelebrationSparkles({
         noise={1}
       />
     </group>
-  );
+  )
 }
 
 // Firework burst effect for bigger celebrations
 interface FireworkBurstProps {
-  position?: [number, number, number];
-  color?: string;
-  count?: number;
-  onComplete?: () => void;
+  position?: [number, number, number]
+  color?: string
+  count?: number
+  onComplete?: () => void
 }
 
 export function FireworkBurst({
@@ -113,67 +113,66 @@ export function FireworkBurst({
   count = 100,
   onComplete,
 }: FireworkBurstProps) {
-  const pointsRef = useRef<THREE.Points>(null);
-  const [elapsed, setElapsed] = useState(0);
+  const pointsRef = useRef<THREE.Points>(null)
+  const [elapsed, setElapsed] = useState(0)
 
   const { positions, velocities } = useMemo(() => {
-    const positions = new Float32Array(count * 3);
-    const velocities: THREE.Vector3[] = [];
+    const positions = new Float32Array(count * 3)
+    const velocities: THREE.Vector3[] = []
 
     for (let i = 0; i < count; i++) {
       // Start from center
-      positions[i * 3] = 0;
-      positions[i * 3 + 1] = 0;
-      positions[i * 3 + 2] = 0;
+      positions[i * 3] = 0
+      positions[i * 3 + 1] = 0
+      positions[i * 3 + 2] = 0
 
       // Random velocity in sphere
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const speed = 0.05 + Math.random() * 0.1;
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      const speed = 0.05 + Math.random() * 0.1
 
-      velocities.push(new THREE.Vector3(
-        Math.sin(phi) * Math.cos(theta) * speed,
-        Math.sin(phi) * Math.sin(theta) * speed + 0.03, // upward bias
-        Math.cos(phi) * speed
-      ));
+      velocities.push(
+        new THREE.Vector3(
+          Math.sin(phi) * Math.cos(theta) * speed,
+          Math.sin(phi) * Math.sin(theta) * speed + 0.03, // upward bias
+          Math.cos(phi) * speed
+        )
+      )
     }
-    return { positions, velocities };
-  }, [count]);
+    return { positions, velocities }
+  }, [count])
 
   useFrame((_, delta) => {
-    if (!pointsRef.current) return;
+    if (!pointsRef.current) return
 
-    setElapsed(e => {
-      const newElapsed = e + delta;
+    setElapsed((e) => {
+      const newElapsed = e + delta
       if (newElapsed > 2.5) {
-        onComplete?.();
+        onComplete?.()
       }
-      return newElapsed;
-    });
+      return newElapsed
+    })
 
-    const pos = pointsRef.current.geometry.attributes.position.array as Float32Array;
+    const pos = pointsRef.current.geometry.attributes.position.array as Float32Array
 
     for (let i = 0; i < count; i++) {
-      pos[i * 3] += velocities[i].x;
-      pos[i * 3 + 1] += velocities[i].y - 0.002; // gravity
-      pos[i * 3 + 2] += velocities[i].z;
+      pos[i * 3] += velocities[i].x
+      pos[i * 3 + 1] += velocities[i].y - 0.002 // gravity
+      pos[i * 3 + 2] += velocities[i].z
 
       // Slow down over time
-      velocities[i].multiplyScalar(0.98);
+      velocities[i].multiplyScalar(0.98)
     }
 
-    pointsRef.current.geometry.attributes.position.needsUpdate = true;
-  });
+    pointsRef.current.geometry.attributes.position.needsUpdate = true
+  })
 
-  if (elapsed > 2.5) return null;
+  if (elapsed > 2.5) return null
 
   return (
     <points ref={pointsRef} position={position}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         size={0.15}
@@ -184,5 +183,5 @@ export function FireworkBurst({
         depthWrite={false}
       />
     </points>
-  );
+  )
 }

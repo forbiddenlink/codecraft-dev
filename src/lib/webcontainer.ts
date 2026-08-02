@@ -26,7 +26,7 @@ export async function runCode(code: string, filename = 'index.js'): Promise<RunR
   const wc = await bootWebContainer()
 
   await wc.mount({
-    [filename]: { file: { contents: code } }
+    [filename]: { file: { contents: code } },
   })
 
   const process = await wc.spawn('node', [filename])
@@ -62,12 +62,16 @@ export async function runCodeWithDependencies(
   if (dependencies && Object.keys(dependencies).length > 0) {
     fileTree['package.json'] = {
       file: {
-        contents: JSON.stringify({
-          name: 'sandbox',
-          type: 'module',
-          dependencies
-        }, null, 2)
-      }
+        contents: JSON.stringify(
+          {
+            name: 'sandbox',
+            type: 'module',
+            dependencies,
+          },
+          null,
+          2
+        ),
+      },
     }
   }
 

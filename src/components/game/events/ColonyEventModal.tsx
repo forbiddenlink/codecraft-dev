@@ -1,39 +1,36 @@
-'use client';
+'use client'
 
-import { useCallback, useEffect } from 'react';
-import { X, Gift, AlertTriangle, Sparkles } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { COLONY_EVENTS, type ColonyEvent } from '@/data/colonyEvents';
-import { markEventResolved, clearColonyEvent } from '@/store/slices/eventSlice';
-import { addResources, consumeResources } from '@/store/slices/resourceSlice';
-import { gainXP } from '@/store/slices/userSlice';
-import { Icon } from '@/components/ui/Icon';
-import { getColonyEventIcon } from '@/components/ui/eventIcons';
+import { AlertTriangle, Gift, Sparkles, X } from 'lucide-react'
+import { useCallback, useEffect } from 'react'
+import { getColonyEventIcon } from '@/components/ui/eventIcons'
+import { Icon } from '@/components/ui/Icon'
+import { COLONY_EVENTS, type ColonyEvent } from '@/data/colonyEvents'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { clearColonyEvent, markEventResolved } from '@/store/slices/eventSlice'
+import { addResources, consumeResources } from '@/store/slices/resourceSlice'
+import { gainXP } from '@/store/slices/userSlice'
 
 type EffectBag = {
-  resources?: Record<string, number>;
-  xp?: number;
-  morale?: number;
-};
+  resources?: Record<string, number>
+  xp?: number
+  morale?: number
+}
 
-function applyEffects(
-  dispatch: ReturnType<typeof useAppDispatch>,
-  effects?: EffectBag,
-) {
-  if (!effects) return;
+function applyEffects(dispatch: ReturnType<typeof useAppDispatch>, effects?: EffectBag) {
+  if (!effects) return
 
   if (effects.xp && effects.xp > 0) {
-    dispatch(gainXP(effects.xp));
+    dispatch(gainXP(effects.xp))
   }
 
   if (effects.resources) {
     Object.entries(effects.resources).forEach(([resource, amount]) => {
       if (amount > 0) {
-        dispatch(addResources({ type: resource as any, amount }));
+        dispatch(addResources({ type: resource as any, amount }))
       } else if (amount < 0) {
-        dispatch(consumeResources({ type: resource as any, amount: Math.abs(amount) }));
+        dispatch(consumeResources({ type: resource as any, amount: Math.abs(amount) }))
       }
-    });
+    })
   }
 }
 
@@ -45,71 +42,71 @@ function typeStyles(type: ColonyEvent['type']) {
         border: 'border-[rgb(var(--success)/0.35)]',
         badge: 'bg-[rgb(var(--success)/0.18)] text-[rgb(var(--success))]',
         IconGlyph: Gift,
-      };
+      }
     case 'negative':
       return {
         accent: 'text-[rgb(var(--error))]',
         border: 'border-[rgb(var(--error)/0.35)]',
         badge: 'bg-[rgb(var(--error)/0.18)] text-[rgb(var(--error))]',
         IconGlyph: AlertTriangle,
-      };
+      }
     case 'choice':
       return {
         accent: 'text-[rgb(var(--energy))]',
         border: 'border-[rgb(var(--energy)/0.35)]',
         badge: 'bg-[rgb(var(--energy)/0.18)] text-[rgb(var(--energy))]',
         IconGlyph: Sparkles,
-      };
+      }
     default:
       return {
         accent: 'text-[rgb(var(--accent-subtle))]',
         border: 'border-[rgb(var(--accent-subtle)/0.35)]',
         badge: 'bg-[rgb(var(--accent)/0.18)] text-[rgb(var(--accent-subtle))]',
         IconGlyph: Sparkles,
-      };
+      }
   }
 }
 
 export function ColonyEventModal() {
-  const dispatch = useAppDispatch();
-  const activeEventId = useAppSelector((state) => state.events.activeEventId);
-  const resources = useAppSelector((state) => state.resource.storage);
+  const dispatch = useAppDispatch()
+  const activeEventId = useAppSelector((state) => state.events.activeEventId)
+  const resources = useAppSelector((state) => state.resource.storage)
 
   const event = activeEventId
-    ? COLONY_EVENTS.find((item) => item.id === activeEventId) ?? null
-    : null;
+    ? (COLONY_EVENTS.find((item) => item.id === activeEventId) ?? null)
+    : null
 
   // Drop stale / unknown ids so the queue cannot get stuck
   useEffect(() => {
     if (activeEventId && !event) {
-      dispatch(clearColonyEvent());
+      dispatch(clearColonyEvent())
     }
-  }, [activeEventId, event, dispatch]);
+  }, [activeEventId, event, dispatch])
 
   const close = useCallback(() => {
-    dispatch(clearColonyEvent());
-  }, [dispatch]);
+    dispatch(clearColonyEvent())
+  }, [dispatch])
 
   const resolveWithEffects = useCallback(
     (effects?: EffectBag) => {
-      applyEffects(dispatch, effects);
-      dispatch(markEventResolved());
+      applyEffects(dispatch, effects)
+      dispatch(markEventResolved())
     },
-    [dispatch],
-  );
+    [dispatch]
+  )
 
-  if (!event) return null;
+  if (!event) return null
 
-  const styles = typeStyles(event.type);
-  const EventIcon = getColonyEventIcon(event.icon);
+  const styles = typeStyles(event.type)
+  const EventIcon = getColonyEventIcon(event.icon)
 
   const canAfford = (required?: Record<string, number>) => {
-    if (!required) return true;
+    if (!required) return true
     return Object.entries(required).every(([resource, amount]) => {
-      const have = (resources as Record<string, number>)[resource] ?? 0;
-      return have >= amount;
-    });
-  };
+      const have = (resources as Record<string, number>)[resource] ?? 0
+      return have >= amount
+    })
+  }
 
   return (
     <div className="fixed inset-0 z-[55] flex items-center justify-center p-4">
@@ -118,7 +115,7 @@ export function ColonyEventModal() {
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         aria-label="Dismiss event backdrop"
         onClick={() => {
-          if (event.canDismiss) close();
+          if (event.canDismiss) close()
         }}
       />
 
@@ -136,7 +133,9 @@ export function ColonyEventModal() {
             </span>
             <div>
               <div className="mb-1 flex flex-wrap items-center gap-2">
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${styles.badge}`}>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-medium uppercase ${styles.badge}`}
+                >
                   {event.type}
                 </span>
                 <span className="text-[10px] uppercase tracking-wide text-[rgb(var(--text-muted))]">
@@ -193,7 +192,7 @@ export function ColonyEventModal() {
           {event.choices && event.choices.length > 0 ? (
             <div className="space-y-2">
               {event.choices.map((choice) => {
-                const affordable = canAfford(choice.requirements?.resource);
+                const affordable = canAfford(choice.requirements?.resource)
                 return (
                   <button
                     key={choice.id}
@@ -216,7 +215,7 @@ export function ColonyEventModal() {
                         : ''}
                     </div>
                   </button>
-                );
+                )
               })}
             </div>
           ) : (
@@ -231,5 +230,5 @@ export function ColonyEventModal() {
         </div>
       </div>
     </div>
-  );
+  )
 }

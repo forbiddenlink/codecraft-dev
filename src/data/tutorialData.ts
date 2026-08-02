@@ -1,20 +1,20 @@
-import { TutorialStepTypes, type TutorialStep } from '@/store/slices/tutorialSlice';
-import type { Dispatch } from '@reduxjs/toolkit';
+import type { Dispatch } from '@reduxjs/toolkit'
+import { type TutorialStep, TutorialStepTypes } from '@/store/slices/tutorialSlice'
 
 interface TutorialRewards {
-  xp: number;
-  items: string[];
-  unlocks: string[];
+  xp: number
+  items: string[]
+  unlocks: string[]
 }
 
 interface Tutorial {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  difficulty: string;
-  steps: TutorialStep[];
-  rewards: TutorialRewards;
+  id: string
+  title: string
+  description: string
+  category: string
+  difficulty: string
+  steps: TutorialStep[]
+  rewards: TutorialRewards
 }
 
 /**
@@ -46,7 +46,8 @@ export const WELCOME_TUTORIAL: Tutorial = {
       title: 'Colony resources',
       description:
         'Energy, minerals, water, and food appear in the top-right HUD. Buildings cost resources — keep an eye on your stock before placing.',
-      pixelDialogue: 'Habitat Module needs 50 energy and 100 minerals. You start with enough for your first home.',
+      pixelDialogue:
+        'Habitat Module needs 50 energy and 100 minerals. You start with enough for your first home.',
       focusArea: TutorialStepTypes.FOCUS_AREA.RESOURCE_HUD,
       action: { type: TutorialStepTypes.ACTION.VIEW },
       completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
@@ -68,7 +69,8 @@ export const WELCOME_TUTORIAL: Tutorial = {
       title: 'Place your habitat',
       description:
         'After the challenge succeeds, open Buildings (bottom-right), select Habitat Module, then click the ground to place it.',
-      pixelDialogue: 'Press R to rotate the preview, Esc to cancel. Your colony grows with every structure you place.',
+      pixelDialogue:
+        'Press R to rotate the preview, Esc to cancel. Your colony grows with every structure you place.',
       focusArea: TutorialStepTypes.FOCUS_AREA.BUILDING_MENU,
       action: { type: TutorialStepTypes.ACTION.VIEW },
       completion: { type: TutorialStepTypes.COMPLETION.MANUAL },
@@ -80,7 +82,7 @@ export const WELCOME_TUTORIAL: Tutorial = {
     items: ['habitat-module'],
     unlocks: ['html-basics-tutorial'],
   },
-};
+}
 
 export const HTML_BASICS_TUTORIAL: Tutorial = {
   id: 'html-basics-tutorial',
@@ -94,7 +96,8 @@ export const HTML_BASICS_TUTORIAL: Tutorial = {
       title: 'HTML Structure',
       description:
         'HTML uses elements with opening and closing tags to define structure. Create a simple colony layout in the editor.',
-      pixelDialogue: 'HTML is the foundation of your colony! Each element becomes a physical structure.',
+      pixelDialogue:
+        'HTML is the foundation of your colony! Each element becomes a physical structure.',
       focusArea: TutorialStepTypes.FOCUS_AREA.EDITOR,
       action: {
         type: TutorialStepTypes.ACTION.CODE,
@@ -138,22 +141,22 @@ export const HTML_BASICS_TUTORIAL: Tutorial = {
     items: ['laboratory-module'],
     unlocks: ['css-basics-tutorial'],
   },
-};
+}
 
 export const TUTORIALS: Record<string, Tutorial> = {
   'welcome-tutorial': WELCOME_TUTORIAL,
   'html-basics-tutorial': HTML_BASICS_TUTORIAL,
-};
+}
 
 export const getTutorialById = (id: string): Tutorial | null => {
-  return TUTORIALS[id] || null;
-};
+  return TUTORIALS[id] || null
+}
 
 export const startTutorial = (dispatch: Dispatch, tutorialId: string): void => {
-  const tutorial = getTutorialById(tutorialId);
+  const tutorial = getTutorialById(tutorialId)
   if (!tutorial) {
-    console.error(`Tutorial with ID ${tutorialId} not found`);
-    return;
+    console.error(`Tutorial with ID ${tutorialId} not found`)
+    return
   }
 
   void import('@/store/slices/tutorialSlice').then(({ startTutorial: startTutorialAction }) => {
@@ -161,7 +164,7 @@ export const startTutorial = (dispatch: Dispatch, tutorialId: string): void => {
       startTutorialAction({
         tutorialId: tutorial.id,
         steps: tutorial.steps,
-      }),
-    );
-  });
-};
+      })
+    )
+  })
+}

@@ -1,40 +1,40 @@
-import { Vector3, Object3D, Material, Color } from 'three';
+import { type Color, Material, type Object3D, Vector3 } from 'three'
 
 export interface GameObjectDefinition {
-  model: string;
+  model: string
   defaultProperties: {
-    scale: Vector3;
-    color?: string;
-    opacity?: number;
-    emissive?: string;
-    metalness?: number;
-    roughness?: number;
-  };
-  behaviors: string[];
+    scale: Vector3
+    color?: string
+    opacity?: number
+    emissive?: string
+    metalness?: number
+    roughness?: number
+  }
+  behaviors: string[]
 }
 
 export interface TransformRules {
-  scale: Vector3;
-  rotation: Vector3;
-  position: Vector3;
-  parent?: string;
+  scale: Vector3
+  rotation: Vector3
+  position: Vector3
+  parent?: string
   constraints?: {
-    minScale?: Vector3;
-    maxScale?: Vector3;
-    allowRotation?: boolean;
-    allowTranslation?: boolean;
-  };
+    minScale?: Vector3
+    maxScale?: Vector3
+    allowRotation?: boolean
+    allowTranslation?: boolean
+  }
 }
 
 export interface ElementMapping {
-  htmlTag: string;
-  gameObject: GameObjectDefinition;
-  transformRules: TransformRules;
+  htmlTag: string
+  gameObject: GameObjectDefinition
+  transformRules: TransformRules
   children?: {
-    allowedTags: string[];
-    maxCount?: number;
-    positioning: 'grid' | 'flex' | 'absolute';
-  };
+    allowedTags: string[]
+    maxCount?: number
+    positioning: 'grid' | 'flex' | 'absolute'
+  }
 }
 
 // Base mappings for HTML structural elements
@@ -48,9 +48,9 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
         color: '#1E3A8A', // cosmic-blue
         opacity: 1,
         metalness: 0.5,
-        roughness: 0.5
+        roughness: 0.5,
       },
-      behaviors: ['resizable', 'colorable', 'interactive']
+      behaviors: ['resizable', 'colorable', 'interactive'],
     },
     transformRules: {
       scale: new Vector3(1, 1, 1),
@@ -60,13 +60,13 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
         minScale: new Vector3(0.5, 0.5, 0.5),
         maxScale: new Vector3(5, 5, 5),
         allowRotation: true,
-        allowTranslation: true
-      }
+        allowTranslation: true,
+      },
     },
     children: {
       allowedTags: ['*'],
-      positioning: 'grid'
-    }
+      positioning: 'grid',
+    },
   },
 
   main: {
@@ -78,9 +78,9 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
         color: '#F8FAFC', // stellar-white
         emissive: '#FBBF24', // energy-yellow
         metalness: 0.7,
-        roughness: 0.3
+        roughness: 0.3,
       },
-      behaviors: ['central-hub', 'resource-distributor', 'interactive']
+      behaviors: ['central-hub', 'resource-distributor', 'interactive'],
     },
     transformRules: {
       scale: new Vector3(2, 2, 2),
@@ -88,13 +88,13 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
       position: new Vector3(0, 0, 0),
       constraints: {
         allowRotation: false,
-        allowTranslation: false
-      }
+        allowTranslation: false,
+      },
     },
     children: {
       allowedTags: ['section', 'article', 'nav', 'aside'],
-      positioning: 'grid'
-    }
+      positioning: 'grid',
+    },
   },
 
   section: {
@@ -106,9 +106,9 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
         color: '#1E3A8A', // cosmic-blue
         opacity: 0.9,
         metalness: 0.6,
-        roughness: 0.4
+        roughness: 0.4,
       },
-      behaviors: ['resource-container', 'expandable', 'interactive']
+      behaviors: ['resource-container', 'expandable', 'interactive'],
     },
     transformRules: {
       scale: new Vector3(1.5, 1.5, 1.5),
@@ -118,24 +118,24 @@ export const BASE_MAPPINGS: Record<string, ElementMapping> = {
         minScale: new Vector3(1, 1, 1),
         maxScale: new Vector3(3, 3, 3),
         allowRotation: true,
-        allowTranslation: true
-      }
+        allowTranslation: true,
+      },
     },
     children: {
       allowedTags: ['article', 'div', 'aside'],
-      positioning: 'flex'
-    }
-  }
-};
+      positioning: 'flex',
+    },
+  },
+}
 
 // CSS property to game world effect mapping
 export interface CSSToGameMapping {
-  cssProperty: string;
+  cssProperty: string
   gameProperty: {
-    component: string;
-    property: string;
-    converter: (value: string) => number | Color | boolean | string;
-  };
+    component: string
+    property: string
+    converter: (value: string) => number | Color | boolean | string
+  }
 }
 
 export const CSS_MAPPINGS: Record<string, CSSToGameMapping> = {
@@ -144,38 +144,38 @@ export const CSS_MAPPINGS: Record<string, CSSToGameMapping> = {
     gameProperty: {
       component: 'material',
       property: 'color',
-      converter: (value: string) => value // Color conversion handled by Three.js
-    }
+      converter: (value: string) => value, // Color conversion handled by Three.js
+    },
   },
   width: {
     cssProperty: 'width',
     gameProperty: {
       component: 'transform',
       property: 'scale.x',
-      converter: (value: string) => parseFloat(value) / 100 // Convert percentage to scale
-    }
+      converter: (value: string) => parseFloat(value) / 100, // Convert percentage to scale
+    },
   },
   height: {
     cssProperty: 'height',
     gameProperty: {
       component: 'transform',
       property: 'scale.y',
-      converter: (value: string) => parseFloat(value) / 100
-    }
+      converter: (value: string) => parseFloat(value) / 100,
+    },
   },
   opacity: {
     cssProperty: 'opacity',
     gameProperty: {
       component: 'material',
       property: 'opacity',
-      converter: (value: string) => parseFloat(value)
-    }
-  }
-};
+      converter: (value: string) => parseFloat(value),
+    },
+  },
+}
 
 // Helper function to get mapping for an HTML element
 export function getElementMapping(tag: string): ElementMapping {
-  return BASE_MAPPINGS[tag.toLowerCase()] || BASE_MAPPINGS.div;
+  return BASE_MAPPINGS[tag.toLowerCase()] || BASE_MAPPINGS.div
 }
 
 // Helper function to apply CSS properties to a game object
@@ -184,19 +184,19 @@ export function applyCSSToGameObject(
   cssProperties: Record<string, string>
 ): void {
   Object.entries(cssProperties).forEach(([property, value]) => {
-    const mapping = CSS_MAPPINGS[property];
+    const mapping = CSS_MAPPINGS[property]
     if (mapping) {
-      const convertedValue = mapping.gameProperty.converter(value);
+      const convertedValue = mapping.gameProperty.converter(value)
       if (mapping.gameProperty.component === 'material' && 'material' in gameObject) {
-        ((gameObject as any).material as any)[mapping.gameProperty.property] = convertedValue;
+        ;((gameObject as any).material as any)[mapping.gameProperty.property] = convertedValue
       } else if (mapping.gameProperty.component === 'transform') {
-        const [prop, axis] = mapping.gameProperty.property.split('.');
+        const [prop, axis] = mapping.gameProperty.property.split('.')
         if (axis) {
-          (gameObject as any)[prop][axis] = convertedValue as number;
+          ;(gameObject as any)[prop][axis] = convertedValue as number
         } else {
-          (gameObject as any)[prop] = convertedValue as number;
+          ;(gameObject as any)[prop] = convertedValue as number
         }
       }
     }
-  });
-} 
+  })
+}

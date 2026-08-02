@@ -1,47 +1,47 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { LucideIcon } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion'
+import type { LucideIcon } from 'lucide-react'
 import {
-  Rocket,
-  UserRound,
   Bot,
-  Code2,
-  Route,
-  Trophy,
-  Crosshair,
+  Building2,
   ChevronLeft,
   ChevronRight,
-  Building2,
-} from 'lucide-react';
-import { useAppDispatch } from '@/store/hooks';
-import { startTutorial } from '@/store/slices/tutorialSlice';
-import { setUser } from '@/store/slices/userSlice';
-import { WELCOME_TUTORIAL } from '@/data/tutorialData';
-import { trackEvent, identifyUser } from '@/utils/analytics';
-import { Icon } from '@/components/ui/Icon';
+  Code2,
+  Crosshair,
+  Rocket,
+  Route,
+  Trophy,
+  UserRound,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import { WELCOME_TUTORIAL } from '@/data/tutorialData'
+import { useAppDispatch } from '@/store/hooks'
+import { startTutorial } from '@/store/slices/tutorialSlice'
+import { setUser } from '@/store/slices/userSlice'
+import { identifyUser, trackEvent } from '@/utils/analytics'
 
 type OnboardingStep = {
-  id: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-};
+  id: string
+  title: string
+  description: string
+  icon: LucideIcon
+}
 
 export default function OnboardingFlow() {
-  const dispatch = useAppDispatch();
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [username, setUsername] = useState('');
-  const [nameError, setNameError] = useState('');
+  const dispatch = useAppDispatch()
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const [username, setUsername] = useState('')
+  const [nameError, setNameError] = useState('')
 
   useEffect(() => {
-    const hasCompletedOnboarding = localStorage.getItem('codecraft_onboarding_complete');
+    const hasCompletedOnboarding = localStorage.getItem('codecraft_onboarding_complete')
     if (!hasCompletedOnboarding) {
-      setIsVisible(true);
+      setIsVisible(true)
     }
-  }, []);
+  }, [])
 
   const steps: OnboardingStep[] = useMemo(
     () => [
@@ -94,50 +94,50 @@ export default function OnboardingFlow() {
         icon: Crosshair,
       },
     ],
-    [],
-  );
+    []
+  )
 
-  const currentStepData = steps[currentStep];
+  const currentStepData = steps[currentStep]
 
   const completeOnboarding = () => {
-    const name = username.trim() || 'Commander';
-    localStorage.setItem('codecraft_username', name);
-    localStorage.setItem('codecraft_onboarding_complete', 'true');
+    const name = username.trim() || 'Commander'
+    localStorage.setItem('codecraft_username', name)
+    localStorage.setItem('codecraft_onboarding_complete', 'true')
 
     const userId =
       localStorage.getItem('codecraft_user_id') ||
-      `player_${Math.random().toString(36).slice(2, 10)}`;
-    localStorage.setItem('codecraft_user_id', userId);
+      `player_${Math.random().toString(36).slice(2, 10)}`
+    localStorage.setItem('codecraft_user_id', userId)
 
-    dispatch(setUser({ id: userId, username: name }));
-    void identifyUser(userId, { username: name });
-    void trackEvent({ name: 'onboarding_completed', properties: { username: name } });
+    dispatch(setUser({ id: userId, username: name }))
+    void identifyUser(userId, { username: name })
+    void trackEvent({ name: 'onboarding_completed', properties: { username: name } })
 
     dispatch(
       startTutorial({
         tutorialId: WELCOME_TUTORIAL.id,
         steps: WELCOME_TUTORIAL.steps,
-      }),
-    );
+      })
+    )
 
-    setIsVisible(false);
-  };
+    setIsVisible(false)
+  }
 
   const handleNext = () => {
     if (currentStep === 1 && !username.trim()) {
-      setNameError('Enter a callsign to continue.');
-      return;
+      setNameError('Enter a callsign to continue.')
+      return
     }
-    setNameError('');
+    setNameError('')
 
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     } else {
-      completeOnboarding();
+      completeOnboarding()
     }
-  };
+  }
 
-  if (!isVisible) return null;
+  if (!isVisible) return null
 
   return (
     <AnimatePresence>
@@ -215,8 +215,8 @@ export default function OnboardingFlow() {
                   type="text"
                   value={username}
                   onChange={(e) => {
-                    setUsername(e.target.value);
-                    if (nameError) setNameError('');
+                    setUsername(e.target.value)
+                    if (nameError) setNameError('')
                   }}
                   placeholder="Enter callsign"
                   className="w-full rounded-[var(--radius-md)] border border-white/15 bg-white/[0.04] px-5 py-3.5 text-center text-lg text-white placeholder:text-white/35 focus:border-[rgb(var(--accent-subtle))] focus:outline-none"
@@ -270,5 +270,5 @@ export default function OnboardingFlow() {
         </motion.div>
       </motion.div>
     </AnimatePresence>
-  );
+  )
 }

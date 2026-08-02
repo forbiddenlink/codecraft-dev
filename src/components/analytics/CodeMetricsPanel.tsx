@@ -3,33 +3,33 @@
  * Shows detailed code quality and usage statistics
  */
 
-import { FileCode2, Palette, Sparkles, Lightbulb } from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+import { FileCode2, Lightbulb, Palette, Sparkles } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface CodeMetricsPanelProps {
-  analytics: LearningAnalytics;
+  analytics: LearningAnalytics
 }
 
 export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
   // Get top HTML tags
   const topHTMLTags = Array.from(analytics.mostUsedHTMLTags.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+    .slice(0, 10)
 
   // Get top CSS properties
   const topCSSProperties = Array.from(analytics.mostUsedCSSProperties.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
+    .slice(0, 10)
 
   const totalHTMLTags = Array.from(analytics.mostUsedHTMLTags.values()).reduce(
     (sum, count) => sum + count,
     0
-  );
+  )
   const totalCSSProps = Array.from(analytics.mostUsedCSSProperties.values()).reduce(
     (sum, count) => sum + count,
     0
-  );
+  )
 
   return (
     <div className="space-y-6">
@@ -77,7 +77,7 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
           {topHTMLTags.length > 0 ? (
             <div className="space-y-3">
               {topHTMLTags.map(([tag, count], index) => {
-                const percentage = totalHTMLTags > 0 ? (count / totalHTMLTags) * 100 : 0;
+                const percentage = totalHTMLTags > 0 ? (count / totalHTMLTags) * 100 : 0
                 return (
                   <div key={tag} className="space-y-1">
                     <div className="flex items-center justify-between">
@@ -105,7 +105,7 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
                       />
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           ) : (
@@ -130,7 +130,7 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
           {topCSSProperties.length > 0 ? (
             <div className="space-y-3">
               {topCSSProperties.map(([prop, count], index) => {
-                const percentage = totalCSSProps > 0 ? (count / totalCSSProps) * 100 : 0;
+                const percentage = totalCSSProps > 0 ? (count / totalCSSProps) * 100 : 0
                 return (
                   <div key={prop} className="space-y-1">
                     <div className="flex items-center justify-between">
@@ -158,7 +158,7 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
                       />
                     </div>
                   </div>
-                );
+                )
               })}
             </div>
           ) : (
@@ -178,12 +178,16 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
         <div className="space-y-2 text-sm">
           {topHTMLTags.length > 0 && (
             <p className="text-gray-300">
-              • Your most-used HTML tag is <span className="text-blue-400 font-mono">&lt;{topHTMLTags[0][0]}&gt;</span>, appearing {topHTMLTags[0][1]} times.
+              • Your most-used HTML tag is{' '}
+              <span className="text-blue-400 font-mono">&lt;{topHTMLTags[0][0]}&gt;</span>,
+              appearing {topHTMLTags[0][1]} times.
             </p>
           )}
           {topCSSProperties.length > 0 && (
             <p className="text-gray-300">
-              • You frequently use <span className="text-purple-400 font-mono">{topCSSProperties[0][0]}</span> for styling.
+              • You frequently use{' '}
+              <span className="text-purple-400 font-mono">{topCSSProperties[0][0]}</span> for
+              styling.
             </p>
           )}
           {analytics.mostUsedHTMLTags.has('div') && analytics.mostUsedHTMLTags.has('section') && (
@@ -191,13 +195,14 @@ export function CodeMetricsPanel({ analytics }: CodeMetricsPanelProps) {
               • Great use of semantic HTML! Keep using meaningful tags like &lt;section&gt;.
             </p>
           )}
-          {analytics.mostUsedCSSProperties.has('flex') || analytics.mostUsedCSSProperties.has('display') && (
-            <p className="text-gray-300">
-              • You&apos;re mastering modern CSS layouts with Flexbox!
-            </p>
-          )}
+          {analytics.mostUsedCSSProperties.has('flex') ||
+            (analytics.mostUsedCSSProperties.has('display') && (
+              <p className="text-gray-300">
+                • You&apos;re mastering modern CSS layouts with Flexbox!
+              </p>
+            ))}
         </div>
       </div>
     </div>
-  );
+  )
 }

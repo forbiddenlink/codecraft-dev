@@ -1,48 +1,48 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { processTick } from '@/store/slices/resourceSlice';
-import { motion } from 'framer-motion';
-import { Icon } from '@/components/ui/Icon';
-import {
-  RESOURCE_COLORS,
-  RESOURCE_ICONS,
-  type ColonyResource,
-} from '@/components/ui/resourceMeta';
+import { motion } from 'framer-motion'
+import { useEffect } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import { type ColonyResource, RESOURCE_COLORS, RESOURCE_ICONS } from '@/components/ui/resourceMeta'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { processTick } from '@/store/slices/resourceSlice'
 
-type ResourceType = Extract<ColonyResource, 'energy' | 'minerals' | 'water' | 'food'>;
+type ResourceType = Extract<ColonyResource, 'energy' | 'minerals' | 'water' | 'food'>
 
-const RESOURCE_ORDER: ResourceType[] = ['energy', 'minerals', 'water', 'food'];
+const RESOURCE_ORDER: ResourceType[] = ['energy', 'minerals', 'water', 'food']
 
 const RESOURCE_NAMES: Record<ResourceType, string> = {
   energy: 'Energy',
   minerals: 'Minerals',
   water: 'Water',
   food: 'Food',
-};
+}
 
 export default function ResourceHUD() {
-  const dispatch = useAppDispatch();
-  const storage = useAppSelector((state) => state.resource.storage) as Record<ResourceType, number>;
-  const capacity = useAppSelector((state) => state.resource.capacity) as Record<ResourceType, number>;
-  const productionRates = useAppSelector(
-    (state) => state.resource.productionRates,
-  ) as Record<ResourceType, number>;
+  const dispatch = useAppDispatch()
+  const storage = useAppSelector((state) => state.resource.storage) as Record<ResourceType, number>
+  const capacity = useAppSelector((state) => state.resource.capacity) as Record<
+    ResourceType,
+    number
+  >
+  const productionRates = useAppSelector((state) => state.resource.productionRates) as Record<
+    ResourceType,
+    number
+  >
 
   useEffect(() => {
     const interval = setInterval(() => {
-      dispatch(processTick(1));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [dispatch]);
+      dispatch(processTick(1))
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [dispatch])
 
   return (
     <div className="flex gap-2.5">
       {RESOURCE_ORDER.map((resourceType, index) => {
-        const amount = storage[resourceType] ?? 0;
-        const color = RESOURCE_COLORS[resourceType];
-        const rate = productionRates[resourceType] ?? 0;
+        const amount = storage[resourceType] ?? 0
+        const color = RESOURCE_COLORS[resourceType]
+        const rate = productionRates[resourceType] ?? 0
 
         return (
           <motion.div
@@ -107,8 +107,8 @@ export default function ResourceHUD() {
               </div>
             </div>
           </motion.div>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

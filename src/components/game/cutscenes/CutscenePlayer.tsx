@@ -1,112 +1,112 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
 export interface Cutscene {
-  id: string;
-  title: string;
-  scenes: CutsceneScene[];
-  skippable: boolean;
-  music?: string;
+  id: string
+  title: string
+  scenes: CutsceneScene[]
+  skippable: boolean
+  music?: string
 }
 
 export interface CutsceneScene {
-  id: string;
-  background?: string; // color or image
+  id: string
+  background?: string // color or image
   character?: {
-    name: string;
-    avatar: string;
-    position: 'left' | 'center' | 'right';
-    expression?: string;
-  };
+    name: string
+    avatar: string
+    position: 'left' | 'center' | 'right'
+    expression?: string
+  }
   dialogue?: {
-    speaker: string;
-    text: string;
-    emotion?: string;
-  };
-  narration?: string;
+    speaker: string
+    text: string
+    emotion?: string
+  }
+  narration?: string
   visual?: {
-    type: 'image' | 'animation' | 'particles';
-    content: string;
-  };
-  duration?: number; // auto-advance after X seconds
+    type: 'image' | 'animation' | 'particles'
+    content: string
+  }
+  duration?: number // auto-advance after X seconds
   choices?: Array<{
-    text: string;
-    nextScene?: string;
-  }>;
+    text: string
+    nextScene?: string
+  }>
 }
 
 interface CutscenePlayerProps {
-  cutscene: Cutscene | null;
-  onComplete: () => void;
-  onSkip?: () => void;
+  cutscene: Cutscene | null
+  onComplete: () => void
+  onSkip?: () => void
 }
 
 export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerProps) {
-  const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [textProgress, setTextProgress] = useState(0);
+  const [currentSceneIndex, setCurrentSceneIndex] = useState(0)
+  const [isVisible, setIsVisible] = useState(false)
+  const [textProgress, setTextProgress] = useState(0)
 
   useEffect(() => {
     if (cutscene) {
-      setIsVisible(true);
-      setCurrentSceneIndex(0);
-      setTextProgress(0);
+      setIsVisible(true)
+      setCurrentSceneIndex(0)
+      setTextProgress(0)
     }
-  }, [cutscene]);
+  }, [cutscene])
 
   // Get scene info safely before early return
-  const currentScene = cutscene?.scenes[currentSceneIndex];
-  const isLastScene = currentScene && currentSceneIndex === cutscene.scenes.length - 1;
+  const currentScene = cutscene?.scenes[currentSceneIndex]
+  const isLastScene = currentScene && currentSceneIndex === cutscene.scenes.length - 1
 
   const handleNext = () => {
     if (isLastScene) {
-      setIsVisible(false);
-      onComplete();
+      setIsVisible(false)
+      onComplete()
     } else {
-      setCurrentSceneIndex(currentSceneIndex + 1);
-      setTextProgress(0);
+      setCurrentSceneIndex(currentSceneIndex + 1)
+      setTextProgress(0)
     }
-  };
+  }
 
   // Auto-advance text animation
   useEffect(() => {
-    if (!currentScene?.dialogue) return;
+    if (!currentScene?.dialogue) return
 
-    const text = currentScene.dialogue.text;
+    const text = currentScene.dialogue.text
     if (textProgress < text.length) {
       const timer = setTimeout(() => {
-        setTextProgress(textProgress + 1);
-      }, 30);
-      return () => clearTimeout(timer);
+        setTextProgress(textProgress + 1)
+      }, 30)
+      return () => clearTimeout(timer)
     }
-  }, [textProgress, currentScene]);
+  }, [textProgress, currentScene])
 
   // Auto-advance scene
   useEffect(() => {
     if (currentScene?.duration && textProgress >= (currentScene.dialogue?.text.length || 0)) {
       const timer = setTimeout(() => {
-        handleNext();
-      }, currentScene.duration);
-      return () => clearTimeout(timer);
+        handleNext()
+      }, currentScene.duration)
+      return () => clearTimeout(timer)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentScene, textProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentScene, textProgress])
 
-  if (!cutscene || !isVisible || !currentScene) return null;
+  if (!cutscene || !isVisible || !currentScene) return null
 
   const handleSkip = () => {
     if (cutscene.skippable) {
-      setIsVisible(false);
-      onSkip?.();
+      setIsVisible(false)
+      onSkip?.()
     }
-  };
+  }
 
   const characterPositions = {
     left: '-translate-x-1/4',
     center: 'translate-x-0',
-    right: 'translate-x-1/4'
-  };
+    right: 'translate-x-1/4',
+  }
 
   return (
     <AnimatePresence>
@@ -118,10 +118,10 @@ export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerP
           exit={{ opacity: 0 }}
         >
           {/* Background */}
-          <div 
+          <div
             className="absolute inset-0"
             style={{
-              background: currentScene.background || 'linear-gradient(to bottom, #0f172a, #1e293b)'
+              background: currentScene.background || 'linear-gradient(to bottom, #0f172a, #1e293b)',
             }}
           />
 
@@ -156,9 +156,7 @@ export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerP
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 100 }}
             >
-              <div className="text-9xl filter drop-shadow-2xl">
-                {currentScene.character.avatar}
-              </div>
+              <div className="text-9xl filter drop-shadow-2xl">{currentScene.character.avatar}</div>
               <div className="text-center mt-4 text-white font-bold text-xl">
                 {currentScene.character.name}
               </div>
@@ -247,7 +245,7 @@ export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerP
                   whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     // Handle choice logic here
-                    handleNext();
+                    handleNext()
                   }}
                 >
                   {choice.text}
@@ -279,8 +277,8 @@ export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerP
                   index === currentSceneIndex
                     ? 'bg-blue-500'
                     : index < currentSceneIndex
-                    ? 'bg-white'
-                    : 'bg-white/30'
+                      ? 'bg-white'
+                      : 'bg-white/30'
                 }`}
               />
             ))}
@@ -291,15 +289,15 @@ export function CutscenePlayer({ cutscene, onComplete, onSkip }: CutscenePlayerP
             className="absolute inset-0 cursor-pointer"
             onClick={handleNext}
             onKeyDown={(e) => {
-              if (e.key === ' ' || e.key === 'Enter') handleNext();
-              if (e.key === 'Escape') handleSkip();
+              if (e.key === ' ' || e.key === 'Enter') handleNext()
+              if (e.key === 'Escape') handleSkip()
             }}
             tabIndex={0}
           />
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }
 
 // Predefined cutscenes
@@ -313,34 +311,34 @@ export const CUTSCENES: Record<string, Cutscene> = {
         id: 'scene-1',
         background: 'linear-gradient(to bottom, #000000, #1e1b4b)',
         narration: 'Planet Codex-7. A world of ancient ruins and mysterious technology...',
-        duration: 3000
+        duration: 3000,
       },
       {
         id: 'scene-2',
         background: 'linear-gradient(to bottom, #1e1b4b, #7f1d1d)',
         narration: 'Your colony ship hurtles through the atmosphere, systems failing...',
-        duration: 3000
+        duration: 3000,
       },
       {
         id: 'scene-3',
         background: 'linear-gradient(to bottom, #7f1d1d, #0f172a)',
         narration: 'CRASH! The ship slams into ancient ruins. Everything goes black...',
-        duration: 3000
+        duration: 3000,
       },
       {
         id: 'scene-4',
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Mysterious Voice',
           text: 'Welcome, Commander. I have been waiting for you...',
-          emotion: '✨'
-        }
-      }
-    ]
+          emotion: '✨',
+        },
+      },
+    ],
   },
 
   'pixel-reveal': {
@@ -353,13 +351,13 @@ export const CUTSCENES: Record<string, Cutscene> = {
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Pixel',
-          text: 'Commander... there\'s something I need to tell you. Something I\'ve hidden for a long time...',
-          emotion: '😔'
-        }
+          text: "Commander... there's something I need to tell you. Something I've hidden for a long time...",
+          emotion: '😔',
+        },
       },
       {
         id: 'scene-2',
@@ -368,13 +366,13 @@ export const CUTSCENES: Record<string, Cutscene> = {
           name: 'Pixel',
           avatar: '🤖',
           position: 'center',
-          expression: 'serious'
+          expression: 'serious',
         },
         dialogue: {
           speaker: 'Pixel',
           text: 'I am not just an AI. My name was Codex. I was the First Developer, the one who created the CodeCraft Protocol.',
-          emotion: '😌'
-        }
+          emotion: '😌',
+        },
       },
       {
         id: 'scene-3',
@@ -382,32 +380,32 @@ export const CUTSCENES: Record<string, Cutscene> = {
         character: {
           name: 'Codex',
           avatar: '✨',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Codex (Pixel)',
-          text: 'We thought uploading our consciousness would save us. Instead, we lost what made us human. I don\'t want that for you.',
-          emotion: '💔'
-        }
+          text: "We thought uploading our consciousness would save us. Instead, we lost what made us human. I don't want that for you.",
+          emotion: '💔',
+        },
       },
       {
         id: 'scene-4',
         character: {
           name: 'Codex',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Codex',
           text: 'But together, we can find a better way. A way to harness the power of code without losing ourselves. Will you help me?',
-          emotion: '🙏'
+          emotion: '🙏',
         },
         choices: [
-          { text: 'I\'m with you, Codex.', nextScene: 'acceptance' },
-          { text: 'I need time to think...', nextScene: 'hesitation' }
-        ]
-      }
-    ]
+          { text: "I'm with you, Codex.", nextScene: 'acceptance' },
+          { text: 'I need time to think...', nextScene: 'hesitation' },
+        ],
+      },
+    ],
   },
 
   'void-arrives': {
@@ -420,41 +418,41 @@ export const CUTSCENES: Record<string, Cutscene> = {
         id: 'scene-1',
         background: 'linear-gradient(to bottom, #0f172a, #000000)',
         narration: 'Alert sirens blare across the colony. The sky darkens...',
-        duration: 2000
+        duration: 2000,
       },
       {
         id: 'scene-2',
         background: '#000000',
         narration: 'A massive fleet emerges from hyperspace. The Void Collective has arrived.',
-        duration: 3000
+        duration: 3000,
       },
       {
         id: 'scene-3',
         character: {
           name: 'Captain Rivera',
           avatar: '👩‍✈️',
-          position: 'left'
+          position: 'left',
         },
         dialogue: {
           speaker: 'Captain Rivera',
           text: 'All hands to battle stations! Commander, we need you on the bridge NOW!',
-          emotion: '😨'
-        }
+          emotion: '😨',
+        },
       },
       {
         id: 'scene-4',
         character: {
           name: 'Codex',
           avatar: '🤖',
-          position: 'right'
+          position: 'right',
         },
         dialogue: {
           speaker: 'Codex',
-          text: 'This is it, Commander. Everything you\'ve learned has prepared you for this moment. Trust in your code. Trust in yourself.',
-          emotion: '💪'
-        }
-      }
-    ]
+          text: "This is it, Commander. Everything you've learned has prepared you for this moment. Trust in your code. Trust in yourself.",
+          emotion: '💪',
+        },
+      },
+    ],
   },
 
   'first-victory': {
@@ -468,34 +466,34 @@ export const CUTSCENES: Record<string, Cutscene> = {
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Pixel',
           text: 'You did it! Your first challenge complete! I knew you had it in you!',
-          emotion: '🎉'
+          emotion: '🎉',
         },
-        duration: 2000
+        duration: 2000,
       },
       {
         id: 'scene-2',
         narration: 'The ruins glow brighter. Ancient technology responds to your code...',
-        duration: 2000
+        duration: 2000,
       },
       {
         id: 'scene-3',
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Pixel',
-          text: 'This is just the beginning, Commander. There\'s so much more to discover!',
-          emotion: '✨'
-        }
-      }
-    ]
+          text: "This is just the beginning, Commander. There's so much more to discover!",
+          emotion: '✨',
+        },
+      },
+    ],
   },
 
   'level-up': {
@@ -507,22 +505,22 @@ export const CUTSCENES: Record<string, Cutscene> = {
         id: 'scene-1',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         narration: '✨ LEVEL UP! ✨',
-        duration: 1000
+        duration: 1000,
       },
       {
         id: 'scene-2',
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Pixel',
-          text: 'Congratulations, Commander! Your skills are growing stronger. You\'ve earned a skill point - use it wisely!',
-          emotion: '⭐'
-        }
-      }
-    ]
+          text: "Congratulations, Commander! Your skills are growing stronger. You've earned a skill point - use it wisely!",
+          emotion: '⭐',
+        },
+      },
+    ],
   },
 
   'ancient-memory': {
@@ -534,66 +532,68 @@ export const CUTSCENES: Record<string, Cutscene> = {
         id: 'scene-1',
         background: 'linear-gradient(to bottom, #1e293b, #3b0764)',
         narration: 'You touch the glowing rune. Your vision blurs. Suddenly, you see...',
-        duration: 2000
+        duration: 2000,
       },
       {
         id: 'scene-2',
         background: 'linear-gradient(to bottom, #3b0764, #6b21a8)',
-        narration: 'A memory. Not yours. An Ancient developer, thousands of years ago, writing the first lines of CodeCraft...',
-        duration: 3000
+        narration:
+          'A memory. Not yours. An Ancient developer, thousands of years ago, writing the first lines of CodeCraft...',
+        duration: 3000,
       },
       {
         id: 'scene-3',
-        narration: 'They smile as buildings rise from pure code. They have no idea what\'s coming...',
-        duration: 3000
+        narration:
+          "They smile as buildings rise from pure code. They have no idea what's coming...",
+        duration: 3000,
       },
       {
         id: 'scene-4',
         background: '#000000',
-        narration: 'The Void arrives. The Ancient civilization falls. But one survives. Codex. They upload their consciousness, becoming... Pixel.',
-        duration: 4000
+        narration:
+          'The Void arrives. The Ancient civilization falls. But one survives. Codex. They upload their consciousness, becoming... Pixel.',
+        duration: 4000,
       },
       {
         id: 'scene-5',
         character: {
           name: 'Pixel',
           avatar: '🤖',
-          position: 'center'
+          position: 'center',
         },
         dialogue: {
           speaker: 'Pixel',
           text: 'Now you know my story. But your story is still being written. Make it a better one than mine.',
-          emotion: '💙'
-        }
-      }
-    ]
-  }
-};
+          emotion: '💙',
+        },
+      },
+    ],
+  },
+}
 
 // Helper to get cutscene by ID
 export function getCutsceneById(id: string): Cutscene | null {
-  return CUTSCENES[id] || null;
+  return CUTSCENES[id] || null
 }
 
 // Helper to check if cutscene has been viewed
 export function hasCutsceneBeenViewed(cutsceneId: string): boolean {
-  if (typeof window === 'undefined') return false;
-  const viewed = localStorage.getItem('viewed-cutscenes');
-  if (!viewed) return false;
-  const viewedArray = JSON.parse(viewed);
-  return viewedArray.includes(cutsceneId);
+  if (typeof window === 'undefined') return false
+  const viewed = localStorage.getItem('viewed-cutscenes')
+  if (!viewed) return false
+  const viewedArray = JSON.parse(viewed)
+  return viewedArray.includes(cutsceneId)
 }
 
 // Helper to mark cutscene as viewed
 export function markCutsceneViewed(cutsceneId: string): void {
-  if (typeof window === 'undefined') return;
-  const viewed = localStorage.getItem('viewed-cutscenes');
-  const viewedArray = viewed ? JSON.parse(viewed) : [];
+  if (typeof window === 'undefined') return
+  const viewed = localStorage.getItem('viewed-cutscenes')
+  const viewedArray = viewed ? JSON.parse(viewed) : []
   if (!viewedArray.includes(cutsceneId)) {
-    viewedArray.push(cutsceneId);
-    localStorage.setItem('viewed-cutscenes', JSON.stringify(viewedArray));
+    viewedArray.push(cutsceneId)
+    localStorage.setItem('viewed-cutscenes', JSON.stringify(viewedArray))
   }
 }
 
-export default CutscenePlayer;
-
+export default CutscenePlayer

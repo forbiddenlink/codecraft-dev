@@ -1,23 +1,23 @@
-'use client';
-import { useRef, useMemo, useState, useEffect } from 'react';
-import { RigidBody, BallCollider } from '@react-three/rapier';
-import type { RapierRigidBody } from '@react-three/rapier';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+'use client'
+import { useFrame } from '@react-three/fiber'
+import type { RapierRigidBody } from '@react-three/rapier'
+import { BallCollider, RigidBody } from '@react-three/rapier'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 
 interface PhysicsParticle {
-  id: number;
-  position: [number, number, number];
-  velocity: [number, number, number];
-  color: string;
-  size: number;
+  id: number
+  position: [number, number, number]
+  velocity: [number, number, number]
+  color: string
+  size: number
 }
 
 interface PhysicsCelebrationProps {
-  position?: [number, number, number];
-  type?: 'success' | 'levelUp' | 'achievement' | 'mastery' | 'streak';
-  particleCount?: number;
-  onComplete?: () => void;
+  position?: [number, number, number]
+  type?: 'success' | 'levelUp' | 'achievement' | 'mastery' | 'streak'
+  particleCount?: number
+  onComplete?: () => void
 }
 
 const CELEBRATION_CONFIGS = {
@@ -51,7 +51,7 @@ const CELEBRATION_CONFIGS = {
     speed: 10,
     duration: 3000,
   },
-};
+}
 
 /**
  * Physics-based celebration particles using Rapier.
@@ -63,16 +63,16 @@ export default function PhysicsCelebration({
   particleCount,
   onComplete,
 }: PhysicsCelebrationProps) {
-  const [visible, setVisible] = useState(true);
-  const config = CELEBRATION_CONFIGS[type];
-  const count = particleCount || config.count;
+  const [visible, setVisible] = useState(true)
+  const config = CELEBRATION_CONFIGS[type]
+  const count = particleCount || config.count
 
   // Generate initial particles with random velocities
   const particles = useMemo<PhysicsParticle[]>(() => {
     return Array.from({ length: count }, (_, i) => {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const speed = config.speed * (0.5 + Math.random() * 0.5);
+      const theta = Math.random() * Math.PI * 2
+      const phi = Math.acos(2 * Math.random() - 1)
+      const speed = config.speed * (0.5 + Math.random() * 0.5)
 
       return {
         id: i,
@@ -84,21 +84,21 @@ export default function PhysicsCelebration({
         ] as [number, number, number],
         color: config.colors[Math.floor(Math.random() * config.colors.length)],
         size: 0.1 + Math.random() * 0.15,
-      };
-    });
-  }, [count, config]);
+      }
+    })
+  }, [count, config])
 
   // Auto-hide after duration
   useEffect(() => {
     const timer = setTimeout(() => {
-      setVisible(false);
-      onComplete?.();
-    }, config.duration);
+      setVisible(false)
+      onComplete?.()
+    }, config.duration)
 
-    return () => clearTimeout(timer);
-  }, [config.duration, onComplete]);
+    return () => clearTimeout(timer)
+  }, [config.duration, onComplete])
 
-  if (!visible) return null;
+  if (!visible) return null
 
   return (
     <group position={position}>
@@ -111,18 +111,18 @@ export default function PhysicsCelebration({
         />
       ))}
     </group>
-  );
+  )
 }
 
 interface PhysicsParticleProps {
-  initialVelocity: [number, number, number];
-  color: string;
-  size: number;
+  initialVelocity: [number, number, number]
+  color: string
+  size: number
 }
 
 function PhysicsParticle({ initialVelocity, color, size }: PhysicsParticleProps) {
-  const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const [opacity, setOpacity] = useState(1);
+  const rigidBodyRef = useRef<RapierRigidBody>(null)
+  const [opacity, setOpacity] = useState(1)
 
   // Apply initial impulse on mount
   useEffect(() => {
@@ -130,16 +130,16 @@ function PhysicsParticle({ initialVelocity, color, size }: PhysicsParticleProps)
       rigidBodyRef.current.applyImpulse(
         { x: initialVelocity[0], y: initialVelocity[1], z: initialVelocity[2] },
         true
-      );
+      )
     }
-  }, [initialVelocity]);
+  }, [initialVelocity])
 
   // Fade out over time
   useFrame((state, delta) => {
-    setOpacity((prev) => Math.max(0, prev - delta * 0.3));
-  });
+    setOpacity((prev) => Math.max(0, prev - delta * 0.3))
+  })
 
-  if (opacity <= 0) return null;
+  if (opacity <= 0) return null
 
   return (
     <RigidBody
@@ -164,5 +164,5 @@ function PhysicsParticle({ initialVelocity, color, size }: PhysicsParticleProps)
         />
       </mesh>
     </RigidBody>
-  );
+  )
 }

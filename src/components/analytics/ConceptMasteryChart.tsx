@@ -3,13 +3,13 @@
  * Visualizes mastery level for each programming concept
  */
 
-import { Target, Dumbbell, BookOpen } from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+import { BookOpen, Dumbbell, Target } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface ConceptMasteryChartProps {
-  analytics: LearningAnalytics;
-  detailed?: boolean;
+  analytics: LearningAnalytics
+  detailed?: boolean
 }
 
 export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMasteryChartProps) {
@@ -20,29 +20,29 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
       attempts: analytics.errorsPerConcept.get(concept) || 0,
       isStrong: analytics.strongConcepts.includes(concept),
       isWeak: analytics.weakConcepts.includes(concept),
-    }),
-  );
+    })
+  )
 
-  concepts.sort((a, b) => b.successRate - a.successRate);
+  concepts.sort((a, b) => b.successRate - a.successRate)
 
-  const displayLimit = detailed ? concepts.length : 8;
-  const displayConcepts = concepts.slice(0, displayLimit);
+  const displayLimit = detailed ? concepts.length : 8
+  const displayConcepts = concepts.slice(0, displayLimit)
 
   const getMasteryColor = (rate: number) => {
-    if (rate >= 90) return 'bg-success';
-    if (rate >= 75) return 'bg-info';
-    if (rate >= 60) return 'bg-warning';
-    if (rate >= 40) return 'bg-orange-500';
-    return 'bg-error';
-  };
+    if (rate >= 90) return 'bg-success'
+    if (rate >= 75) return 'bg-info'
+    if (rate >= 60) return 'bg-warning'
+    if (rate >= 40) return 'bg-orange-500'
+    return 'bg-error'
+  }
 
   const getMasteryLabel = (rate: number) => {
-    if (rate >= 90) return 'Mastered';
-    if (rate >= 75) return 'Proficient';
-    if (rate >= 60) return 'Intermediate';
-    if (rate >= 40) return 'Learning';
-    return 'Needs Practice';
-  };
+    if (rate >= 90) return 'Mastered'
+    if (rate >= 75) return 'Proficient'
+    if (rate >= 60) return 'Intermediate'
+    if (rate >= 40) return 'Learning'
+    return 'Needs Practice'
+  }
 
   return (
     <div className="card">
@@ -104,5 +104,5 @@ export function ConceptMasteryChart({ analytics, detailed = false }: ConceptMast
         </p>
       )}
     </div>
-  );
+  )
 }

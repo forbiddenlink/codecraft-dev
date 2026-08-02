@@ -3,33 +3,33 @@
  * Visual novel-style dialogue interface
  */
 
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
 import {
-  Smile,
-  Meh,
-  Frown,
-  Sparkles,
   Angry,
-  HelpCircle,
-  Award,
-  Lock,
   ArrowRight,
+  Award,
+  Frown,
+  HelpCircle,
+  Lock,
+  Meh,
+  Smile,
+  Sparkles,
   X,
-} from 'lucide-react';
-import type { DialogueNode, DialogueChoice } from '@/utils/dialogueSystem';
-import { Icon } from '@/components/ui/Icon';
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import type { DialogueChoice, DialogueNode } from '@/utils/dialogueSystem'
 
 export interface DialogueBoxProps {
-  npcName: string;
-  npcAvatar?: string;
-  node: DialogueNode;
-  choices: DialogueChoice[];
-  onChoice: (choiceId: string) => void;
-  onContinue: () => void;
-  onClose: () => void;
+  npcName: string
+  npcAvatar?: string
+  node: DialogueNode
+  choices: DialogueChoice[]
+  onChoice: (choiceId: string) => void
+  onContinue: () => void
+  onClose: () => void
 }
 
 const emotionColors = {
@@ -40,7 +40,7 @@ const emotionColors = {
   angry: 'from-red-600/20 to-red-800/20 border-red-500/30',
   confused: 'from-slate-600/20 to-slate-800/20 border-slate-500/30',
   proud: 'from-orange-600/20 to-orange-800/20 border-orange-500/30',
-};
+}
 
 const emotionIcons: Record<keyof typeof emotionColors, LucideIcon> = {
   happy: Smile,
@@ -50,7 +50,7 @@ const emotionIcons: Record<keyof typeof emotionColors, LucideIcon> = {
   angry: Angry,
   confused: HelpCircle,
   proud: Award,
-};
+}
 
 export function DialogueBox({
   npcName,
@@ -61,41 +61,41 @@ export function DialogueBox({
   onContinue,
   onClose,
 }: DialogueBoxProps) {
-  const [displayedText, setDisplayedText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayedText, setDisplayedText] = useState('')
+  const [isTyping, setIsTyping] = useState(true)
+  const [currentIndex, setCurrentIndex] = useState(0)
 
-  const emotion = node.emotion || 'neutral';
-  const colorClass = emotionColors[emotion];
+  const emotion = node.emotion || 'neutral'
+  const colorClass = emotionColors[emotion]
 
   // Typewriter effect
   useEffect(() => {
     if (currentIndex < node.text.length) {
       const timeout = setTimeout(() => {
-        setDisplayedText(node.text.slice(0, currentIndex + 1));
-        setCurrentIndex(currentIndex + 1);
-      }, 30); // Typing speed
+        setDisplayedText(node.text.slice(0, currentIndex + 1))
+        setCurrentIndex(currentIndex + 1)
+      }, 30) // Typing speed
 
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(timeout)
     } else {
-      setIsTyping(false);
+      setIsTyping(false)
     }
-  }, [currentIndex, node.text]);
+  }, [currentIndex, node.text])
 
   // Reset typing when node changes
   useEffect(() => {
-    setDisplayedText('');
-    setCurrentIndex(0);
-    setIsTyping(true);
-  }, [node.id]);
+    setDisplayedText('')
+    setCurrentIndex(0)
+    setIsTyping(true)
+  }, [node.id])
 
   const handleSkipTyping = () => {
-    setDisplayedText(node.text);
-    setCurrentIndex(node.text.length);
-    setIsTyping(false);
-  };
+    setDisplayedText(node.text)
+    setCurrentIndex(node.text.length)
+    setIsTyping(false)
+  }
 
-  const hasChoices = choices.length > 0;
+  const hasChoices = choices.length > 0
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end justify-center p-4 pointer-events-auto">
@@ -141,9 +141,7 @@ export function DialogueBox({
           >
             <p className="text-white text-lg leading-relaxed">
               {displayedText}
-              {isTyping && (
-                <span className="inline-block w-2 h-5 bg-white ml-1 animate-pulse" />
-              )}
+              {isTyping && <span className="inline-block w-2 h-5 bg-white ml-1 animate-pulse" />}
             </p>
           </div>
 
@@ -153,7 +151,7 @@ export function DialogueBox({
               {hasChoices ? (
                 <div className="space-y-2">
                   {choices.map((choice) => {
-                    const isAvailable = !choice.requirementText;
+                    const isAvailable = !choice.requirementText
                     return (
                       <button
                         key={choice.id}
@@ -175,7 +173,7 @@ export function DialogueBox({
                           )}
                         </div>
                       </button>
-                    );
+                    )
                   })}
                 </div>
               ) : (
@@ -202,5 +200,5 @@ export function DialogueBox({
         </div>
       </div>
     </div>
-  );
+  )
 }

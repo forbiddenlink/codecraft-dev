@@ -1,36 +1,36 @@
-import { validateHtml, validateCss, validateJs, ValidationResult } from './codeValidation';
-import { parseHtmlToGameObjects, GameObject } from './parseHtmlToGameObjects';
-import { applyCSSToGameObject } from '@/game/mapping/ElementMapping';
-import { BuildingTemplate } from '@/types/buildings';
+import { applyCSSToGameObject } from '@/game/mapping/ElementMapping'
+import type { BuildingTemplate } from '@/types/buildings'
+import { type ValidationResult, validateCss, validateHtml, validateJs } from './codeValidation'
+import { type GameObject, parseHtmlToGameObjects } from './parseHtmlToGameObjects'
 
 export interface ExecutionResult {
-  success: boolean;
-  gameObjects: GameObject[];
+  success: boolean
+  gameObjects: GameObject[]
   validationResults: {
-    html: ValidationResult;
-    css: ValidationResult;
-    js: ValidationResult;
-  };
-  error?: string;
+    html: ValidationResult
+    css: ValidationResult
+    js: ValidationResult
+  }
+  error?: string
 }
 
 export interface CodeExecutionContext {
-  html: string;
-  css: string;
-  js?: string;
-  buildingTemplate?: BuildingTemplate;
+  html: string
+  css: string
+  js?: string
+  buildingTemplate?: BuildingTemplate
 }
 
 export class CodeExecutionEngine {
-  private sandbox: HTMLIFrameElement | null = null;
+  private sandbox: HTMLIFrameElement | null = null
 
   constructor() {
     // Create a sandboxed environment for code execution
     if (typeof window !== 'undefined') {
-      this.sandbox = document.createElement('iframe');
-      this.sandbox.style.display = 'none';
-      this.sandbox.sandbox.add('allow-scripts');
-      document.body.appendChild(this.sandbox);
+      this.sandbox = document.createElement('iframe')
+      this.sandbox.style.display = 'none'
+      this.sandbox.sandbox.add('allow-scripts')
+      document.body.appendChild(this.sandbox)
     }
   }
 
@@ -40,28 +40,32 @@ export class CodeExecutionEngine {
       const validationResults = {
         html: validateHtml(context.html),
         css: validateCss(context.css),
-        js: context.js ? validateJs(context.js) : { isValid: true, errors: [], warnings: [] }
-      };
+        js: context.js ? validateJs(context.js) : { isValid: true, errors: [], warnings: [] },
+      }
 
       // Check for validation errors
-      if (!validationResults.html.isValid || !validationResults.css.isValid || !validationResults.js.isValid) {
+      if (
+        !validationResults.html.isValid ||
+        !validationResults.css.isValid ||
+        !validationResults.js.isValid
+      ) {
         return {
           success: false,
           gameObjects: [],
           validationResults,
-          error: 'Code validation failed. Check the validation results for details.'
-        };
+          error: 'Code validation failed. Check the validation results for details.',
+        }
       }
 
       // Parse HTML into game objects
-      const gameObjects = parseHtmlToGameObjects(context.html);
+      const gameObjects = parseHtmlToGameObjects(context.html)
 
       // Apply CSS to game objects
-      this.applyCssToGameObjects(gameObjects, context.css);
+      this.applyCssToGameObjects(gameObjects, context.css)
 
       // If there's JavaScript, execute it in the sandbox
       if (context.js) {
-        await this.executeJavaScript(context.js, gameObjects);
+        await this.executeJavaScript(context.js, gameObjects)
       }
 
       // TODO: If this is for a building template, validate against template requirements
@@ -73,8 +77,8 @@ export class CodeExecutionEngine {
       return {
         success: true,
         gameObjects,
-        validationResults
-      };
+        validationResults,
+      }
     } catch (error: any) {
       return {
         success: false,
@@ -82,28 +86,28 @@ export class CodeExecutionEngine {
         validationResults: {
           html: { isValid: false, errors: [], warnings: [] },
           css: { isValid: false, errors: [], warnings: [] },
-          js: { isValid: false, errors: [], warnings: [] }
+          js: { isValid: false, errors: [], warnings: [] },
         },
-        error: error?.message || 'Unknown error'
-      };
+        error: error?.message || 'Unknown error',
+      }
     }
   }
 
   private applyCssToGameObjects(objects: GameObject[], css: string): void {
     // Create a style element to parse CSS
-    const style = document.createElement('style');
-    style.textContent = css;
-    document.head.appendChild(style);
+    const style = document.createElement('style')
+    style.textContent = css
+    document.head.appendChild(style)
 
     // Apply CSS to each game object
     const applyToObject = (obj: GameObject) => {
-      const element = document.createElement(obj.tag);
-      
+      const element = document.createElement(obj.tag)
+
       // Apply classes and compute styles
       if (obj.className) {
-        element.className = obj.className;
+        element.className = obj.className
       }
-      const computedStyle = window.getComputedStyle(element);
+      const computedStyle = window.getComputedStyle(element)
 
       // TODO: Convert CSS properties to game object properties
       // applyCSSToGameObject expects Object3D, not GameObject
@@ -112,16 +116,16 @@ export class CodeExecutionEngine {
 
       // Recursively apply to children
       if (obj.children) {
-        obj.children.forEach(applyToObject);
+        obj.children.forEach(applyToObject)
       }
-    };
+    }
 
-    objects.forEach(applyToObject);
-    document.head.removeChild(style);
+    objects.forEach(applyToObject)
+    document.head.removeChild(style)
   }
 
   private async executeJavaScript(code: string, gameObjects: GameObject[]): Promise<void> {
-    if (!this.sandbox) return;
+    if (!this.sandbox) return
 
     return new Promise((resolve, reject) => {
       try {
@@ -131,12 +135,12 @@ export class CodeExecutionEngine {
           console: {
             log: console.log,
             warn: console.warn,
-            error: console.error
+            error: console.error,
           },
           setTimeout: setTimeout,
           clearTimeout: clearTimeout,
           // Add other safe APIs as needed
-        };
+        }
 
         // Execute the code in the sandbox
         const wrappedCode = `
@@ -147,36 +151,36 @@ export class CodeExecutionEngine {
           } catch (error) {
             window.parent.postMessage({ type: 'error', message: error.message }, '*');
           }
-        `;
+        `
 
         // Handle messages from the sandbox
         const handleMessage = (event: MessageEvent) => {
           if (event.data.type === 'error') {
-            reject(new Error(event.data.message));
+            reject(new Error(event.data.message))
           }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        // Execute the code
-        const scriptContent = `(${wrappedCode})(${JSON.stringify(context)});`;
-        const contentDoc = this.sandbox?.contentDocument;
-        if (!contentDoc) {
-          reject(new Error('Sandbox content document not available'));
-          return;
         }
 
-        const script = contentDoc.createElement('script');
-        script.textContent = scriptContent;
-        contentDoc.body.appendChild(script);
+        window.addEventListener('message', handleMessage)
+
+        // Execute the code
+        const scriptContent = `(${wrappedCode})(${JSON.stringify(context)});`
+        const contentDoc = this.sandbox?.contentDocument
+        if (!contentDoc) {
+          reject(new Error('Sandbox content document not available'))
+          return
+        }
+
+        const script = contentDoc.createElement('script')
+        script.textContent = scriptContent
+        contentDoc.body.appendChild(script)
 
         // Clean up
-        window.removeEventListener('message', handleMessage);
-        resolve();
+        window.removeEventListener('message', handleMessage)
+        resolve()
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   // TODO: Re-implement validation against building template requirements
@@ -261,8 +265,8 @@ export class CodeExecutionEngine {
 
   public destroy(): void {
     if (this.sandbox) {
-      document.body.removeChild(this.sandbox);
-      this.sandbox = null;
+      document.body.removeChild(this.sandbox)
+      this.sandbox = null
     }
   }
-} 
+}

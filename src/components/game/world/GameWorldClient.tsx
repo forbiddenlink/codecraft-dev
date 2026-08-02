@@ -1,69 +1,65 @@
-"use client";
-import React, { Suspense, useRef, useState, useMemo } from 'react';
-import { Canvas, useThree } from '@react-three/fiber';
-import { OrbitControls, Stars, Sky, Environment } from '@react-three/drei';
-import { EffectComposer, Bloom } from '@react-three/postprocessing';
-import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive';
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setEditorVisible, setCode, setLanguage } from "@/store/slices/editorSlice";
-import { setTargetPosition } from "@/store/slices/playerSlice";
-import { selectBuilding, setSelectedTemplateId, toggleBuildMode, unlockBuilding } from "@/store/slices/buildingSlice";
-import { nextStep, endTutorial } from "@/store/slices/tutorialSlice";
-import { setCurrentChallenge } from "@/store/slices/challengeSlice";
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
-import { RootState } from "@/store/store";
-import { ParsedCSSRule, JSExecutionContext } from "@/store/slices/gameSlice";
-import { parseCSSRule } from "@/utils/cssParser";
-import ResourceCollectors from "@/components/game/resources/ResourceCollectors";
-import ResourceFlowSystem from "@/components/game/resources/ResourceFlowSystem";
-import ResourceGenerators from "@/components/game/resources/ResourceGenerators";
-import PlacedBuildings from "@/components/game/buildings/PlacedBuildings";
-import BuildingPreview from "@/components/game/buildings/BuildingPreview";
-import BuildingGrid from "@/components/game/buildings/BuildingGrid";
-import HtmlStructureVisualization from "@/components/game/buildings/HtmlStructureVisualization";
-import UnlockedVillagers from "@/components/game/villagers/UnlockedVillagers";
-import ErrorVisualization from "@/components/game/code/ErrorVisualization";
-import WeatherSystem from "@/components/game/environment/WeatherSystem";
-import CodeExecutionVisualizer from "@/components/game/code/CodeExecutionVisualizer";
-import TutorialOverlay from "@/components/game/tutorial/TutorialOverlay";
-import ResourceHUD from "@/components/game/hud/ResourceHUD";
-import BuildingMenu from "@/components/game/buildings/BuildingMenu";
-import { getAvailableChallenges, getChallengeById } from '@/data/challenges';
-import Ground from "@/components/game/ground/Ground";
-import { PhysicsProvider, PhysicsGround, PhysicsCelebration } from "@/components/game/physics";
-import HintPanel from "@/components/game/challenges/HintPanel";
-import MasteryDashboard from "@/components/game/challenges/MasteryDashboard";
-import StreakDisplay from "@/components/game/streaks/StreakDisplay";
-import CelebrationSparkles from "@/components/game/celebrations/CelebrationSparkles";
-import { useChallengeProgress, CelebrationType } from "@/hooks/useChallengeProgress";
-import { parseHtmlToStructure } from "@/utils/htmlParser";
-import type { Challenge } from '@/types/challenges';
-import type { HtmlNode } from '@/types/html';
-import { ThreeEvent } from '@react-three/fiber';
-import Player from '@/components/game/player/Player';
-import Pixel from '@/components/game/pixel/Pixel';
-import CameraFocusManager from '@/components/game/camera/CameraFocusManager';
-import * as THREE from 'three';
-import confetti from 'canvas-confetti';
+'use client'
+import { Environment, OrbitControls, Sky, Stars } from '@react-three/drei'
+import { Canvas, type ThreeEvent, useThree } from '@react-three/fiber'
+import { Bloom, EffectComposer } from '@react-three/postprocessing'
+import confetti from 'canvas-confetti'
+import { Bot, CheckCircle2, ChevronLeft, ChevronRight, Code2, Home, Target } from 'lucide-react'
+import React, { Suspense, useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
+import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
+import BuildingGrid from '@/components/game/buildings/BuildingGrid'
+import BuildingMenu from '@/components/game/buildings/BuildingMenu'
+import BuildingPreview from '@/components/game/buildings/BuildingPreview'
+import HtmlStructureVisualization from '@/components/game/buildings/HtmlStructureVisualization'
+import PlacedBuildings from '@/components/game/buildings/PlacedBuildings'
+import CameraFocusManager from '@/components/game/camera/CameraFocusManager'
+import CelebrationSparkles from '@/components/game/celebrations/CelebrationSparkles'
+import HintPanel from '@/components/game/challenges/HintPanel'
+import MasteryDashboard from '@/components/game/challenges/MasteryDashboard'
+import CodeExecutionVisualizer from '@/components/game/code/CodeExecutionVisualizer'
+import ErrorVisualization from '@/components/game/code/ErrorVisualization'
+import WeatherSystem from '@/components/game/environment/WeatherSystem'
+import Ground from '@/components/game/ground/Ground'
+import ResourceHUD from '@/components/game/hud/ResourceHUD'
+import { PhysicsCelebration, PhysicsGround, PhysicsProvider } from '@/components/game/physics'
+import Pixel from '@/components/game/pixel/Pixel'
+import Player from '@/components/game/player/Player'
+import ResourceCollectors from '@/components/game/resources/ResourceCollectors'
+import ResourceFlowSystem from '@/components/game/resources/ResourceFlowSystem'
+import ResourceGenerators from '@/components/game/resources/ResourceGenerators'
+import StreakDisplay from '@/components/game/streaks/StreakDisplay'
+import TutorialOverlay from '@/components/game/tutorial/TutorialOverlay'
+import UnlockedVillagers from '@/components/game/villagers/UnlockedVillagers'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { getAvailableChallenges, getChallengeById } from '@/data/challenges'
+import { buildingSystem } from '@/game/systems/BuildingSystem'
+import { CelebrationType, useChallengeProgress } from '@/hooks/useChallengeProgress'
+import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
-  ChevronLeft,
-  ChevronRight,
-  Code2,
-  CheckCircle2,
-  Target,
-  Bot,
-  Home,
-} from 'lucide-react';
+  selectBuilding,
+  setSelectedTemplateId,
+  toggleBuildMode,
+  unlockBuilding,
+} from '@/store/slices/buildingSlice'
+import { setCurrentChallenge } from '@/store/slices/challengeSlice'
+import { setCode, setEditorVisible, setLanguage } from '@/store/slices/editorSlice'
+import type { JSExecutionContext, ParsedCSSRule } from '@/store/slices/gameSlice'
+import { setTargetPosition } from '@/store/slices/playerSlice'
+import { endTutorial, nextStep } from '@/store/slices/tutorialSlice'
+import type { RootState } from '@/store/store'
+import type { Challenge } from '@/types/challenges'
+import type { HtmlNode } from '@/types/html'
 import {
-  trackChallengeStarted,
-  trackChallengeCompleted,
-  trackCodeSubmitted,
   trackBuildingConstructed,
-} from '@/utils/analytics';
-import { buildingTemplates } from '@/data/buildingTemplates';
-import { buildingSystem } from '@/game/systems/BuildingSystem';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+  trackChallengeCompleted,
+  trackChallengeStarted,
+  trackCodeSubmitted,
+} from '@/utils/analytics'
+import { parseCSSRule } from '@/utils/cssParser'
+import { parseHtmlToStructure } from '@/utils/htmlParser'
 
 // Environment settings
 const ENVIRONMENT_CONFIG = {
@@ -73,7 +69,7 @@ const ENVIRONMENT_CONFIG = {
     count: 5000,
     factor: 7,
     saturation: 1,
-    fade: true
+    fade: true,
   },
   sky: {
     distance: 450000,
@@ -83,21 +79,21 @@ const ENVIRONMENT_CONFIG = {
     mieCoefficient: 0.001,
     mieDirectionalG: 0.85,
     rayleigh: 0.3,
-    turbidity: 2
+    turbidity: 2,
   },
   fog: {
     color: '#0f172a',
     near: 150,
-    far: 500
+    far: 500,
   },
   grid: {
     width: 200,
     height: 200,
-    cellSize: 5
+    cellSize: 5,
   },
   scene: {
     background: '#0f172a',
-    groundColor: '#1e293b'
+    groundColor: '#1e293b',
   },
   camera: {
     position: [20, 25, 35] as [number, number, number],
@@ -105,9 +101,9 @@ const ENVIRONMENT_CONFIG = {
     near: 0.1,
     far: 1000,
     minDistance: 5,
-    maxDistance: 50
-  }
-};
+    maxDistance: 50,
+  },
+}
 
 // Helper function to determine sun position based on time of day (currently unused)
 // function getSunPosition(timeOfDay: number): [number, number, number] {
@@ -125,9 +121,9 @@ function determinePixelMood(
   isEditorVisible: boolean,
   errors: Array<{ message: string }> | null
 ): 'concerned' | 'curious' | 'happy' | 'neutral' {
-  if (errors && errors.length > 0) return 'concerned';
-  if (isEditorVisible && challenge) return 'curious';
-  return 'happy';
+  if (errors && errors.length > 0) return 'concerned'
+  if (isEditorVisible && challenge) return 'curious'
+  return 'happy'
 }
 
 // Helper to generate contextual tips
@@ -136,60 +132,60 @@ function generateContextualTip(
   playerProgress: Record<string, unknown>,
   resources: Record<string, number>
 ): string {
-  if (challenge?.description) return challenge.description;
-  
+  if (challenge?.description) return challenge.description
+
   const resourceArray = Object.entries(resources).map(([resourceId, amount]) => ({
     resourceId,
-    amount
-  }));
-  
-  if (resourceArray.some(r => r.amount < 20)) {
-    return 'Try building more resource collectors!';
+    amount,
+  }))
+
+  if (resourceArray.some((r) => r.amount < 20)) {
+    return 'Try building more resource collectors!'
   }
-  return 'Explore and build your colony!';
+  return 'Explore and build your colony!'
 }
 
 // Component Props
-type HtmlStructureVisualizationProps = React.ComponentProps<typeof HtmlStructureVisualization>;
-type BuildingPreviewProps = React.ComponentProps<typeof BuildingPreview>;
+type HtmlStructureVisualizationProps = React.ComponentProps<typeof HtmlStructureVisualization>
+type BuildingPreviewProps = React.ComponentProps<typeof BuildingPreview>
 // type ErrorVisualizationProps = React.ComponentProps<typeof ErrorVisualization>;
 // type CodeExecutionVisualizerProps = React.ComponentProps<typeof CodeExecutionVisualizer>;
 
 interface ResourceGenerator {
-  id: string;
-  position: [number, number, number];
-  isActive: boolean;
-  type: string;
-  rotation: [number, number, number];
-  outputRate: number;
-  resourceType: 'energy' | 'minerals' | 'water' | 'food';
-  status: 'active' | 'inactive';
-  efficiency: number;
-  lastCollection: number;
-  customizations: Record<string, unknown>;
-  resources: Array<{ resourceId: string; amount: number }>;
+  id: string
+  position: [number, number, number]
+  isActive: boolean
+  type: string
+  rotation: [number, number, number]
+  outputRate: number
+  resourceType: 'energy' | 'minerals' | 'water' | 'food'
+  status: 'active' | 'inactive'
+  efficiency: number
+  lastCollection: number
+  customizations: Record<string, unknown>
+  resources: Array<{ resourceId: string; amount: number }>
 }
 
 interface ResourceFlow {
-  from: [number, number, number];
-  to: [number, number, number];
-  resource: string;
-  amount: number;
+  from: [number, number, number]
+  to: [number, number, number]
+  resource: string
+  amount: number
 }
 
 interface GameExecutionData {
-  variables: Record<string, string | number | boolean | null | undefined>;
-  callStack: string[];
-  output: string[];
+  variables: Record<string, string | number | boolean | null | undefined>
+  callStack: string[]
+  output: string[]
 }
 
 interface ParsedHtmlNode {
-  type: string;
-  attributes?: Record<string, string>;
-  level?: number;
-  index?: number;
-  children?: ParsedHtmlNode[];
-  styles?: Record<string, string>;
+  type: string
+  attributes?: Record<string, string>
+  level?: number
+  index?: number
+  children?: ParsedHtmlNode[]
+  styles?: Record<string, string>
 }
 
 // interface ResourceGeneratorsProps {
@@ -203,51 +199,57 @@ interface ParsedHtmlNode {
 
 // Define building state interface
 interface BuildingState {
-  buildMode: boolean;
-  selectedTemplateId: string | null;
+  buildMode: boolean
+  selectedTemplateId: string | null
 }
 
 // Define game state interface
 interface TutorialStep {
-  focusArea?: string;
-  content?: string;
-  position?: [number, number, number];
+  focusArea?: string
+  content?: string
+  position?: [number, number, number]
 }
 
 interface GameStatePartial {
-  colonyResources?: Record<string, number>;
-  cssRules?: ParsedCSSRule[];
-  jsExecutionContext?: JSExecutionContext | null;
-  tutorialActive?: boolean;
-  tutorialStep?: number;
+  colonyResources?: Record<string, number>
+  cssRules?: ParsedCSSRule[]
+  jsExecutionContext?: JSExecutionContext | null
+  tutorialActive?: boolean
+  tutorialStep?: number
   tutorialState?: {
-    active: boolean;
-    step: number;
-    steps: TutorialStep[];
-  };
-  building?: BuildingState;
-  generators?: ResourceGenerator[];
+    active: boolean
+    step: number
+    steps: TutorialStep[]
+  }
+  building?: BuildingState
+  generators?: ResourceGenerator[]
 }
 
 const DarkBackground = () => (
   <mesh position={[0, 0, -100]} scale={[200, 200, 1]}>
     <planeGeometry />
-    <meshBasicMaterial color={ENVIRONMENT_CONFIG.scene.background} depthTest={false} side={2} transparent opacity={1} />
+    <meshBasicMaterial
+      color={ENVIRONMENT_CONFIG.scene.background}
+      depthTest={false}
+      side={2}
+      transparent
+      opacity={1}
+    />
   </mesh>
-);
+)
 
 const SceneContent = () => {
-  const { gl, scene } = useThree();
-  
+  const { gl, scene } = useThree()
+
   React.useEffect(() => {
     if (gl && scene) {
       scene.fog = new THREE.Fog(
         ENVIRONMENT_CONFIG.fog.color,
         ENVIRONMENT_CONFIG.fog.near,
         ENVIRONMENT_CONFIG.fog.far
-      );
+      )
     }
-  }, [gl, scene]);
+  }, [gl, scene])
 
   return (
     <group>
@@ -258,34 +260,35 @@ const SceneContent = () => {
         groundColor={ENVIRONMENT_CONFIG.scene.groundColor}
       />
     </group>
-  );
-};
+  )
+}
 
 export default function GameWorldClient() {
-  const dispatch = useAppDispatch();
-  const [challengeIndex, setChallengeIndex] = useState(0);
+  const dispatch = useAppDispatch()
+  const [challengeIndex, setChallengeIndex] = useState(0)
   const [validationFeedback, setValidationFeedback] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
-  const [placementFeedback, setPlacementFeedback] = useState<string | null>(null);
+    success: boolean
+    message: string
+  } | null>(null)
+  const [placementFeedback, setPlacementFeedback] = useState<string | null>(null)
   const [placeBuildingCta, setPlaceBuildingCta] = useState<{
-    templateId: string;
-    name: string;
-  } | null>(null);
-  const { completed, completeChallenge, pendingCelebration, clearCelebration } = useChallengeProgress();
-  const controlsRef = useRef<OrbitControlsImpl>(null);
+    templateId: string
+    name: string
+  } | null>(null)
+  const { completed, completeChallenge, pendingCelebration, clearCelebration } =
+    useChallengeProgress()
+  const controlsRef = useRef<OrbitControlsImpl>(null)
 
   // Performance optimization: detect low-power devices and reduced motion preference
-  const isLowPowerDevice = useIsLowPowerDevice();
-  const prefersReducedMotion = useReducedMotion();
-  
+  const isLowPowerDevice = useIsLowPowerDevice()
+  const prefersReducedMotion = useReducedMotion()
+
   // Game state selectors with safe defaults
-  const isEditorVisible = useAppSelector((state: RootState) => state.editor.isVisible);
-  const code = useAppSelector((state: RootState) => state.editor.code);
-  const language = useAppSelector((state: RootState) => state.editor.language);
-  const errors = useAppSelector((state: RootState) => state.editor.errors);
-  const gameState = useAppSelector((state: RootState) => state.game) as GameStatePartial;
+  const isEditorVisible = useAppSelector((state: RootState) => state.editor.isVisible)
+  const code = useAppSelector((state: RootState) => state.editor.code)
+  const language = useAppSelector((state: RootState) => state.editor.language)
+  const errors = useAppSelector((state: RootState) => state.editor.errors)
+  const gameState = useAppSelector((state: RootState) => state.game) as GameStatePartial
 
   // Safely destructure gameState with defaults
   const {
@@ -293,41 +296,41 @@ export default function GameWorldClient() {
     cssRules = [],
     jsExecutionContext: _jsExecutionContext = {},
     building = { buildMode: false, selectedTemplateId: null },
-    generators = []
-  } = gameState;
+    generators = [],
+  } = gameState
 
-  const tutorialIsActive = useAppSelector((state: RootState) => state.tutorial.isActive);
-  const tutorialStepIndex = useAppSelector((state: RootState) => state.tutorial.currentStepIndex);
-  const tutorialSteps = useAppSelector((state: RootState) => state.tutorial.steps);
-  const [challengeStartedAt, setChallengeStartedAt] = useState<number | null>(null);
-  const [attemptCount, setAttemptCount] = useState(0);
+  const tutorialIsActive = useAppSelector((state: RootState) => state.tutorial.isActive)
+  const tutorialStepIndex = useAppSelector((state: RootState) => state.tutorial.currentStepIndex)
+  const tutorialSteps = useAppSelector((state: RootState) => state.tutorial.steps)
+  const [challengeStartedAt, setChallengeStartedAt] = useState<number | null>(null)
+  const [attemptCount, setAttemptCount] = useState(0)
 
-  const isBuildModeActive = building.buildMode;
-  const selectedBuildingTemplateId = building.selectedTemplateId;
-  const previewRotation = useAppSelector((state: RootState) => state.building.previewRotation);
-  const resourceGenerators = generators as ResourceGenerator[];
-  
+  const isBuildModeActive = building.buildMode
+  const selectedBuildingTemplateId = building.selectedTemplateId
+  const previewRotation = useAppSelector((state: RootState) => state.building.previewRotation)
+  const resourceGenerators = generators as ResourceGenerator[]
+
   // Environment state
-  const [_timeOfDay, setTimeOfDay] = useState<number>(12);
-  const [weather, setWeather] = useState<'clear' | 'cloudy' | 'stormy' | 'foggy'>('clear');
-  const [weatherIntensity, setWeatherIntensity] = useState<number>(0.5);
-  
+  const [_timeOfDay, setTimeOfDay] = useState<number>(12)
+  const [weather, setWeather] = useState<'clear' | 'cloudy' | 'stormy' | 'foggy'>('clear')
+  const [weatherIntensity, setWeatherIntensity] = useState<number>(0.5)
+
   // Building preview state
-  const [, setPreviewPosition] = useState<[number, number, number]>([0, 0, 0]);
-  const [, setIsValidPlacement] = useState(true);
-  
+  const [, setPreviewPosition] = useState<[number, number, number]>([0, 0, 0])
+  const [, setIsValidPlacement] = useState(true)
+
   // Get available challenges based on completed ones
-  const availableChallenges = useMemo(() => getAvailableChallenges(completed), [completed]);
-  const currentChallenge = availableChallenges[challengeIndex];
-  
+  const availableChallenges = useMemo(() => getAvailableChallenges(completed), [completed])
+  const currentChallenge = availableChallenges[challengeIndex]
+
   // Fix the HTML structure parsing
   const parsedStructure = useMemo(() => {
     if (language === 'html' && code.html) {
       try {
-        const structure = parseHtmlToStructure(code.html) as ParsedHtmlNode[];
+        const structure = parseHtmlToStructure(code.html) as ParsedHtmlNode[]
         // cssRules are already parsed in the Redux store
-        const cssRulesParsed = cssRules;
-        
+        const cssRulesParsed = cssRules
+
         // Convert to HtmlNode format with proper typing
         const convertNode = (node: ParsedHtmlNode): HtmlNode => ({
           elementType: node.type || 'div',
@@ -335,388 +338,411 @@ export default function GameWorldClient() {
           level: node.level || 0,
           index: node.index || 0,
           children: Array.isArray(node.children) ? node.children.map(convertNode) : [],
-          styles: typeof node.styles === 'object' ? 
-            Object.entries(node.styles || {}).reduce((acc, [key, value]) => {
-              acc[key] = String(value);
-              return acc;
-            }, {} as Record<string, string>) : {}
-        });
+          styles:
+            typeof node.styles === 'object'
+              ? Object.entries(node.styles || {}).reduce(
+                  (acc, [key, value]) => {
+                    acc[key] = String(value)
+                    return acc
+                  },
+                  {} as Record<string, string>
+                )
+              : {},
+        })
 
-        const convertedStructure = Array.isArray(structure) ? structure.map(convertNode) : [];
-        
+        const convertedStructure = Array.isArray(structure) ? structure.map(convertNode) : []
+
         // Apply CSS rules to the converted structure
-        const styledStructure = convertedStructure.map(node => ({
+        const styledStructure = convertedStructure.map((node) => ({
           ...node,
           styles: {
             ...node.styles,
             ...cssRulesParsed.reduce((acc, rule) => {
               // Safely handle CSS rule declarations
-              const declarations = rule && typeof rule === 'object' ? 
-                Object.entries(rule).reduce((styles, [key, value]) => {
-                  if (typeof value === 'string' || typeof value === 'number') {
-                    styles[key] = String(value);
-                  }
-                  return styles;
-                }, {} as Record<string, string>) : {};
-              return { ...acc, ...declarations };
-            }, {})
-          }
-        }));
+              const declarations =
+                rule && typeof rule === 'object'
+                  ? Object.entries(rule).reduce(
+                      (styles, [key, value]) => {
+                        if (typeof value === 'string' || typeof value === 'number') {
+                          styles[key] = String(value)
+                        }
+                        return styles
+                      },
+                      {} as Record<string, string>
+                    )
+                  : {}
+              return { ...acc, ...declarations }
+            }, {}),
+          },
+        }))
 
-        return styledStructure;
+        return styledStructure
       } catch (error) {
-        console.error('Error parsing HTML structure:', error);
-        return [];
+        console.error('Error parsing HTML structure:', error)
+        return []
       }
     }
-    return [];
-  }, [code.html, language, cssRules]);
+    return []
+  }, [code.html, language, cssRules])
 
   const [, setPixelMessage] = useState(
     "Welcome to CodeCraft! I'm Pixel, and I'll be your guide on this adventure."
-  );
+  )
 
   // Day/night cycle
   React.useEffect(() => {
     const timeInterval = setInterval(() => {
-      setTimeOfDay((time) => (time + 0.1) % 24);
-    }, 3000);
-    return () => clearInterval(timeInterval);
-  }, []);
-  
+      setTimeOfDay((time) => (time + 0.1) % 24)
+    }, 3000)
+    return () => clearInterval(timeInterval)
+  }, [])
+
   // Weather system
   React.useEffect(() => {
     const weatherInterval = setInterval(() => {
       if (Math.random() < 0.2) {
-        const weatherTypes: Array<'clear' | 'cloudy' | 'stormy' | 'foggy'> = ['clear', 'cloudy', 'stormy', 'foggy'];
-        const newWeather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
-        setWeather(newWeather);
-        setWeatherIntensity(0.3 + Math.random() * 0.7);
+        const weatherTypes: Array<'clear' | 'cloudy' | 'stormy' | 'foggy'> = [
+          'clear',
+          'cloudy',
+          'stormy',
+          'foggy',
+        ]
+        const newWeather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)]
+        setWeather(newWeather)
+        setWeatherIntensity(0.3 + Math.random() * 0.7)
       }
-    }, 120000);
-    return () => clearInterval(weatherInterval);
-  }, []);
+    }, 120000)
+    return () => clearInterval(weatherInterval)
+  }, [])
 
   // Get selected building ID to enable deselection on ground click
-  const selectedBuildingId = useAppSelector((state: RootState) => state.building.selectedBuildingId);
+  const selectedBuildingId = useAppSelector((state: RootState) => state.building.selectedBuildingId)
 
   const checkValidPlacement = React.useCallback((x: number, z: number): boolean => {
-    return x >= -ENVIRONMENT_CONFIG.grid.width/2 &&
-           x <= ENVIRONMENT_CONFIG.grid.width/2 &&
-           z >= -ENVIRONMENT_CONFIG.grid.height/2 &&
-           z <= ENVIRONMENT_CONFIG.grid.height/2;
-  }, []);
+    return (
+      x >= -ENVIRONMENT_CONFIG.grid.width / 2 &&
+      x <= ENVIRONMENT_CONFIG.grid.width / 2 &&
+      z >= -ENVIRONMENT_CONFIG.grid.height / 2 &&
+      z <= ENVIRONMENT_CONFIG.grid.height / 2
+    )
+  }, [])
 
   // Type-safe event handlers
-  const handleGroundClick = React.useCallback((event: ThreeEvent<PointerEvent>) => {
-    event.stopPropagation();
-    if (event.object.name === 'ground') {
-      const point = event.point;
+  const handleGroundClick = React.useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      event.stopPropagation()
+      if (event.object.name === 'ground') {
+        const point = event.point
 
-      // Deselect any selected building when clicking on ground
-      if (selectedBuildingId) {
-        dispatch(selectBuilding(null));
-        return;
-      }
-
-      if (isBuildModeActive && selectedBuildingTemplateId) {
-        const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
-        const snappedX = Math.round(point.x / gridSize) * gridSize;
-        const snappedZ = Math.round(point.z / gridSize) * gridSize;
-        if (!checkValidPlacement(snappedX, snappedZ)) {
-          setPlacementFeedback('That spot is blocked. Try another grid cell.');
-          return;
+        // Deselect any selected building when clicking on ground
+        if (selectedBuildingId) {
+          dispatch(selectBuilding(null))
+          return
         }
-        const template = buildingTemplates[selectedBuildingTemplateId];
-        const placedId = buildingSystem.placeBuilding(
-          selectedBuildingTemplateId,
-          new THREE.Vector3(snappedX, 0, snappedZ),
-          previewRotation,
-        );
-        if (!placedId) {
-          setPlacementFeedback('Cannot place — check resources and collisions.');
-          return;
-        }
-        setPlacementFeedback(null);
-        setPlaceBuildingCta(null);
-        void trackBuildingConstructed(
-          selectedBuildingTemplateId,
-          1,
-          Object.fromEntries(
-            (template?.costs || []).map((c) => [c.resourceId, c.amount]),
-          ),
-        );
-      } else {
-        dispatch(setTargetPosition({
-          x: point.x,
-          y: 0.5,
-          z: point.z
-        }));
-      }
-    }
-  }, [dispatch, isBuildModeActive, selectedBuildingTemplateId, selectedBuildingId, checkValidPlacement, previewRotation]);
 
-  const handleGroundHover = React.useCallback((event: ThreeEvent<PointerEvent>) => {
-    if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {
-      const point = event.point;
-      const gridSize = ENVIRONMENT_CONFIG.grid.cellSize;
-      setPreviewPosition([
-        Math.round(point.x / gridSize) * gridSize,
-        0,
-        Math.round(point.z / gridSize) * gridSize
-      ]);
-      setIsValidPlacement(checkValidPlacement(point.x, point.z));
-    }
-  }, [isBuildModeActive, selectedBuildingTemplateId, checkValidPlacement]);
+        if (isBuildModeActive && selectedBuildingTemplateId) {
+          const gridSize = ENVIRONMENT_CONFIG.grid.cellSize
+          const snappedX = Math.round(point.x / gridSize) * gridSize
+          const snappedZ = Math.round(point.z / gridSize) * gridSize
+          if (!checkValidPlacement(snappedX, snappedZ)) {
+            setPlacementFeedback('That spot is blocked. Try another grid cell.')
+            return
+          }
+          const template = buildingTemplates[selectedBuildingTemplateId]
+          const placedId = buildingSystem.placeBuilding(
+            selectedBuildingTemplateId,
+            new THREE.Vector3(snappedX, 0, snappedZ),
+            previewRotation
+          )
+          if (!placedId) {
+            setPlacementFeedback('Cannot place — check resources and collisions.')
+            return
+          }
+          setPlacementFeedback(null)
+          setPlaceBuildingCta(null)
+          void trackBuildingConstructed(
+            selectedBuildingTemplateId,
+            1,
+            Object.fromEntries((template?.costs || []).map((c) => [c.resourceId, c.amount]))
+          )
+        } else {
+          dispatch(
+            setTargetPosition({
+              x: point.x,
+              y: 0.5,
+              z: point.z,
+            })
+          )
+        }
+      }
+    },
+    [
+      dispatch,
+      isBuildModeActive,
+      selectedBuildingTemplateId,
+      selectedBuildingId,
+      checkValidPlacement,
+      previewRotation,
+    ]
+  )
+
+  const handleGroundHover = React.useCallback(
+    (event: ThreeEvent<PointerEvent>) => {
+      if (isBuildModeActive && selectedBuildingTemplateId && event.object.name === 'ground') {
+        const point = event.point
+        const gridSize = ENVIRONMENT_CONFIG.grid.cellSize
+        setPreviewPosition([
+          Math.round(point.x / gridSize) * gridSize,
+          0,
+          Math.round(point.z / gridSize) * gridSize,
+        ])
+        setIsValidPlacement(checkValidPlacement(point.x, point.z))
+      }
+    },
+    [isBuildModeActive, selectedBuildingTemplateId, checkValidPlacement]
+  )
 
   // Update Pixel's message based on challenge context
   React.useEffect(() => {
     if (isEditorVisible && currentChallenge) {
-      setPixelMessage(`Let's work on ${currentChallenge.title}! ${currentChallenge.description}`);
+      setPixelMessage(`Let's work on ${currentChallenge.title}! ${currentChallenge.description}`)
     } else if (errors && errors.length > 0) {
-      setPixelMessage(`Hmm, there seems to be an issue with your code. Let's fix it together!`);
+      setPixelMessage(`Hmm, there seems to be an issue with your code. Let's fix it together!`)
     } else if (colonyResources && colonyResources.energy < 20) {
-      setPixelMessage(`Your colony's energy levels are getting low. We should build more collectors!`);
+      setPixelMessage(
+        `Your colony's energy levels are getting low. We should build more collectors!`
+      )
     } else {
-      setPixelMessage("Welcome to CodeCraft! I'm Pixel, and I'll be your guide on this adventure.");
+      setPixelMessage("Welcome to CodeCraft! I'm Pixel, and I'll be your guide on this adventure.")
     }
-  }, [isEditorVisible, currentChallenge, errors, colonyResources]);
+  }, [isEditorVisible, currentChallenge, errors, colonyResources])
 
-  const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i));
+  const handlePrev = () => setChallengeIndex((i) => (i > 0 ? i - 1 : i))
   const handleNext = () =>
-    setChallengeIndex((i) => (i < availableChallenges.length - 1 ? i + 1 : i));
+    setChallengeIndex((i) => (i < availableChallenges.length - 1 ? i + 1 : i))
 
   // Rehydrate building unlocks from completed challenges (Redux is session-only)
   React.useEffect(() => {
     completed.forEach((challengeId) => {
-      const challenge = getChallengeById(challengeId);
+      const challenge = getChallengeById(challengeId)
       challenge?.rewards.forEach((reward) => {
         if (reward.type === 'building') {
-          dispatch(unlockBuilding(reward.id));
+          dispatch(unlockBuilding(reward.id))
         }
-      });
-    });
-  }, [completed, dispatch]);
+      })
+    })
+  }, [completed, dispatch])
 
   // Keep challenge index in range when the available list shrinks after completion
   React.useEffect(() => {
     if (availableChallenges.length === 0) {
-      setChallengeIndex(0);
-      return;
+      setChallengeIndex(0)
+      return
     }
     if (challengeIndex >= availableChallenges.length) {
-      setChallengeIndex(availableChallenges.length - 1);
+      setChallengeIndex(availableChallenges.length - 1)
     }
-  }, [availableChallenges.length, challengeIndex]);
+  }, [availableChallenges.length, challengeIndex])
 
   // Keep Redux challenge index aligned for FeatureHub / dialogue consumers
   React.useEffect(() => {
-    dispatch(setCurrentChallenge(challengeIndex));
-  }, [challengeIndex, dispatch]);
+    dispatch(setCurrentChallenge(challengeIndex))
+  }, [challengeIndex, dispatch])
 
   // 2D confetti burst alongside 3D sparkles
   React.useEffect(() => {
-    if (!pendingCelebration) return;
+    if (!pendingCelebration) return
     const colors =
       pendingCelebration === 'levelUp'
         ? ['#fbbf24', '#f59e0b', '#ffffff']
         : pendingCelebration === 'achievement'
           ? ['#a855f7', '#6366f1', '#ffffff']
-          : ['#22c55e', '#4ade80', '#ffffff'];
+          : ['#22c55e', '#4ade80', '#ffffff']
     confetti({
       particleCount: pendingCelebration === 'success' ? 60 : 120,
       spread: 70,
       origin: { y: 0.65 },
       colors,
-    });
-  }, [pendingCelebration]);
+    })
+  }, [pendingCelebration])
 
   const handleEditorOpen = () => {
     if (currentChallenge) {
-      const editorEmpty = !code.html.trim() && !code.css.trim();
+      const editorEmpty = !code.html.trim() && !code.css.trim()
       if (editorEmpty) {
         if (currentChallenge.htmlTemplate) {
-          dispatch(setCode({ language: 'html', code: currentChallenge.htmlTemplate }));
+          dispatch(setCode({ language: 'html', code: currentChallenge.htmlTemplate }))
         }
         if (currentChallenge.cssTemplate) {
-          dispatch(setCode({ language: 'css', code: currentChallenge.cssTemplate }));
+          dispatch(setCode({ language: 'css', code: currentChallenge.cssTemplate }))
         }
       }
-      dispatch(setLanguage('html'));
-      setChallengeStartedAt(Date.now());
-      setAttemptCount(0);
+      dispatch(setLanguage('html'))
+      setChallengeStartedAt(Date.now())
+      setAttemptCount(0)
       void trackChallengeStarted(
         currentChallenge.id,
         currentChallenge.title,
         currentChallenge.difficulty,
-        'html',
-      );
+        'html'
+      )
     }
-    setValidationFeedback(null);
-    dispatch(setEditorVisible(true));
-  };
+    setValidationFeedback(null)
+    dispatch(setEditorVisible(true))
+  }
 
   const handleCheckSolution = () => {
-    if (!currentChallenge) return;
+    if (!currentChallenge) return
 
-    const combinedCode = `${code.html}\n${code.css}\n${code.javascript}`;
-    const passed = currentChallenge.validate(combinedCode);
-    const nextAttempt = attemptCount + 1;
-    setAttemptCount(nextAttempt);
-    const elapsed = challengeStartedAt ? Date.now() - challengeStartedAt : 0;
+    const combinedCode = `${code.html}\n${code.css}\n${code.javascript}`
+    const passed = currentChallenge.validate(combinedCode)
+    const nextAttempt = attemptCount + 1
+    setAttemptCount(nextAttempt)
+    const elapsed = challengeStartedAt ? Date.now() - challengeStartedAt : 0
 
-    void trackCodeSubmitted(
-      currentChallenge.id,
-      passed,
-      passed ? 100 : 0,
-      elapsed,
-      nextAttempt,
-    );
+    void trackCodeSubmitted(currentChallenge.id, passed, passed ? 100 : 0, elapsed, nextAttempt)
 
     if (!passed) {
       setValidationFeedback({
         success: false,
         message: 'Not quite — check the objectives and try again.',
-      });
-      return;
+      })
+      return
     }
 
-    const celebration = completeChallenge(currentChallenge.id);
+    const celebration = completeChallenge(currentChallenge.id)
     if (!celebration) {
       setValidationFeedback({
         success: true,
         message: 'Already completed — keep building or move to the next challenge.',
-      });
-      return;
+      })
+      return
     }
 
-    void trackChallengeCompleted(
-      currentChallenge.id,
-      100,
-      elapsed,
-      nextAttempt,
-      100,
-    );
+    void trackChallengeCompleted(currentChallenge.id, 100, elapsed, nextAttempt, 100)
 
     setValidationFeedback({
       success: true,
-      message: celebration === 'levelUp'
-        ? 'Challenge complete — level up!'
-        : celebration === 'achievement'
-          ? 'Challenge complete — achievement unlocked!'
-          : 'Challenge complete! Rewards unlocked.',
-    });
+      message:
+        celebration === 'levelUp'
+          ? 'Challenge complete — level up!'
+          : celebration === 'achievement'
+            ? 'Challenge complete — achievement unlocked!'
+            : 'Challenge complete! Rewards unlocked.',
+    })
 
-    const buildingReward = currentChallenge.rewards.find((r) => r.type === 'building');
+    const buildingReward = currentChallenge.rewards.find((r) => r.type === 'building')
     if (buildingReward) {
-      const template = buildingTemplates[buildingReward.id];
+      const template = buildingTemplates[buildingReward.id]
       if (template) {
-        setPlaceBuildingCta({ templateId: template.id, name: template.name });
+        setPlaceBuildingCta({ templateId: template.id, name: template.name })
       }
     }
 
     setTimeout(() => {
-      setChallengeIndex(0);
-      setValidationFeedback(null);
-      setChallengeStartedAt(null);
-      setAttemptCount(0);
-    }, 2200);
-  };
+      setChallengeIndex(0)
+      setValidationFeedback(null)
+      setChallengeStartedAt(null)
+      setAttemptCount(0)
+    }, 2200)
+  }
 
   const handlePlaceUnlockedBuilding = () => {
-    if (!placeBuildingCta) return;
-    dispatch(setSelectedTemplateId(placeBuildingCta.templateId));
-    dispatch(toggleBuildMode(true));
-    const template = buildingTemplates[placeBuildingCta.templateId];
+    if (!placeBuildingCta) return
+    dispatch(setSelectedTemplateId(placeBuildingCta.templateId))
+    dispatch(toggleBuildMode(true))
+    const template = buildingTemplates[placeBuildingCta.templateId]
     if (template) {
-      dispatch(setLanguage('html'));
-      dispatch(setCode({ language: 'html', code: template.defaultHtml }));
+      dispatch(setLanguage('html'))
+      dispatch(setCode({ language: 'html', code: template.defaultHtml }))
     }
-    setPlacementFeedback(`Select a clear grid cell to place ${placeBuildingCta.name}.`);
-  };
-  
+    setPlacementFeedback(`Select a clear grid cell to place ${placeBuildingCta.name}.`)
+  }
+
   const handleTutorialStepComplete = React.useCallback(() => {
-    const isLast = tutorialStepIndex >= tutorialSteps.length - 1;
+    const isLast = tutorialStepIndex >= tutorialSteps.length - 1
     if (isLast) {
-      dispatch(endTutorial());
+      dispatch(endTutorial())
     } else {
-      dispatch(nextStep());
+      dispatch(nextStep())
     }
-  }, [dispatch, tutorialStepIndex, tutorialSteps.length]);
+  }, [dispatch, tutorialStepIndex, tutorialSteps.length])
 
   // Set camera limits and initial position
   React.useEffect(() => {
     if (controlsRef.current) {
-      controlsRef.current.minDistance = ENVIRONMENT_CONFIG.camera.minDistance;
-      controlsRef.current.maxDistance = ENVIRONMENT_CONFIG.camera.maxDistance;
-      controlsRef.current.maxPolarAngle = Math.PI / 2.1;
-      controlsRef.current.minPolarAngle = Math.PI / 4;
-      
+      controlsRef.current.minDistance = ENVIRONMENT_CONFIG.camera.minDistance
+      controlsRef.current.maxDistance = ENVIRONMENT_CONFIG.camera.maxDistance
+      controlsRef.current.maxPolarAngle = Math.PI / 2.1
+      controlsRef.current.minPolarAngle = Math.PI / 4
+
       // Set initial position for a better view of the resources
-      controlsRef.current.object.position.set(20, 25, 35);
-      controlsRef.current.target.set(0, 0, -15);
-      
-      controlsRef.current.enableDamping = true;
-      controlsRef.current.dampingFactor = 0.05;
-      controlsRef.current.rotateSpeed = 0.5;
-      controlsRef.current.zoomSpeed = 0.8;
-      
-      controlsRef.current.update();
+      controlsRef.current.object.position.set(20, 25, 35)
+      controlsRef.current.target.set(0, 0, -15)
+
+      controlsRef.current.enableDamping = true
+      controlsRef.current.dampingFactor = 0.05
+      controlsRef.current.rotateSpeed = 0.5
+      controlsRef.current.zoomSpeed = 0.8
+
+      controlsRef.current.update()
     }
-  }, []);
+  }, [])
 
   // Transform resource generators into correct format
-  const formattedResourceGenerators = useMemo(() => 
-    resourceGenerators.map(g => ({
-      ...g,
-      type: 'default',
-      rotation: [0, 0, 0] as [number, number, number],
-      outputRate: 1,
-      resourceType: 'energy' as const,
-      status: g.isActive ? 'active' as const : 'inactive' as const,
-      efficiency: 1,
-      lastCollection: Date.now(),
-      customizations: {}
-    })) as ResourceGenerator[],
+  const formattedResourceGenerators = useMemo(
+    () =>
+      resourceGenerators.map((g) => ({
+        ...g,
+        type: 'default',
+        rotation: [0, 0, 0] as [number, number, number],
+        outputRate: 1,
+        resourceType: 'energy' as const,
+        status: g.isActive ? ('active' as const) : ('inactive' as const),
+        efficiency: 1,
+        lastCollection: Date.now(),
+        customizations: {},
+      })) as ResourceGenerator[],
     [resourceGenerators]
-  );
+  )
 
   // Transform resource flows
-  const resourceFlows = useMemo(() => 
-    formattedResourceGenerators
-      .filter(g => g.status === 'active')
-      .map(g => ({
-        from: g.position,
-        to: [0, 5, 0] as [number, number, number],
-        resource: g.resourceType,
-        amount: g.outputRate * g.efficiency
-      })) as ResourceFlow[],
+  const resourceFlows = useMemo(
+    () =>
+      formattedResourceGenerators
+        .filter((g) => g.status === 'active')
+        .map((g) => ({
+          from: g.position,
+          to: [0, 5, 0] as [number, number, number],
+          resource: g.resourceType,
+          amount: g.outputRate * g.efficiency,
+        })) as ResourceFlow[],
     [formattedResourceGenerators]
-  );
+  )
 
   // Use the mood determination function
-  const pixelMood = useMemo(() => 
-    determinePixelMood(currentChallenge, isEditorVisible, errors),
+  const pixelMood = useMemo(
+    () => determinePixelMood(currentChallenge, isEditorVisible, errors),
     [currentChallenge, isEditorVisible, errors]
-  );
+  )
 
   // Use the contextual tip function
-  const contextualTip = useMemo(() => 
-    generateContextualTip(currentChallenge, {}, colonyResources),
+  const contextualTip = useMemo(
+    () => generateContextualTip(currentChallenge, {}, colonyResources),
     [currentChallenge, colonyResources]
-  );
+  )
 
   // Type-safe component props
   const htmlStructureProps: HtmlStructureVisualizationProps = {
     htmlStructure: parsedStructure,
     onBuildingSelect: (node: HtmlNode) => {
-      console.log('Selected building:', node);
-    }
-  };
+      console.log('Selected building:', node)
+    },
+  }
 
   const buildingPreviewProps: BuildingPreviewProps = {
-    gridSnap: true
-  };
+    gridSnap: true,
+  }
 
   // These props are prepared for future use
   // const errorVisualizationProps: ErrorVisualizationProps = {
@@ -740,34 +766,34 @@ export default function GameWorldClient() {
           background-color: black;
         }
       `}</style>
-      
+
       {/* Main Game Container */}
       <div className="fixed inset-0 overflow-hidden">
         {/* Game Canvas Container */}
         <div className="absolute inset-0 z-0">
           <Canvas
             shadows
-            gl={{ 
-              alpha: false, 
+            gl={{
+              alpha: false,
               antialias: true,
-              powerPreference: "high-performance",
+              powerPreference: 'high-performance',
               stencil: false,
               logarithmicDepthBuffer: true,
               toneMapping: THREE.NoToneMapping,
-              outputColorSpace: THREE.SRGBColorSpace
+              outputColorSpace: THREE.SRGBColorSpace,
             }}
             camera={{
               position: ENVIRONMENT_CONFIG.camera.position,
               fov: ENVIRONMENT_CONFIG.camera.fov,
               near: ENVIRONMENT_CONFIG.camera.near,
-              far: ENVIRONMENT_CONFIG.camera.far
+              far: ENVIRONMENT_CONFIG.camera.far,
             }}
-            style={{ 
+            style={{
               position: 'absolute',
               top: 0,
               left: 0,
               width: '100%',
-              height: '100%'
+              height: '100%',
             }}
             dpr={isLowPowerDevice ? [1, 1.5] : [1, 2]}
             linear
@@ -779,10 +805,10 @@ export default function GameWorldClient() {
               args={[
                 ENVIRONMENT_CONFIG.fog.color,
                 ENVIRONMENT_CONFIG.fog.near,
-                ENVIRONMENT_CONFIG.fog.far
+                ENVIRONMENT_CONFIG.fog.far,
               ]}
             />
-            
+
             {/* Sky and environment first */}
             <Sky
               distance={ENVIRONMENT_CONFIG.sky.distance}
@@ -802,7 +828,7 @@ export default function GameWorldClient() {
               saturation={ENVIRONMENT_CONFIG.stars.saturation}
               fade={ENVIRONMENT_CONFIG.stars.fade}
             />
-            
+
             {/* Rest of scene content */}
             <Suspense fallback={null}>
               <SceneContent />
@@ -815,14 +841,14 @@ export default function GameWorldClient() {
                   color={ENVIRONMENT_CONFIG.scene.groundColor}
                   size={ENVIRONMENT_CONFIG.grid.width}
                 />
-                
-                <BuildingGrid 
+
+                <BuildingGrid
                   width={ENVIRONMENT_CONFIG.grid.width}
                   height={ENVIRONMENT_CONFIG.grid.height}
                   cellSize={ENVIRONMENT_CONFIG.grid.cellSize}
                   showGridLines={isBuildModeActive}
                 />
-                
+
                 {/* Weather - reduced or disabled for accessibility/performance */}
                 {!prefersReducedMotion && (
                   <WeatherSystem
@@ -830,11 +856,11 @@ export default function GameWorldClient() {
                     intensity={isLowPowerDevice ? weatherIntensity * 0.5 : weatherIntensity}
                   />
                 )}
-                
+
                 {/* Colony Structure */}
                 <group name="colony-root">
                   <HtmlStructureVisualization {...htmlStructureProps} />
-                  
+
                   {/* Resource section spread out in a wider area */}
                   <group name="section-resources">
                     <group position={[-20, 0, -20]}>
@@ -847,44 +873,37 @@ export default function GameWorldClient() {
                           position: [
                             (index - formattedResourceGenerators.length / 2) * 15,
                             0,
-                            index % 2 === 0 ? -5 : 5
-                          ]
+                            index % 2 === 0 ? -5 : 5,
+                          ],
                         }))}
                         showProductionEffects={true}
                       />
                     </group>
-                    <ResourceFlowSystem 
-                      flows={resourceFlows.map(flow => ({
+                    <ResourceFlowSystem
+                      flows={resourceFlows.map((flow) => ({
                         ...flow,
                         from: [flow.from[0], flow.from[1], flow.from[2] - 15],
-                        to: [0, 5, 0]
+                        to: [0, 5, 0],
                       }))}
                     />
                   </group>
-                  
+
                   <group name="section-buildings" position={[-10, 0, 0]}>
                     <PlacedBuildings />
                     {isBuildModeActive && selectedBuildingTemplateId && (
                       <BuildingPreview {...buildingPreviewProps} />
                     )}
                   </group>
-                  
+
                   <group name="section-villagers" position={[0, 0, 10]}>
                     <UnlockedVillagers />
                   </group>
 
                   <Player />
-                  <Pixel 
-                    mood={pixelMood}
-                    contextualTip={contextualTip}
-                  />
+                  <Pixel mood={pixelMood} contextualTip={contextualTip} />
                 </group>
 
-                <Environment
-                  preset="sunset"
-                  background={false}
-                  blur={0.8}
-                />
+                <Environment preset="sunset" background={false} blur={0.8} />
 
                 <directionalLight
                   position={[50, 50, 25]}
@@ -1031,7 +1050,8 @@ export default function GameWorldClient() {
                   {placeBuildingCta && (
                     <div className="mb-3 rounded-[var(--radius-sm)] border border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.15)] p-3">
                       <p className="mb-2 text-sm text-[rgb(var(--text-primary))]">
-                        Blueprint unlocked: <span className="font-semibold">{placeBuildingCta.name}</span>
+                        Blueprint unlocked:{' '}
+                        <span className="font-semibold">{placeBuildingCta.name}</span>
                       </p>
                       <button
                         type="button"
@@ -1052,7 +1072,8 @@ export default function GameWorldClient() {
 
                   {completed.length === 0 && !placeBuildingCta && (
                     <p className="mb-3 text-xs text-[rgb(var(--text-muted))]">
-                      First mission: write a header, check your solution, then place your Habitat Module.
+                      First mission: write a header, check your solution, then place your Habitat
+                      Module.
                     </p>
                   )}
 
@@ -1135,7 +1156,7 @@ export default function GameWorldClient() {
           <div className="absolute right-4 bottom-4 z-50 pointer-events-auto">
             <BuildingMenu />
           </div>
-          
+
           {/* Tutorial Overlay */}
           {tutorialIsActive && (
             <div className="pointer-events-auto">
@@ -1149,5 +1170,5 @@ export default function GameWorldClient() {
         </div>
       </div>
     </>
-  );
+  )
 }

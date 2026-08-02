@@ -3,7 +3,7 @@
  * Sample conversations for NPCs in CodeCraft
  */
 
-import type { DialogueTree, DialogueNode } from '@/utils/dialogueSystem';
+import type { DialogueNode, DialogueTree } from '@/utils/dialogueSystem'
 
 /**
  * Tutorial Guide - First Meeting
@@ -53,7 +53,7 @@ export const tutorialGuideIntro: DialogueTree = {
       {
         id: 'intro_eager',
         speaker: 'Tutorial Guide',
-        text: "Excellent attitude! That enthusiasm will serve you well. Let me start by explaining the three pillars of web development: HTML for structure, CSS for style, and JavaScript for interactivity.",
+        text: 'Excellent attitude! That enthusiasm will serve you well. Let me start by explaining the three pillars of web development: HTML for structure, CSS for style, and JavaScript for interactivity.',
         emotion: 'happy',
         next: 'explain_basics',
       },
@@ -95,7 +95,7 @@ export const tutorialGuideIntro: DialogueTree = {
       {
         id: 'explain_basics',
         speaker: 'Tutorial Guide',
-        text: "HTML is like the skeleton of a webpage - it provides the structure. CSS is the clothing and makeup - it makes things look beautiful. And JavaScript is the muscles and brain - it makes things move and think!",
+        text: 'HTML is like the skeleton of a webpage - it provides the structure. CSS is the clothing and makeup - it makes things look beautiful. And JavaScript is the muscles and brain - it makes things move and think!',
         emotion: 'neutral',
         choices: [
           {
@@ -142,7 +142,7 @@ export const tutorialGuideIntro: DialogueTree = {
       },
     ],
   ]),
-};
+}
 
 /**
  * Resource Manager - Trading Dialogue
@@ -326,7 +326,7 @@ export const resourceManagerTrade: DialogueTree = {
       },
     ],
   ]),
-};
+}
 
 /**
  * Skill Master - Advanced Training
@@ -445,11 +445,7 @@ export const skillMasterAdvanced: DialogueTree = {
       },
     ],
   ]),
-};
+}
 
 // Export all dialogue trees
-export const allDialogueTrees = [
-  tutorialGuideIntro,
-  resourceManagerTrade,
-  skillMasterAdvanced,
-];
+export const allDialogueTrees = [tutorialGuideIntro, resourceManagerTrade, skillMasterAdvanced]

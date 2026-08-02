@@ -1,9 +1,9 @@
-import type { LucideIcon, LucideProps } from 'lucide-react';
+import type { LucideIcon, LucideProps } from 'lucide-react'
 
 type IconProps = LucideProps & {
-  icon: LucideIcon;
-  className?: string;
-};
+  icon: LucideIcon
+  className?: string
+}
 
 /** Consistent Lucide icon sizing for HUD / menus. */
 export function Icon({
@@ -14,12 +14,6 @@ export function Icon({
   ...props
 }: IconProps) {
   return (
-    <Glyph
-      aria-hidden
-      size={size}
-      strokeWidth={strokeWidth}
-      className={className}
-      {...props}
-    />
-  );
+    <Glyph aria-hidden size={size} strokeWidth={strokeWidth} className={className} {...props} />
+  )
 }

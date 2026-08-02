@@ -1,13 +1,13 @@
-'use client';
-import { useRef } from 'react';
-import { Vector3 } from 'three';
-import { Html } from '@react-three/drei';
-import { ResourceType } from '@/utils/resourceManagement';
+'use client'
+import { Html } from '@react-three/drei'
+import { useRef } from 'react'
+import type { Vector3 } from 'three'
+import type { ResourceType } from '@/utils/resourceManagement'
 
 interface ResourceCollectorProps {
-  position: [number, number, number];
-  resource: ResourceType;
-  collectionRadius: number;
+  position: [number, number, number]
+  resource: ResourceType
+  collectionRadius: number
 }
 
 const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; name: string }> = {
@@ -16,12 +16,16 @@ const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; nam
   water: { color: '#60A5FA', label: 'H2O', name: 'Water' },
   food: { color: '#10B981', label: 'FOOD', name: 'Food' },
   knowledge: { color: '#38BDF8', label: 'KNW', name: 'Knowledge' },
-  bytes: { color: '#22D3EE', label: 'BYT', name: 'Bytes' }
-};
+  bytes: { color: '#22D3EE', label: 'BYT', name: 'Bytes' },
+}
 
-export function ResourceCollector({ position, resource, collectionRadius = 5 }: ResourceCollectorProps) {
-  const particles = useRef<Vector3[]>([]);
-  const resourceDisplay = RESOURCE_DISPLAY[resource];
+export function ResourceCollector({
+  position,
+  resource,
+  collectionRadius = 5,
+}: ResourceCollectorProps) {
+  const particles = useRef<Vector3[]>([])
+  const resourceDisplay = RESOURCE_DISPLAY[resource]
 
   return (
     <group position={position}>
@@ -71,5 +75,5 @@ export function ResourceCollector({ position, resource, collectionRadius = 5 }: 
         </mesh>
       ))}
     </group>
-  );
-} 
+  )
+}

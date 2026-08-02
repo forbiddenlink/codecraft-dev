@@ -7,52 +7,55 @@
 
 // Types for analytics events
 interface AnalyticsEvent {
-  name: string;
-  properties?: Record<string, unknown>;
+  name: string
+  properties?: Record<string, unknown>
 }
 
 interface UserProperties {
-  level?: number;
-  completedChallenges?: number;
-  totalXP?: number;
-  currentPath?: 'html' | 'css' | 'javascript';
-  buildingsPlaced?: number;
-  [key: string]: unknown;
+  level?: number
+  completedChallenges?: number
+  totalXP?: number
+  currentPath?: 'html' | 'css' | 'javascript'
+  buildingsPlaced?: number
+  [key: string]: unknown
 }
 
 // PostHog-like interface for type safety without requiring the package
 interface PostHogLike {
-  init: (apiKey: string, options: Record<string, unknown>) => void;
-  capture: (eventName: string, properties?: Record<string, unknown>) => void;
-  identify: (userId: string, properties?: Record<string, unknown>) => void;
+  init: (apiKey: string, options: Record<string, unknown>) => void
+  capture: (eventName: string, properties?: Record<string, unknown>) => void
+  identify: (userId: string, properties?: Record<string, unknown>) => void
   people: {
-    set: (properties: Record<string, unknown>) => void;
-  };
-  reset: () => void;
-  debug: () => void;
+    set: (properties: Record<string, unknown>) => void
+  }
+  reset: () => void
+  debug: () => void
 }
 
 // Check if analytics is enabled
 const isAnalyticsEnabled = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true' &&
-         !!process.env.NEXT_PUBLIC_POSTHOG_KEY;
-};
+  if (typeof window === 'undefined') return false
+  return (
+    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true' && !!process.env.NEXT_PUBLIC_POSTHOG_KEY
+  )
+}
 
 // Lazy load PostHog
-let posthogInstance: PostHogLike | null = null;
-let posthogPromise: Promise<PostHogLike | null> | null = null;
+let posthogInstance: PostHogLike | null = null
+let posthogPromise: Promise<PostHogLike | null> | null = null
 
 const getPostHog = async (): Promise<PostHogLike | null> => {
-  if (!isAnalyticsEnabled()) return null;
+  if (!isAnalyticsEnabled()) return null
 
   if (!posthogPromise) {
     posthogPromise = (async () => {
       try {
         // Dynamic import with type assertion - posthog-js is an optional peer dependency
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const posthog = (await import(/* webpackIgnore: true */ 'posthog-js' as string)) as { default: PostHogLike };
-        const ph = posthog.default;
+        const posthog = (await import(/* webpackIgnore: true */ 'posthog-js' as string)) as {
+          default: PostHogLike
+        }
+        const ph = posthog.default
         ph.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
           api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
           autocapture: false,
@@ -60,74 +63,74 @@ const getPostHog = async (): Promise<PostHogLike | null> => {
           persistence: 'localStorage',
           loaded: () => {
             if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-              ph.debug();
+              ph.debug()
             }
           },
-        });
-        posthogInstance = ph;
-        return ph;
+        })
+        posthogInstance = ph
+        return ph
       } catch {
         // posthog-js not installed - analytics disabled
         if (process.env.NODE_ENV === 'development') {
-          console.warn('PostHog not available. Install with: npm install posthog-js');
+          console.warn('PostHog not available. Install with: npm install posthog-js')
         }
-        return null;
+        return null
       }
-    })();
+    })()
   }
 
-  return posthogPromise;
-};
+  return posthogPromise
+}
 
 /**
  * Track a custom event
  */
 export const trackEvent = async (event: AnalyticsEvent): Promise<void> => {
-  const posthog = await getPostHog();
-  if (!posthog) return;
+  const posthog = await getPostHog()
+  if (!posthog) return
 
-  posthog.capture(event.name, event.properties);
-};
+  posthog.capture(event.name, event.properties)
+}
 
 /**
  * Track page view
  */
 export const trackPageView = async (path: string): Promise<void> => {
-  const posthog = await getPostHog();
-  if (!posthog) return;
+  const posthog = await getPostHog()
+  if (!posthog) return
 
-  posthog.capture('$pageview', { $current_url: path });
-};
+  posthog.capture('$pageview', { $current_url: path })
+}
 
 /**
  * Identify user with properties
  */
 export const identifyUser = async (userId: string, properties?: UserProperties): Promise<void> => {
-  const posthog = await getPostHog();
-  if (!posthog) return;
+  const posthog = await getPostHog()
+  if (!posthog) return
 
-  posthog.identify(userId, properties);
-};
+  posthog.identify(userId, properties)
+}
 
 /**
  * Set user properties without identification
  */
 export const setUserProperties = async (properties: UserProperties): Promise<void> => {
-  const posthog = await getPostHog();
-  if (!posthog) return;
+  const posthog = await getPostHog()
+  if (!posthog) return
 
-  posthog.people.set(properties);
-};
+  posthog.people.set(properties)
+}
 
 /**
  * Reset user identity (for logout)
  */
 export const resetUser = async (): Promise<void> => {
-  const posthog = await getPostHog();
-  if (!posthog) return;
+  const posthog = await getPostHog()
+  if (!posthog) return
 
-  posthog.reset();
-};
+  posthog.reset()
+}
 
 // =============================================================================
 // LEARNING ANALYTICS EVENTS
@@ -151,8 +154,8 @@ export const trackChallengeStarted = async (
       language,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track when code is submitted
@@ -174,8 +177,8 @@ export const trackCodeSubmitted = async (
       attempt_number: attemptNumber,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track when a challenge is completed
@@ -197,8 +200,8 @@ export const trackChallengeCompleted = async (
       xp_earned: xpEarned,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track when a building is constructed
@@ -216,8 +219,8 @@ export const trackBuildingConstructed = async (
       resources_cost: resourcesCost,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track when a skill is unlocked
@@ -235,8 +238,8 @@ export const trackSkillUnlocked = async (
       player_level: playerLevel,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track when an achievement is earned
@@ -252,8 +255,8 @@ export const trackAchievementEarned = async (
       achievement_title: achievementTitle,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 /**
  * Track session metrics
@@ -273,8 +276,8 @@ export const trackSessionEnd = async (
       xp_earned: xpEarned,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 // =============================================================================
 // PERFORMANCE ANALYTICS
@@ -284,11 +287,11 @@ export const trackSessionEnd = async (
  * Track WebGL performance metrics
  */
 export const trackPerformanceMetrics = async (metrics: {
-  fps: number;
-  drawCalls: number;
-  triangles: number;
-  textures: number;
-  geometries: number;
+  fps: number
+  drawCalls: number
+  triangles: number
+  textures: number
+  geometries: number
 }): Promise<void> => {
   await trackEvent({
     name: 'webgl_performance',
@@ -296,8 +299,8 @@ export const trackPerformanceMetrics = async (metrics: {
       ...metrics,
       timestamp: new Date().toISOString(),
     },
-  });
-};
+  })
+}
 
 // Export instance for direct access if needed
-export const getAnalyticsInstance = (): PostHogLike | null => posthogInstance;
+export const getAnalyticsInstance = (): PostHogLike | null => posthogInstance

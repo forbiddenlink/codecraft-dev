@@ -1,29 +1,26 @@
-'use client';
+'use client'
 
 /**
  * Achievement Progress Tracker
  * Shows progress towards unlocking achievements
  */
 
-import { Trophy, Check } from 'lucide-react';
-import { Icon } from '@/components/ui/Icon';
-import {
-  ACHIEVEMENT_SECTION_ICONS,
-  getAchievementIcon,
-} from '@/components/ui/achievementIcons';
+import { Check, Trophy } from 'lucide-react'
+import { ACHIEVEMENT_SECTION_ICONS, getAchievementIcon } from '@/components/ui/achievementIcons'
+import { Icon } from '@/components/ui/Icon'
 
 export interface AchievementProgressProps {
   achievements: {
-    id: string;
-    title: string;
-    description: string;
-    icon: string;
-    rarity: 'common' | 'rare' | 'epic' | 'legendary';
-    progress: number;
-    isUnlocked: boolean;
-    requirement: string;
-  }[];
-  onAchievementClick?: (id: string) => void;
+    id: string
+    title: string
+    description: string
+    icon: string
+    rarity: 'common' | 'rare' | 'epic' | 'legendary'
+    progress: number
+    isUnlocked: boolean
+    requirement: string
+  }[]
+  onAchievementClick?: (id: string) => void
 }
 
 const rarityColors = {
@@ -34,7 +31,7 @@ const rarityColors = {
     text: 'text-[rgb(var(--success))]',
     bar: 'bg-gradient-to-r from-[rgb(var(--energy))] to-[rgb(var(--success))]',
   },
-};
+}
 
 export function AchievementProgress({
   achievements,
@@ -44,12 +41,12 @@ export function AchievementProgress({
     unlocked: achievements.filter((a) => a.isUnlocked),
     inProgress: achievements.filter((a) => !a.isUnlocked && a.progress > 0),
     locked: achievements.filter((a) => !a.isUnlocked && a.progress === 0),
-  };
+  }
 
   const unlockedPct =
     achievements.length > 0
       ? Math.round((categories.unlocked.length / achievements.length) * 100)
-      : 0;
+      : 0
 
   return (
     <div className="card border border-white/[0.08] bg-[rgb(var(--bg-surface)/0.96)] p-6 shadow-[var(--shadow-lg)] backdrop-blur-xl">
@@ -98,12 +95,16 @@ export function AchievementProgress({
       {categories.unlocked.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 flex items-center gap-2 text-h4 text-[rgb(var(--text-primary))]">
-            <Icon icon={ACHIEVEMENT_SECTION_ICONS.unlocked} size={16} className="text-[rgb(var(--success))]" />
+            <Icon
+              icon={ACHIEVEMENT_SECTION_ICONS.unlocked}
+              size={16}
+              className="text-[rgb(var(--success))]"
+            />
             Unlocked ({categories.unlocked.length})
           </h3>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {categories.unlocked.map((achievement) => {
-              const colors = rarityColors[achievement.rarity];
+              const colors = rarityColors[achievement.rarity]
               return (
                 <button
                   key={achievement.id}
@@ -129,7 +130,7 @@ export function AchievementProgress({
                     {achievement.description}
                   </p>
                 </button>
-              );
+              )
             })}
           </div>
         </div>
@@ -138,12 +139,16 @@ export function AchievementProgress({
       {categories.inProgress.length > 0 && (
         <div className="mb-6">
           <h3 className="mb-3 flex items-center gap-2 text-h4 text-[rgb(var(--text-primary))]">
-            <Icon icon={ACHIEVEMENT_SECTION_ICONS.inProgress} size={16} className="text-[rgb(var(--accent-subtle))]" />
+            <Icon
+              icon={ACHIEVEMENT_SECTION_ICONS.inProgress}
+              size={16}
+              className="text-[rgb(var(--accent-subtle))]"
+            />
             In progress ({categories.inProgress.length})
           </h3>
           <div className="space-y-3">
             {categories.inProgress.map((achievement) => {
-              const colors = rarityColors[achievement.rarity];
+              const colors = rarityColors[achievement.rarity]
               return (
                 <div
                   key={achievement.id}
@@ -177,7 +182,7 @@ export function AchievementProgress({
                     </div>
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         </div>
@@ -186,7 +191,11 @@ export function AchievementProgress({
       {categories.locked.length > 0 && (
         <div>
           <h3 className="mb-3 flex items-center gap-2 text-h4 text-[rgb(var(--text-primary))]">
-            <Icon icon={ACHIEVEMENT_SECTION_ICONS.locked} size={16} className="text-[rgb(var(--text-muted))]" />
+            <Icon
+              icon={ACHIEVEMENT_SECTION_ICONS.locked}
+              size={16}
+              className="text-[rgb(var(--text-muted))]"
+            />
             Locked ({categories.locked.length})
           </h3>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
@@ -208,5 +217,5 @@ export function AchievementProgress({
         </div>
       )}
     </div>
-  );
+  )
 }

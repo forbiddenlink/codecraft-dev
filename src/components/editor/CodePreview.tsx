@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
+import React, { useEffect, useRef, useState } from 'react'
 
 interface CodePreviewProps {
-  html: string;
-  css: string;
-  javascript: string;
-  isVisible?: boolean;
+  html: string
+  css: string
+  javascript: string
+  isVisible?: boolean
 }
 
 export function CodePreview({ html, css, javascript, isVisible = true }: CodePreviewProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!iframeRef.current) return;
+    if (!iframeRef.current) return
 
     try {
-      const iframe = iframeRef.current;
-      const document = iframe.contentDocument || iframe.contentWindow?.document;
+      const iframe = iframeRef.current
+      const document = iframe.contentDocument || iframe.contentWindow?.document
 
-      if (!document) return;
+      if (!document) return
 
       // Create complete HTML document
       const fullHtml = `
@@ -75,31 +75,31 @@ export function CodePreview({ html, css, javascript, isVisible = true }: CodePre
           </script>
         </body>
         </html>
-      `;
+      `
 
-      document.open();
-      document.write(fullHtml);
-      document.close();
+      document.open()
+      document.write(fullHtml)
+      document.close()
 
-      setError(null);
+      setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred');
+      setError(err instanceof Error ? err.message : 'Unknown error occurred')
     }
-  }, [html, css, javascript]);
+  }, [html, css, javascript])
 
   // Listen for errors from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'error') {
-        setError(`JavaScript Error: ${event.data.message}`);
+        setError(`JavaScript Error: ${event.data.message}`)
       }
-    };
+    }
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [])
 
-  if (!isVisible) return null;
+  if (!isVisible) return null
 
   return (
     <motion.div
@@ -178,5 +178,5 @@ export function CodePreview({ html, css, javascript, isVisible = true }: CodePre
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

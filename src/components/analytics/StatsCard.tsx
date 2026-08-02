@@ -3,17 +3,17 @@
  * Displays individual statistics with Lucide icons
  */
 
-import type { LucideIcon } from 'lucide-react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-import { Icon } from '@/components/ui/Icon';
+import type { LucideIcon } from 'lucide-react'
+import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
 
 export interface StatsCardProps {
-  title: string;
-  value: string | number;
-  icon: LucideIcon;
-  color: 'purple' | 'blue' | 'green' | 'orange' | 'red' | 'yellow';
-  subtitle?: string;
-  trend?: 'up' | 'down' | 'stable';
+  title: string
+  value: string | number
+  icon: LucideIcon
+  color: 'purple' | 'blue' | 'green' | 'orange' | 'red' | 'yellow'
+  subtitle?: string
+  trend?: 'up' | 'down' | 'stable'
 }
 
 const colorClasses = {
@@ -23,10 +23,10 @@ const colorClasses = {
   orange: 'text-[rgb(var(--energy))]',
   red: 'text-[rgb(var(--error))]',
   yellow: 'text-[rgb(var(--energy))]',
-};
+}
 
 export function StatsCard({ title, value, icon, color, subtitle, trend }: StatsCardProps) {
-  const valueColor = colorClasses[color];
+  const valueColor = colorClasses[color]
 
   return (
     <div className="card card-interactive hover:scale-[1.02]">
@@ -56,5 +56,5 @@ export function StatsCard({ title, value, icon, color, subtitle, trend }: StatsC
       </div>
       {subtitle && <p className="text-small">{subtitle}</p>}
     </div>
-  );
+  )
 }

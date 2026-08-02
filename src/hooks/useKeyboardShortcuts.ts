@@ -3,88 +3,88 @@
  * Global keyboard shortcuts for CodeCraft features
  */
 
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleMainMenu, toggleSettings, toggleHelp } from '@/store/slices/uiSlice';
-import { openAnalytics } from '@/store/slices/analyticsSlice';
-import { toggleSessionBrowser, toggleCreateModal } from '@/store/slices/multiplayerSlice';
-import { toggleAchievementProgress } from '@/store/slices/achievementSlice';
+import { useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { toggleAchievementProgress } from '@/store/slices/achievementSlice'
+import { openAnalytics } from '@/store/slices/analyticsSlice'
+import { toggleCreateModal, toggleSessionBrowser } from '@/store/slices/multiplayerSlice'
+import { toggleHelp, toggleMainMenu, toggleSettings } from '@/store/slices/uiSlice'
 
 function isTypingTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
+  if (!(target instanceof HTMLElement)) return false
   return (
     target.tagName === 'INPUT' ||
     target.tagName === 'TEXTAREA' ||
     target.isContentEditable ||
     Boolean(target.closest('.monaco-editor'))
-  );
+  )
 }
 
 export function useKeyboardShortcuts() {
-  const dispatch = useAppDispatch();
-  const buildMode = useAppSelector((state) => state.building.buildMode);
+  const dispatch = useAppDispatch()
+  const buildMode = useAppSelector((state) => state.building.buildMode)
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (isTypingTarget(event.target)) return;
+      if (isTypingTarget(event.target)) return
 
       // Esc: cancel build mode first; otherwise toggle main menu
       if (event.key === 'Escape') {
         if (buildMode) {
           // BuildingPreview owns cancelPlacement on Esc
-          return;
+          return
         }
-        event.preventDefault();
-        dispatch(toggleMainMenu());
-        return;
+        event.preventDefault()
+        dispatch(toggleMainMenu())
+        return
       }
 
-      const isMod = event.ctrlKey || event.metaKey;
-      const key = event.key.toLowerCase();
+      const isMod = event.ctrlKey || event.metaKey
+      const key = event.key.toLowerCase()
 
       if (isMod) {
         switch (key) {
           case 'a':
-            event.preventDefault();
-            dispatch(openAnalytics());
-            break;
+            event.preventDefault()
+            dispatch(openAnalytics())
+            break
           case 'h':
-            event.preventDefault();
-            dispatch(toggleAchievementProgress());
-            break;
+            event.preventDefault()
+            dispatch(toggleAchievementProgress())
+            break
           case 'm':
-            event.preventDefault();
-            dispatch(toggleSessionBrowser());
-            break;
+            event.preventDefault()
+            dispatch(toggleSessionBrowser())
+            break
           case 'c':
             if (event.shiftKey) {
-              event.preventDefault();
-              dispatch(toggleCreateModal());
+              event.preventDefault()
+              dispatch(toggleCreateModal())
             }
-            break;
+            break
           case ',':
-            event.preventDefault();
-            dispatch(toggleSettings());
-            break;
+            event.preventDefault()
+            dispatch(toggleSettings())
+            break
           case 'k':
-            event.preventDefault();
+            event.preventDefault()
             // Command palette reserved
-            break;
+            break
           default:
-            break;
+            break
         }
-        return;
+        return
       }
 
       if (event.key === '?' || (event.shiftKey && key === '/')) {
-        event.preventDefault();
-        dispatch(toggleHelp());
+        event.preventDefault()
+        dispatch(toggleHelp())
       }
-    };
+    }
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [dispatch, buildMode]);
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [dispatch, buildMode])
 }
 
 /**
@@ -116,5 +116,5 @@ export function getKeyboardShortcuts() {
         { key: 'Esc', description: 'Cancel build mode' },
       ],
     },
-  ];
+  ]
 }

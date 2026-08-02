@@ -3,12 +3,12 @@
  * Shows how time is distributed across different challenges
  */
 
-import { Clock, Lightbulb } from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+import { Clock, Lightbulb } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface TimeDistributionChartProps {
-  analytics: LearningAnalytics;
+  analytics: LearningAnalytics
 }
 
 export function TimeDistributionChart({ analytics }: TimeDistributionChartProps) {
@@ -19,20 +19,20 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
     { label: '10-20m', min: 600000, max: 1200000, count: 0, color: 'bg-yellow-500' },
     { label: '20-30m', min: 1200000, max: 1800000, count: 0, color: 'bg-orange-500' },
     { label: '> 30m', min: 1800000, max: Infinity, count: 0, color: 'bg-red-500' },
-  ];
+  ]
 
   analytics.timePerChallenge.forEach((time) => {
-    const range = timeRanges.find((r) => time >= r.min && time < r.max);
-    if (range) range.count++;
-  });
+    const range = timeRanges.find((r) => time >= r.min && time < r.max)
+    if (range) range.count++
+  })
 
-  const totalChallenges = analytics.timePerChallenge.size;
-  const maxCount = Math.max(...timeRanges.map((r) => r.count));
+  const totalChallenges = analytics.timePerChallenge.size
+  const maxCount = Math.max(...timeRanges.map((r) => r.count))
 
   // Calculate insights
-  const quickChallenges = timeRanges[0].count + timeRanges[1].count;
-  const slowChallenges = timeRanges[3].count + timeRanges[4].count;
-  const efficiency = totalChallenges > 0 ? (quickChallenges / totalChallenges) * 100 : 0;
+  const quickChallenges = timeRanges[0].count + timeRanges[1].count
+  const slowChallenges = timeRanges[3].count + timeRanges[4].count
+  const efficiency = totalChallenges > 0 ? (quickChallenges / totalChallenges) * 100 : 0
 
   return (
     <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border border-gray-700 rounded-xl p-6">
@@ -47,8 +47,8 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
       {/* Chart */}
       <div className="space-y-4 mb-6">
         {timeRanges.map((range) => {
-          const percentage = totalChallenges > 0 ? (range.count / totalChallenges) * 100 : 0;
-          const barWidth = maxCount > 0 ? (range.count / maxCount) * 100 : 0;
+          const percentage = totalChallenges > 0 ? (range.count / totalChallenges) * 100 : 0
+          const barWidth = maxCount > 0 ? (range.count / maxCount) * 100 : 0
 
           return (
             <div key={range.label} className="space-y-1">
@@ -70,7 +70,7 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
                 </div>
               </div>
             </div>
-          );
+          )
         })}
       </div>
 
@@ -119,5 +119,5 @@ export function TimeDistributionChart({ analytics }: TimeDistributionChartProps)
         </p>
       </div>
     </div>
-  );
+  )
 }

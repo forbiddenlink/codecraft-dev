@@ -1,34 +1,30 @@
 // File: /src/app/playground/page.tsx
-'use client';
+'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Editor, { loader } from '@monaco-editor/react';
-import type { editor } from 'monaco-editor';
-import { FileTree, buildFileTree, type FileNode } from '@/components/playground/FileTree';
+import Editor, { loader } from '@monaco-editor/react'
+import type { WebContainer } from '@webcontainer/api'
+import { AnimatePresence, motion } from 'framer-motion'
+import type { editor } from 'monaco-editor'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { buildFileTree, type FileNode, FileTree } from '@/components/playground/FileTree'
 import {
-  PlaygroundTerminal,
   createTerminalLine,
+  PlaygroundTerminal,
   type TerminalLine,
-} from '@/components/playground/PlaygroundTerminal';
-import {
-  bootWebContainer,
-  teardownWebContainer,
-  isWebContainerSupported,
-} from '@/lib/webcontainer';
-import type { WebContainer } from '@webcontainer/api';
+} from '@/components/playground/PlaygroundTerminal'
+import { bootWebContainer, isWebContainerSupported, teardownWebContainer } from '@/lib/webcontainer'
 
 // Configure Monaco Editor loader
 loader.config({
   paths: {
     vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs',
   },
-});
+})
 
 interface PlaygroundFile {
-  path: string;
-  content: string;
-  language: string;
+  path: string
+  content: string
+  language: string
 }
 
 // Default starter files
@@ -66,10 +62,10 @@ console.log("Doubled:", doubled);
     ),
     language: 'json',
   },
-];
+]
 
 function getLanguageFromPath(path: string): string {
-  const ext = path.split('.').pop()?.toLowerCase();
+  const ext = path.split('.').pop()?.toLowerCase()
   const extToLang: Record<string, string> = {
     js: 'javascript',
     mjs: 'javascript',
@@ -82,315 +78,311 @@ function getLanguageFromPath(path: string): string {
     css: 'css',
     md: 'markdown',
     txt: 'plaintext',
-  };
-  return ext ? extToLang[ext] || 'plaintext' : 'plaintext';
+  }
+  return ext ? extToLang[ext] || 'plaintext' : 'plaintext'
 }
 
 export default function PlaygroundPage() {
   // State
-  const [files, setFiles] = useState<PlaygroundFile[]>(DEFAULT_FILES);
-  const [selectedFile, setSelectedFile] = useState<string>('index.js');
-  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [isWebContainerReady, setIsWebContainerReady] = useState(false);
-  const [webContainerError, setWebContainerError] = useState<string | null>(null);
-  const [layout, setLayout] = useState<'horizontal' | 'vertical'>('horizontal');
-  const [sidebarWidth, setSidebarWidth] = useState(220);
-  const [editorHeight, setEditorHeight] = useState(60); // percentage
+  const [files, setFiles] = useState<PlaygroundFile[]>(DEFAULT_FILES)
+  const [selectedFile, setSelectedFile] = useState<string>('index.js')
+  const [terminalLines, setTerminalLines] = useState<TerminalLine[]>([])
+  const [isRunning, setIsRunning] = useState(false)
+  const [isInstalling, setIsInstalling] = useState(false)
+  const [isWebContainerReady, setIsWebContainerReady] = useState(false)
+  const [webContainerError, setWebContainerError] = useState<string | null>(null)
+  const [layout, setLayout] = useState<'horizontal' | 'vertical'>('horizontal')
+  const [sidebarWidth, setSidebarWidth] = useState(220)
+  const [editorHeight, setEditorHeight] = useState(60) // percentage
 
   // Refs
-  const webContainerRef = useRef<WebContainer | null>(null);
-  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-  const runningProcessRef = useRef<{ kill: () => void } | null>(null);
+  const webContainerRef = useRef<WebContainer | null>(null)
+  const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null)
+  const runningProcessRef = useRef<{ kill: () => void } | null>(null)
 
   // Get current file
-  const currentFile = files.find((f) => f.path === selectedFile);
+  const currentFile = files.find((f) => f.path === selectedFile)
 
   // Initialize WebContainer
   useEffect(() => {
     if (!isWebContainerSupported()) {
       setWebContainerError(
         'WebContainers are not supported in this browser. Please use a modern browser with SharedArrayBuffer support.'
-      );
-      return;
+      )
+      return
     }
 
     const initWebContainer = async () => {
       try {
-        addTerminalLine('Booting WebContainer...', 'system');
-        const wc = await bootWebContainer();
-        webContainerRef.current = wc;
-        setIsWebContainerReady(true);
-        addTerminalLine('WebContainer ready!', 'system');
+        addTerminalLine('Booting WebContainer...', 'system')
+        const wc = await bootWebContainer()
+        webContainerRef.current = wc
+        setIsWebContainerReady(true)
+        addTerminalLine('WebContainer ready!', 'system')
 
         // Mount initial files
-        await mountFiles(wc, files);
+        await mountFiles(wc, files)
       } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to boot WebContainer';
-        setWebContainerError(message);
-        addTerminalLine(`Error: ${message}`, 'stderr');
+        const message = err instanceof Error ? err.message : 'Failed to boot WebContainer'
+        setWebContainerError(message)
+        addTerminalLine(`Error: ${message}`, 'stderr')
       }
-    };
+    }
 
-    initWebContainer();
+    initWebContainer()
 
     // Cleanup on unmount
     return () => {
       if (runningProcessRef.current) {
-        runningProcessRef.current.kill();
+        runningProcessRef.current.kill()
       }
-      teardownWebContainer();
-    };
+      teardownWebContainer()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   // Mount files to WebContainer
   const mountFiles = async (wc: WebContainer, filesToMount: PlaygroundFile[]) => {
-    const fileTree: Record<string, { file: { contents: string } }> = {};
+    const fileTree: Record<string, { file: { contents: string } }> = {}
 
     for (const file of filesToMount) {
-      fileTree[file.path] = { file: { contents: file.content } };
+      fileTree[file.path] = { file: { contents: file.content } }
     }
 
-    await wc.mount(fileTree);
-  };
+    await wc.mount(fileTree)
+  }
 
   // Add terminal line helper
-  const addTerminalLine = useCallback(
-    (content: string, type: TerminalLine['type'] = 'stdout') => {
-      setTerminalLines((prev) => [...prev, createTerminalLine(content, type)]);
-    },
-    []
-  );
+  const addTerminalLine = useCallback((content: string, type: TerminalLine['type'] = 'stdout') => {
+    setTerminalLines((prev) => [...prev, createTerminalLine(content, type)])
+  }, [])
 
   // Clear terminal
   const clearTerminal = useCallback(() => {
-    setTerminalLines([]);
-  }, []);
+    setTerminalLines([])
+  }, [])
 
   // Run code
   const runCode = useCallback(async () => {
-    if (!webContainerRef.current || isRunning) return;
+    if (!webContainerRef.current || isRunning) return
 
-    const wc = webContainerRef.current;
+    const wc = webContainerRef.current
 
     // Kill any running process
     if (runningProcessRef.current) {
-      runningProcessRef.current.kill();
-      runningProcessRef.current = null;
+      runningProcessRef.current.kill()
+      runningProcessRef.current = null
     }
 
-    setIsRunning(true);
-    addTerminalLine(`$ node ${selectedFile}`, 'command');
+    setIsRunning(true)
+    addTerminalLine(`$ node ${selectedFile}`, 'command')
 
     try {
       // Update file content in WebContainer
       if (currentFile) {
-        await wc.fs.writeFile(currentFile.path, currentFile.content);
+        await wc.fs.writeFile(currentFile.path, currentFile.content)
       }
 
       // Run the file
-      const process = await wc.spawn('node', [selectedFile]);
+      const process = await wc.spawn('node', [selectedFile])
 
-      runningProcessRef.current = process;
+      runningProcessRef.current = process
 
       // Read output stream
-      const reader = process.output.getReader();
+      const reader = process.output.getReader()
 
       const readOutput = async () => {
         try {
           while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+            const { done, value } = await reader.read()
+            if (done) break
             // Split by newlines and add each line
-            const lines = value.split('\n').filter((line) => line.trim());
+            const lines = value.split('\n').filter((line) => line.trim())
             for (const line of lines) {
-              addTerminalLine(line, 'stdout');
+              addTerminalLine(line, 'stdout')
             }
           }
         } catch {
           // Process was killed
         }
-      };
+      }
 
-      readOutput();
+      readOutput()
 
       // Wait for process to exit
-      const exitCode = await process.exit;
-      addTerminalLine(`Process exited with code ${exitCode}`, 'system');
+      const exitCode = await process.exit
+      addTerminalLine(`Process exited with code ${exitCode}`, 'system')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Execution failed';
-      addTerminalLine(message, 'stderr');
+      const message = err instanceof Error ? err.message : 'Execution failed'
+      addTerminalLine(message, 'stderr')
     } finally {
-      setIsRunning(false);
-      runningProcessRef.current = null;
+      setIsRunning(false)
+      runningProcessRef.current = null
     }
-  }, [selectedFile, currentFile, isRunning, addTerminalLine]);
+  }, [selectedFile, currentFile, isRunning, addTerminalLine])
 
   // Install npm packages
   const installPackages = useCallback(async () => {
-    if (!webContainerRef.current || isInstalling) return;
+    if (!webContainerRef.current || isInstalling) return
 
-    const wc = webContainerRef.current;
-    setIsInstalling(true);
-    addTerminalLine('$ npm install', 'command');
+    const wc = webContainerRef.current
+    setIsInstalling(true)
+    addTerminalLine('$ npm install', 'command')
 
     try {
       // Update package.json first
-      const packageJson = files.find((f) => f.path === 'package.json');
+      const packageJson = files.find((f) => f.path === 'package.json')
       if (packageJson) {
-        await wc.fs.writeFile('package.json', packageJson.content);
+        await wc.fs.writeFile('package.json', packageJson.content)
       }
 
-      const installProcess = await wc.spawn('npm', ['install']);
+      const installProcess = await wc.spawn('npm', ['install'])
 
       // Read output
-      const reader = installProcess.output.getReader();
+      const reader = installProcess.output.getReader()
 
       const readOutput = async () => {
         try {
           while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const lines = value.split('\n').filter((line) => line.trim());
+            const { done, value } = await reader.read()
+            if (done) break
+            const lines = value.split('\n').filter((line) => line.trim())
             for (const line of lines) {
-              addTerminalLine(line, 'stdout');
+              addTerminalLine(line, 'stdout')
             }
           }
         } catch {
           // Process ended
         }
-      };
+      }
 
-      readOutput();
+      readOutput()
 
-      const exitCode = await installProcess.exit;
+      const exitCode = await installProcess.exit
 
       if (exitCode === 0) {
-        addTerminalLine('Dependencies installed successfully!', 'system');
+        addTerminalLine('Dependencies installed successfully!', 'system')
       } else {
-        addTerminalLine(`npm install failed with code ${exitCode}`, 'stderr');
+        addTerminalLine(`npm install failed with code ${exitCode}`, 'stderr')
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Install failed';
-      addTerminalLine(message, 'stderr');
+      const message = err instanceof Error ? err.message : 'Install failed'
+      addTerminalLine(message, 'stderr')
     } finally {
-      setIsInstalling(false);
+      setIsInstalling(false)
     }
-  }, [files, isInstalling, addTerminalLine]);
+  }, [files, isInstalling, addTerminalLine])
 
   // Handle file selection
   const handleSelectFile = useCallback((path: string) => {
-    setSelectedFile(path);
-  }, []);
+    setSelectedFile(path)
+  }, [])
 
   // Handle code change
   const handleCodeChange = useCallback(
     (value: string | undefined) => {
-      if (!value || !selectedFile) return;
+      if (!value || !selectedFile) return
 
-      setFiles((prev) =>
-        prev.map((f) => (f.path === selectedFile ? { ...f, content: value } : f))
-      );
+      setFiles((prev) => prev.map((f) => (f.path === selectedFile ? { ...f, content: value } : f)))
     },
     [selectedFile]
-  );
+  )
 
   // Handle file creation
   const handleCreateFile = useCallback(
     (parentPath: string, name: string, type: 'file' | 'directory') => {
-      const newPath = parentPath ? `${parentPath}/${name}` : name;
+      const newPath = parentPath ? `${parentPath}/${name}` : name
 
       if (type === 'file') {
-        const language = getLanguageFromPath(name);
-        setFiles((prev) => [...prev, { path: newPath, content: '', language }]);
-        setSelectedFile(newPath);
+        const language = getLanguageFromPath(name)
+        setFiles((prev) => [...prev, { path: newPath, content: '', language }])
+        setSelectedFile(newPath)
 
         // Also write to WebContainer
         if (webContainerRef.current) {
-          webContainerRef.current.fs.writeFile(newPath, '');
+          webContainerRef.current.fs.writeFile(newPath, '')
         }
       } else {
         // Create directory (WebContainer handles this implicitly)
         if (webContainerRef.current) {
-          webContainerRef.current.fs.mkdir(newPath, { recursive: true });
+          webContainerRef.current.fs.mkdir(newPath, { recursive: true })
         }
       }
     },
     []
-  );
+  )
 
   // Handle file deletion
   const handleDeleteFile = useCallback(
     (path: string) => {
-      setFiles((prev) => prev.filter((f) => !f.path.startsWith(path)));
+      setFiles((prev) => prev.filter((f) => !f.path.startsWith(path)))
 
       if (selectedFile === path || selectedFile.startsWith(path + '/')) {
-        const remaining = files.filter((f) => !f.path.startsWith(path));
-        setSelectedFile(remaining[0]?.path || '');
+        const remaining = files.filter((f) => !f.path.startsWith(path))
+        setSelectedFile(remaining[0]?.path || '')
       }
 
       // Remove from WebContainer
       if (webContainerRef.current) {
-        webContainerRef.current.fs.rm(path, { recursive: true });
+        webContainerRef.current.fs.rm(path, { recursive: true })
       }
     },
     [selectedFile, files]
-  );
+  )
 
   // Handle file rename
   const handleRenameFile = useCallback(
     async (path: string, newName: string) => {
-      const parts = path.split('/');
-      parts[parts.length - 1] = newName;
-      const newPath = parts.join('/');
+      const parts = path.split('/')
+      parts[parts.length - 1] = newName
+      const newPath = parts.join('/')
 
       setFiles((prev) =>
         prev.map((f) => {
           if (f.path === path) {
-            return { ...f, path: newPath, language: getLanguageFromPath(newName) };
+            return { ...f, path: newPath, language: getLanguageFromPath(newName) }
           }
           if (f.path.startsWith(path + '/')) {
-            return { ...f, path: f.path.replace(path, newPath) };
+            return { ...f, path: f.path.replace(path, newPath) }
           }
-          return f;
+          return f
         })
-      );
+      )
 
       if (selectedFile === path) {
-        setSelectedFile(newPath);
+        setSelectedFile(newPath)
       }
 
       // Rename in WebContainer
       if (webContainerRef.current) {
-        const content = files.find((f) => f.path === path)?.content || '';
-        await webContainerRef.current.fs.rm(path);
-        await webContainerRef.current.fs.writeFile(newPath, content);
+        const content = files.find((f) => f.path === path)?.content || ''
+        await webContainerRef.current.fs.rm(path)
+        await webContainerRef.current.fs.writeFile(newPath, content)
       }
     },
     [selectedFile, files]
-  );
+  )
 
   // Editor mount handler
-  const handleEditorMount = useCallback((editor: editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
-    editorRef.current = editor;
+  const handleEditorMount = useCallback(
+    (editor: editor.IStandaloneCodeEditor, monaco: typeof import('monaco-editor')) => {
+      editorRef.current = editor
 
-    // Add keyboard shortcut for running code
-    editor.addAction({
-      id: 'run-code',
-      label: 'Run Code',
-      keybindings: [
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-      ],
-      run: () => {
-        runCode();
-      },
-    });
-  }, [runCode]);
+      // Add keyboard shortcut for running code
+      editor.addAction({
+        id: 'run-code',
+        label: 'Run Code',
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+        run: () => {
+          runCode()
+        },
+      })
+    },
+    [runCode]
+  )
 
   // Build file tree for display
-  const fileTree: FileNode[] = buildFileTree(files);
+  const fileTree: FileNode[] = buildFileTree(files)
 
   // WebContainer error state
   if (webContainerError) {
@@ -405,7 +397,7 @@ export default function PlaygroundPage() {
           </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -483,10 +475,10 @@ export default function PlaygroundPage() {
             <button
               onClick={() => {
                 if (runningProcessRef.current) {
-                  runningProcessRef.current.kill();
-                  runningProcessRef.current = null;
-                  setIsRunning(false);
-                  addTerminalLine('Process killed', 'system');
+                  runningProcessRef.current.kill()
+                  runningProcessRef.current = null
+                  setIsRunning(false)
+                  addTerminalLine('Process killed', 'system')
                 }
               }}
               className="px-4 py-1.5 text-sm bg-red-600 hover:bg-red-700 text-white rounded font-medium transition-colors"
@@ -519,21 +511,21 @@ export default function PlaygroundPage() {
         <div
           className="w-1 bg-gray-700 hover:bg-blue-500 cursor-col-resize transition-colors"
           onMouseDown={(e) => {
-            const startX = e.clientX;
-            const startWidth = sidebarWidth;
+            const startX = e.clientX
+            const startWidth = sidebarWidth
 
             const onMouseMove = (moveEvent: MouseEvent) => {
-              const delta = moveEvent.clientX - startX;
-              setSidebarWidth(Math.max(150, Math.min(400, startWidth + delta)));
-            };
+              const delta = moveEvent.clientX - startX
+              setSidebarWidth(Math.max(150, Math.min(400, startWidth + delta)))
+            }
 
             const onMouseUp = () => {
-              document.removeEventListener('mousemove', onMouseMove);
-              document.removeEventListener('mouseup', onMouseUp);
-            };
+              document.removeEventListener('mousemove', onMouseMove)
+              document.removeEventListener('mouseup', onMouseUp)
+            }
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            document.addEventListener('mousemove', onMouseMove)
+            document.addEventListener('mouseup', onMouseUp)
           }}
         />
 
@@ -595,28 +587,28 @@ export default function PlaygroundPage() {
               layout === 'horizontal' ? 'h-1 cursor-row-resize' : 'w-1 cursor-col-resize'
             } bg-gray-700 hover:bg-blue-500 transition-colors`}
             onMouseDown={(e) => {
-              const startPos = layout === 'horizontal' ? e.clientY : e.clientX;
-              const startHeight = editorHeight;
-              const container = e.currentTarget.parentElement;
-              if (!container) return;
+              const startPos = layout === 'horizontal' ? e.clientY : e.clientX
+              const startHeight = editorHeight
+              const container = e.currentTarget.parentElement
+              if (!container) return
 
               const containerSize =
-                layout === 'horizontal' ? container.clientHeight : container.clientWidth;
+                layout === 'horizontal' ? container.clientHeight : container.clientWidth
 
               const onMouseMove = (moveEvent: MouseEvent) => {
-                const currentPos = layout === 'horizontal' ? moveEvent.clientY : moveEvent.clientX;
-                const delta = currentPos - startPos;
-                const deltaPercent = (delta / containerSize) * 100;
-                setEditorHeight(Math.max(20, Math.min(80, startHeight + deltaPercent)));
-              };
+                const currentPos = layout === 'horizontal' ? moveEvent.clientY : moveEvent.clientX
+                const delta = currentPos - startPos
+                const deltaPercent = (delta / containerSize) * 100
+                setEditorHeight(Math.max(20, Math.min(80, startHeight + deltaPercent)))
+              }
 
               const onMouseUp = () => {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-              };
+                document.removeEventListener('mousemove', onMouseMove)
+                document.removeEventListener('mouseup', onMouseUp)
+              }
 
-              document.addEventListener('mousemove', onMouseMove);
-              document.addEventListener('mouseup', onMouseUp);
+              document.addEventListener('mousemove', onMouseMove)
+              document.addEventListener('mouseup', onMouseUp)
             }}
           />
 
@@ -656,5 +648,5 @@ export default function PlaygroundPage() {
         </div>
       </footer>
     </div>
-  );
+  )
 }

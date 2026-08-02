@@ -1,23 +1,23 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
 import {
-  X,
-  GraduationCap,
-  Terminal,
-  Scale,
-  FileText,
-  Code2,
-  MousePointer2,
   Building2,
+  Code2,
+  FileText,
+  GraduationCap,
+  MousePointer2,
   Orbit,
-} from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleHelp } from '@/store/slices/uiSlice';
-import { startTutorial } from '@/store/slices/tutorialSlice';
-import { WELCOME_TUTORIAL } from '@/data/tutorialData';
-import { getKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { Icon } from '@/components/ui/Icon';
+  Scale,
+  Terminal,
+  X,
+} from 'lucide-react'
+import Link from 'next/link'
+import { Icon } from '@/components/ui/Icon'
+import { WELCOME_TUTORIAL } from '@/data/tutorialData'
+import { getKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { startTutorial } from '@/store/slices/tutorialSlice'
+import { toggleHelp } from '@/store/slices/uiSlice'
 
 const STEPS = [
   {
@@ -45,23 +45,23 @@ const STEPS = [
     title: 'Navigate the colony',
     body: 'Drag to orbit, scroll to zoom, right-drag to pan.',
   },
-] as const;
+] as const
 
 export function HelpModal() {
-  const dispatch = useAppDispatch();
-  const isOpen = useAppSelector((state) => state.ui.showHelp);
+  const dispatch = useAppDispatch()
+  const isOpen = useAppSelector((state) => state.ui.showHelp)
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const startWelcomeTutorial = () => {
     dispatch(
       startTutorial({
         tutorialId: WELCOME_TUTORIAL.id,
         steps: WELCOME_TUTORIAL.steps,
-      }),
-    );
-    dispatch(toggleHelp());
-  };
+      })
+    )
+    dispatch(toggleHelp())
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -182,5 +182,5 @@ export function HelpModal() {
         </div>
       </div>
     </div>
-  );
+  )
 }
