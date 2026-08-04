@@ -54,7 +54,7 @@ importers:
         version: 3.23.0(@types/json-schema@7.0.15)(yjs@13.6.31)
       '@monaco-editor/react':
         specifier: ^4.7.0
-        version: 4.7.0(monaco-editor@0.56.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 4.7.0(monaco-editor@0.55.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@react-spring/three':
         specifier: ^10.1.2
         version: 10.1.2(@react-three/fiber@9.6.1(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(react@19.2.8)(three@0.185.1)
@@ -116,11 +116,11 @@ importers:
         specifier: ^1.27.0
         version: 1.27.0(react@19.2.8)
       monaco-editor:
-        specifier: ^0.56.0
-        version: 0.56.0
+        specifier: 0.55.1
+        version: 0.55.1
       monaco-vim:
         specifier: ^0.4.4
-        version: 0.4.4(monaco-editor@0.56.0)
+        version: 0.4.4(monaco-editor@0.55.1)
       next:
         specifier: '>=16.1.7'
         version: 16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.0)(@types/node@26.1.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -180,7 +180,7 @@ importers:
         version: 5.32.5
       y-monaco:
         specifier: ^0.1.6
-        version: 0.1.6(monaco-editor@0.56.0)(yjs@13.6.31)
+        version: 0.1.6(monaco-editor@0.55.1)(yjs@13.6.31)
       y-protocols:
         specifier: ^1.0.7
         version: 1.0.7(yjs@13.6.31)
@@ -253,7 +253,7 @@ importers:
         version: 29.1.1(@noble/hashes@1.8.0)
       monaco-editor-webpack-plugin:
         specifier: ^7.1.1
-        version: 7.1.1(monaco-editor@0.56.0)(webpack@5.109.0(esbuild@0.28.1))
+        version: 7.1.1(monaco-editor@0.55.1)(webpack@5.109.0(esbuild@0.28.1))
       msw:
         specifier: ^2.15.0
         version: 2.15.0(@types/node@26.1.1)(typescript@6.0.3)
@@ -4791,8 +4791,8 @@ packages:
       monaco-editor: '>= 0.31.0'
       webpack: '>=5.104.1'
 
-  monaco-editor@0.56.0:
-    resolution: {integrity: sha512-sXboRm3BeBeLm938eaiyLMe0OxzfXIlZvbv4ir/jVgQy1zDhWjgmny0WoN45fuDKhCCQsYMbBJrv/A6jd8aCUg==}
+  monaco-editor@0.55.1:
+    resolution: {integrity: sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==}
 
   monaco-vim@0.4.4:
     resolution: {integrity: sha512-LNChAb//WEm/W+eyeHG/0+pdVEHotk2hLTN+M3sQZx5E8cAlSWSgqcxpcRuQnxDybSln7pfHF9i63HmbIQvrWw==}
@@ -7500,10 +7500,10 @@ snapshots:
     dependencies:
       state-local: 1.0.7
 
-  '@monaco-editor/react@4.7.0(monaco-editor@0.56.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@monaco-editor/react@4.7.0(monaco-editor@0.55.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@monaco-editor/loader': 1.7.0
-      monaco-editor: 0.56.0
+      monaco-editor: 0.55.1
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
 
@@ -11063,20 +11063,20 @@ snapshots:
 
   module-details-from-path@1.0.4: {}
 
-  monaco-editor-webpack-plugin@7.1.1(monaco-editor@0.56.0)(webpack@5.109.0(esbuild@0.28.1)):
+  monaco-editor-webpack-plugin@7.1.1(monaco-editor@0.55.1)(webpack@5.109.0(esbuild@0.28.1)):
     dependencies:
       loader-utils: 2.0.4
-      monaco-editor: 0.56.0
+      monaco-editor: 0.55.1
       webpack: 5.109.0(esbuild@0.28.1)
 
-  monaco-editor@0.56.0:
+  monaco-editor@0.55.1:
     dependencies:
       dompurify: 3.4.12
       marked: 14.0.0
 
-  monaco-vim@0.4.4(monaco-editor@0.56.0):
+  monaco-vim@0.4.4(monaco-editor@0.55.1):
     dependencies:
-      monaco-editor: 0.56.0
+      monaco-editor: 0.55.1
 
   motion-dom@12.42.2:
     dependencies:
@@ -12602,10 +12602,10 @@ snapshots:
       lib0: 0.2.117
       yjs: 13.6.31
 
-  y-monaco@0.1.6(monaco-editor@0.56.0)(yjs@13.6.31):
+  y-monaco@0.1.6(monaco-editor@0.55.1)(yjs@13.6.31):
     dependencies:
       lib0: 0.2.117
-      monaco-editor: 0.56.0
+      monaco-editor: 0.55.1
       yjs: 13.6.31
 
   y-protocols@1.0.7(yjs@13.6.31):
