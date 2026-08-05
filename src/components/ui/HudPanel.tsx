@@ -1,16 +1,16 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 type HudPanelProps = {
-  children: ReactNode;
-  className?: string;
-  padding?: 'sm' | 'md' | 'lg';
-};
+  children: ReactNode
+  className?: string
+  padding?: 'sm' | 'md' | 'lg'
+}
 
 const paddingMap = {
   sm: 'p-3',
   md: 'p-4',
   lg: 'p-5',
-} as const;
+} as const
 
 /** Frosted HUD surface used over the 3D world. */
 export function HudPanel({ children, className = '', padding = 'md' }: HudPanelProps) {
@@ -20,5 +20,5 @@ export function HudPanel({ children, className = '', padding = 'md' }: HudPanelP
     >
       {children}
     </div>
-  );
+  )
 }

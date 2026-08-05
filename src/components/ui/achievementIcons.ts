@@ -1,26 +1,26 @@
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
 import {
-  Target,
-  Rocket,
-  Star,
-  Zap,
+  BookOpen,
+  Bot,
   Building2,
-  Crown,
-  Sparkles,
-  Trophy,
   CheckCircle2,
+  Crown,
+  Dumbbell,
+  FileCode2,
+  Flame,
+  Gem,
+  GraduationCap,
   Hourglass,
   Lock,
-  FileCode2,
   Palette,
-  Gem,
+  Rocket,
   Shield,
-  Bot,
-  Flame,
-  GraduationCap,
-  Dumbbell,
-  BookOpen,
-} from 'lucide-react';
+  Sparkles,
+  Star,
+  Target,
+  Trophy,
+  Zap,
+} from 'lucide-react'
 
 /** Lucide icons keyed by achievement id (FeatureHub / data). */
 export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
@@ -35,7 +35,7 @@ export const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
   html_novice: FileCode2,
   css_artist: Palette,
   javascript_wizard: Zap,
-};
+}
 
 const FALLBACK_BY_NAME: Record<string, LucideIcon> = {
   sparkles: Sparkles,
@@ -56,16 +56,16 @@ const FALLBACK_BY_NAME: Record<string, LucideIcon> = {
   'graduation-cap': GraduationCap,
   dumbbell: Dumbbell,
   'book-open': BookOpen,
-};
+}
 
 export function getAchievementIcon(id: string, fallback?: string): LucideIcon {
-  if (ACHIEVEMENT_ICONS[id]) return ACHIEVEMENT_ICONS[id];
-  if (fallback && FALLBACK_BY_NAME[fallback]) return FALLBACK_BY_NAME[fallback];
-  return Trophy;
+  if (ACHIEVEMENT_ICONS[id]) return ACHIEVEMENT_ICONS[id]
+  if (fallback && FALLBACK_BY_NAME[fallback]) return FALLBACK_BY_NAME[fallback]
+  return Trophy
 }
 
 export const ACHIEVEMENT_SECTION_ICONS = {
   unlocked: CheckCircle2,
   inProgress: Hourglass,
   locked: Lock,
-} as const;
+} as const

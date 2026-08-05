@@ -1,51 +1,55 @@
-import { useRef, useState } from 'react';
-import { Html, Trail } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { Group, MeshStandardMaterial } from 'three';
-import { useAppSelector } from '@/hooks/reduxHooks';
-import { buildingTemplates, PlacedBuilding } from '@/data/buildingTemplates';
-import { animated, useSpring } from '@react-spring/three';
+import { animated, useSpring } from '@react-spring/three'
+import { Html, Trail } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useRef, useState } from 'react'
+import type { Group, MeshStandardMaterial } from 'three'
+import { buildingTemplates, type PlacedBuilding } from '@/data/buildingTemplates'
+import { useAppSelector } from '@/hooks/reduxHooks'
 
 interface BuildingInteractionProps {
-  building: PlacedBuilding;
-  onSelect: (id: string) => void;
-  isSelected: boolean;
+  building: PlacedBuilding
+  onSelect: (id: string) => void
+  isSelected: boolean
 }
 
-export default function BuildingInteraction({ building, onSelect, isSelected }: BuildingInteractionProps) {
-  const resources = useAppSelector(state => state.resource.storage);
-  const buildingRef = useRef<Group>(null);
-  const materialRef = useRef<MeshStandardMaterial>(null);
-  const [isHovered, setIsHovered] = useState(false);
+export default function BuildingInteraction({
+  building,
+  onSelect,
+  isSelected,
+}: BuildingInteractionProps) {
+  const resources = useAppSelector((state) => state.resource.storage)
+  const buildingRef = useRef<Group>(null)
+  const materialRef = useRef<MeshStandardMaterial>(null)
+  const [isHovered, setIsHovered] = useState(false)
 
   // Animation spring for hover and selection effects
   const { scale, glow } = useSpring({
     scale: isHovered || isSelected ? 1.05 : 1,
     glow: isHovered || isSelected ? 0.8 : 0.5,
-    config: { tension: 120, friction: 14 }
-  });
+    config: { tension: 120, friction: 14 },
+  })
 
   useFrame((state) => {
-    if (!buildingRef.current || !materialRef.current) return;
+    if (!buildingRef.current || !materialRef.current) return
 
     // Animate building effects
     if (building.status === 'active') {
-      const time = state.clock.getElapsedTime();
-      materialRef.current.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1;
+      const time = state.clock.getElapsedTime()
+      materialRef.current.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1
     }
 
     // Resource generation particles
     if (building.status === 'active' && building.effects) {
-      building.effects.forEach(effect => {
+      building.effects.forEach((effect) => {
         if (effect.type === 'resource' && effect.value > 0) {
           // Resource generation visual feedback will be handled by Trail
         }
-      });
+      })
     }
-  });
+  })
 
-  const template = buildingTemplates[building.templateId];
-  if (!template) return null;
+  const template = buildingTemplates[building.templateId]
+  if (!template) return null
 
   return (
     <group
@@ -70,24 +74,25 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
         </animated.mesh>
 
         {/* Resource generation effects */}
-        {building.status === 'active' && building.effects.map((effect, index) => {
-          if (effect.type === 'resource' && effect.value > 0) {
-            return (
-              <Trail
-                key={`${effect.type}-${effect.target}-${index}`}
-                width={0.5}
-                length={4}
-                color={template.category === 'production' ? '#10B981' : '#3B82F6'}
-                attenuation={(t) => t * t}
-              >
-                <mesh visible={false}>
-                  <sphereGeometry args={[0.1]} />
-                </mesh>
-              </Trail>
-            );
-          }
-          return null;
-        })}
+        {building.status === 'active' &&
+          building.effects.map((effect, index) => {
+            if (effect.type === 'resource' && effect.value > 0) {
+              return (
+                <Trail
+                  key={`${effect.type}-${effect.target}-${index}`}
+                  width={0.5}
+                  length={4}
+                  color={template.category === 'production' ? '#10B981' : '#3B82F6'}
+                  attenuation={(t) => t * t}
+                >
+                  <mesh visible={false}>
+                    <sphereGeometry args={[0.1]} />
+                  </mesh>
+                </Trail>
+              )
+            }
+            return null
+          })}
 
         {/* Building info overlay */}
         <Html
@@ -102,7 +107,7 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
             pointerEvents: 'none',
             transform: 'scale(1.5)',
             opacity: isHovered || isSelected ? 1 : 0,
-            transition: 'opacity 0.2s ease-in-out'
+            transition: 'opacity 0.2s ease-in-out',
           }}
         >
           <div className="flex flex-col items-center gap-1">
@@ -117,16 +122,16 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
             {building.status === 'active' && (
               <div className="flex flex-wrap gap-2 justify-center">
                 {building.effects.map((effect, index) => {
-                  if (!effect.target || !(effect.target in resources)) return null;
+                  if (!effect.target || !(effect.target in resources)) return null
 
                   const resourceLabels: Record<string, string> = {
                     energy: 'NRG',
                     minerals: 'MIN',
                     water: 'H2O',
                     food: 'FOOD',
-                  };
-                  const resourceLabel = resourceLabels[effect.target];
-                  if (!resourceLabel) return null;
+                  }
+                  const resourceLabel = resourceLabels[effect.target]
+                  if (!resourceLabel) return null
 
                   return (
                     <div
@@ -135,11 +140,9 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
                     >
                       {effect.type === 'resource' && effect.value > 0 && '+'}
                       {effect.value}
-                      {effect.type === 'efficiency' && 'x '}
-                      {' '}
-                      {resourceLabel}
+                      {effect.type === 'efficiency' && 'x '} {resourceLabel}
                     </div>
-                  );
+                  )
                 })}
               </div>
             )}
@@ -147,5 +150,5 @@ export default function BuildingInteraction({ building, onSelect, isSelected }: 
         </Html>
       </animated.group>
     </group>
-  );
-} 
+  )
+}

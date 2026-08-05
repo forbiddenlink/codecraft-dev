@@ -1,11 +1,11 @@
-'use client';
-import { useRef } from 'react';
-import { RigidBody, CuboidCollider } from '@react-three/rapier';
-import type { RapierRigidBody } from '@react-three/rapier';
-import { Box, RoundedBox, Cylinder, Sphere, Text } from '@react-three/drei';
-import { animated, useSpring } from '@react-spring/three';
-import { useFrame } from '@react-three/fiber';
-import { Color, Group, MeshStandardMaterial } from 'three';
+'use client'
+import { animated, useSpring } from '@react-spring/three'
+import { Box, Cylinder, RoundedBox, Sphere, Text } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import type { RapierRigidBody } from '@react-three/rapier'
+import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { useRef } from 'react'
+import { Color, type Group, type MeshStandardMaterial } from 'three'
 
 export type PhysicsBuildingType =
   | 'div'
@@ -22,48 +22,52 @@ export type PhysicsBuildingType =
   | 'generator'
   | 'dock'
   | 'command'
-  | 'storage';
+  | 'storage'
 
 interface PhysicsBuildingProps {
-  elementType: PhysicsBuildingType;
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: [number, number, number];
-  color?: string;
-  isHovered?: boolean;
-  isSelected?: boolean;
-  isActive?: boolean;
-  textContent?: string;
-  onClick?: () => void;
-  enablePhysics?: boolean;
-  mass?: number;
+  elementType: PhysicsBuildingType
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  scale?: [number, number, number]
+  color?: string
+  isHovered?: boolean
+  isSelected?: boolean
+  isActive?: boolean
+  textContent?: string
+  onClick?: () => void
+  enablePhysics?: boolean
+  mass?: number
 }
 
-function getBuildingDimensions(elementType: PhysicsBuildingType): { width: number; height: number; depth: number } {
+function getBuildingDimensions(elementType: PhysicsBuildingType): {
+  width: number
+  height: number
+  depth: number
+} {
   switch (elementType) {
     case 'section':
     case 'main':
     case 'habitat':
     case 'command':
-      return { width: 3, height: 2, depth: 3 };
+      return { width: 3, height: 2, depth: 3 }
     case 'article':
     case 'laboratory':
-      return { width: 2, height: 2, depth: 2 };
+      return { width: 2, height: 2, depth: 2 }
     case 'nav':
     case 'dock':
-      return { width: 3, height: 1, depth: 1.5 };
+      return { width: 3, height: 1, depth: 1.5 }
     case 'header':
-      return { width: 3, height: 1, depth: 3 };
+      return { width: 3, height: 1, depth: 3 }
     case 'footer':
-      return { width: 3, height: 0.7, depth: 3 };
+      return { width: 3, height: 0.7, depth: 3 }
     case 'generator':
-      return { width: 1.5, height: 2, depth: 1.5 };
+      return { width: 1.5, height: 2, depth: 1.5 }
     case 'greenhouse':
-      return { width: 2, height: 2, depth: 2 };
+      return { width: 2, height: 2, depth: 2 }
     case 'storage':
-      return { width: 2, height: 1.5, depth: 2 };
+      return { width: 2, height: 1.5, depth: 2 }
     default:
-      return { width: 2, height: 1.5, depth: 2 };
+      return { width: 2, height: 1.5, depth: 2 }
   }
 }
 
@@ -72,23 +76,23 @@ function getDefaultColor(elementType: PhysicsBuildingType): string {
     case 'section':
     case 'main':
     case 'habitat':
-      return '#7bb5d4';
+      return '#7bb5d4'
     case 'article':
     case 'laboratory':
-      return '#a8c6d9';
+      return '#a8c6d9'
     case 'nav':
     case 'dock':
     case 'header':
     case 'footer':
-      return '#5d8ca8';
+      return '#5d8ca8'
     case 'generator':
-      return '#4a5568';
+      return '#4a5568'
     case 'greenhouse':
-      return '#10b981';
+      return '#10b981'
     case 'storage':
-      return '#6b7280';
+      return '#6b7280'
     default:
-      return '#4a5568';
+      return '#4a5568'
   }
 }
 
@@ -104,31 +108,31 @@ export default function PhysicsBuilding({
   textContent,
   onClick,
   enablePhysics = true,
-  mass = 1
+  mass = 1,
 }: PhysicsBuildingProps) {
-  const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const groupRef = useRef<Group>(null);
-  const materialRef = useRef<MeshStandardMaterial>(null);
+  const rigidBodyRef = useRef<RapierRigidBody>(null)
+  const groupRef = useRef<Group>(null)
+  const materialRef = useRef<MeshStandardMaterial>(null)
 
-  const dimensions = getBuildingDimensions(elementType);
-  const buildingColor = new Color(color || getDefaultColor(elementType));
+  const dimensions = getBuildingDimensions(elementType)
+  const buildingColor = new Color(color || getDefaultColor(elementType))
 
   const { hoverScale, emissiveIntensity } = useSpring({
     hoverScale: isHovered || isSelected ? 1.05 : 1,
     emissiveIntensity: isHovered ? 2.0 : isSelected ? 1.5 : isActive ? 0.4 : 0.1,
-    config: { tension: 170, friction: 26 }
-  });
+    config: { tension: 170, friction: 26 },
+  })
 
   useFrame((state) => {
-    if (!materialRef.current) return;
+    if (!materialRef.current) return
 
-    const time = state.clock.getElapsedTime();
+    const time = state.clock.getElapsedTime()
 
     // Animate energy systems for generators
     if (isActive && elementType === 'generator') {
-      materialRef.current.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1;
+      materialRef.current.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1
     }
-  });
+  })
 
   const renderShape = () => {
     const commonMaterial = (
@@ -141,7 +145,7 @@ export default function PhysicsBuilding({
         roughness={0.6}
         toneMapped={false}
       />
-    );
+    )
 
     switch (elementType) {
       case 'section':
@@ -156,12 +160,14 @@ export default function PhysicsBuilding({
           >
             {commonMaterial}
           </RoundedBox>
-        );
+        )
 
       case 'generator':
         return (
           <group>
-            <Cylinder args={[dimensions.width * 0.4, dimensions.width * 0.6, dimensions.height, 16]}>
+            <Cylinder
+              args={[dimensions.width * 0.4, dimensions.width * 0.6, dimensions.height, 16]}
+            >
               {commonMaterial}
             </Cylinder>
             <Box
@@ -175,7 +181,7 @@ export default function PhysicsBuilding({
               />
             </Box>
           </group>
-        );
+        )
 
       case 'greenhouse':
         return (
@@ -199,14 +205,10 @@ export default function PhysicsBuilding({
               args={[dimensions.width * 0.5, dimensions.width * 0.5, dimensions.height * 0.4, 16]}
               position={[0, -dimensions.height * 0.2, 0]}
             >
-              <meshStandardMaterial
-                color={buildingColor}
-                metalness={0.4}
-                roughness={0.6}
-              />
+              <meshStandardMaterial color={buildingColor} metalness={0.4} roughness={0.6} />
             </Cylinder>
           </group>
-        );
+        )
 
       case 'laboratory':
       case 'article':
@@ -229,21 +231,25 @@ export default function PhysicsBuilding({
               />
             </Sphere>
           </group>
-        );
+        )
 
       default:
         return (
-          <Box args={[dimensions.width, dimensions.height, dimensions.depth]}>
-            {commonMaterial}
-          </Box>
-        );
+          <Box args={[dimensions.width, dimensions.height, dimensions.depth]}>{commonMaterial}</Box>
+        )
     }
-  };
+  }
 
   const content = (
     <animated.group
       ref={groupRef}
-      scale={hoverScale.to(s => [s * scale[0], s * scale[1], s * scale[2]]) as unknown as [number, number, number]}
+      scale={
+        hoverScale.to((s) => [s * scale[0], s * scale[1], s * scale[2]]) as unknown as [
+          number,
+          number,
+          number,
+        ]
+      }
       onClick={onClick}
     >
       {renderShape()}
@@ -260,7 +266,7 @@ export default function PhysicsBuilding({
         </Text>
       )}
     </animated.group>
-  );
+  )
 
   if (enablePhysics) {
     return (
@@ -276,12 +282,12 @@ export default function PhysicsBuilding({
         />
         {content}
       </RigidBody>
-    );
+    )
   }
 
   return (
     <group position={position} rotation={rotation}>
       {content}
     </group>
-  );
+  )
 }

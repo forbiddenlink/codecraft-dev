@@ -1,28 +1,28 @@
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
 import {
-  Gem,
-  Lightbulb,
-  Users,
-  Zap,
-  Sun,
-  Sparkles,
-  PartyPopper,
-  Bot,
-  Trophy,
-  TriangleAlert,
-  Flame,
-  CloudRain,
-  Snowflake,
-  Moon,
-  Rocket,
-  Package,
-  Wrench,
-  Music,
   BookOpen,
-  Palette,
+  Bot,
+  CloudRain,
+  Flame,
+  Gem,
   Heart,
+  Lightbulb,
+  Moon,
+  Music,
+  Package,
+  Palette,
+  PartyPopper,
+  Rocket,
+  Snowflake,
+  Sparkles,
+  Sun,
+  TriangleAlert,
+  Trophy,
+  Users,
   Wind,
-} from 'lucide-react';
+  Wrench,
+  Zap,
+} from 'lucide-react'
 
 const EVENT_ICONS: Record<string, LucideIcon> = {
   gem: Gem,
@@ -47,8 +47,8 @@ const EVENT_ICONS: Record<string, LucideIcon> = {
   palette: Palette,
   heart: Heart,
   wind: Wind,
-};
+}
 
 export function getColonyEventIcon(iconKey: string): LucideIcon {
-  return EVENT_ICONS[iconKey] ?? Sparkles;
+  return EVENT_ICONS[iconKey] ?? Sparkles
 }

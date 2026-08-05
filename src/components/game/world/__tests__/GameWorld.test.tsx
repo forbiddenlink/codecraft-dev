@@ -1,5 +1,5 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react'
+import type React from 'react'
 
 // Mock next/dynamic to test the wrapper component
 jest.mock('next/dynamic', () => {
@@ -12,32 +12,32 @@ jest.mock('next/dynamic', () => {
       <div data-testid="game-world-client" data-ssr={options.ssr.toString()}>
         Game World Client (Mocked)
       </div>
-    );
-    MockComponent.displayName = 'DynamicMock';
-    return MockComponent;
-  };
-});
+    )
+    MockComponent.displayName = 'DynamicMock'
+    return MockComponent
+  }
+})
 
 // Import after mock is set up
-import GameWorld from '../GameWorld';
+import GameWorld from '../GameWorld'
 
 describe('GameWorld', () => {
   it('renders the dynamically loaded client component', () => {
-    render(<GameWorld />);
-    expect(screen.getByTestId('game-world-client')).toBeInTheDocument();
-  });
+    render(<GameWorld />)
+    expect(screen.getByTestId('game-world-client')).toBeInTheDocument()
+  })
 
   it('uses dynamic import with SSR disabled', () => {
-    render(<GameWorld />);
-    const component = screen.getByTestId('game-world-client');
-    expect(component).toHaveAttribute('data-ssr', 'false');
-  });
+    render(<GameWorld />)
+    const component = screen.getByTestId('game-world-client')
+    expect(component).toHaveAttribute('data-ssr', 'false')
+  })
 
   it('displays game content', () => {
-    render(<GameWorld />);
-    expect(screen.getByText(/Game World Client/i)).toBeInTheDocument();
-  });
-});
+    render(<GameWorld />)
+    expect(screen.getByText(/Game World Client/i)).toBeInTheDocument()
+  })
+})
 
 describe('GameWorld integration considerations', () => {
   // These tests document important aspects for E2E testing
@@ -45,12 +45,12 @@ describe('GameWorld integration considerations', () => {
   it('should be tested with Playwright for full WebGL functionality', () => {
     // Note: Full 3D scene testing requires Playwright with GPU support
     // See: .github/workflows/ci.yml for E2E configuration
-    expect(true).toBe(true);
-  });
+    expect(true).toBe(true)
+  })
 
   it('requires browser environment for Three.js rendering', () => {
     // React Three Fiber components need WebGL context
     // Unit tests use mocks; E2E tests use real browser
-    expect(true).toBe(true);
-  });
-});
+    expect(true).toBe(true)
+  })
+})

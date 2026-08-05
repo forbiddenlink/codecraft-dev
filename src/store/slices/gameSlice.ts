@@ -1,64 +1,64 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { GameStructureNode } from '@/utils/htmlParser';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { GameStructureNode } from '@/utils/htmlParser'
 
 interface Position {
-  x: number;
-  y: number;
-  z: number;
+  x: number
+  y: number
+  z: number
 }
 
 interface GameStructureStyle {
-  color?: string;
-  scale?: number;
-  rotation?: [number, number, number];
-  position?: [number, number, number];
-  opacity?: number;
-  emissive?: string;
-  metalness?: number;
-  roughness?: number;
-  wireframe?: boolean;
-  animation?: string;
-  glow?: boolean;
-  shadow?: boolean;
+  color?: string
+  scale?: number
+  rotation?: [number, number, number]
+  position?: [number, number, number]
+  opacity?: number
+  emissive?: string
+  metalness?: number
+  roughness?: number
+  wireframe?: boolean
+  animation?: string
+  glow?: boolean
+  shadow?: boolean
 }
 
 export interface ParsedCSSRule {
-  selector: string;
-  properties: GameStructureStyle;
+  selector: string
+  properties: GameStructureStyle
 }
 
 export interface JSExecutionContext {
-  success: boolean;
-  output?: any;
-  error?: string;
-  variables?: Record<string, any>;
-  console?: string[];
+  success: boolean
+  output?: any
+  error?: string
+  variables?: Record<string, any>
+  console?: string[]
 }
 
 interface GameState {
-  playerPosition: Position;
-  pixelPosition: Position;
-  isPlayerMoving: boolean;
-  isPixelMoving: boolean;
-  movementSpeed: number;
-  pixelMood: 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking';
-  pixelTarget?: Position; // Position Pixel is trying to reach
-  playerInteractionRadius: number;
-  isEditorVisible: boolean;
-  editorErrors: Array<{ message: string }>;
-  tutorialActive: boolean;
+  playerPosition: Position
+  pixelPosition: Position
+  isPlayerMoving: boolean
+  isPixelMoving: boolean
+  movementSpeed: number
+  pixelMood: 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking'
+  pixelTarget?: Position // Position Pixel is trying to reach
+  playerInteractionRadius: number
+  isEditorVisible: boolean
+  editorErrors: Array<{ message: string }>
+  tutorialActive: boolean
   tutorialStep?: {
-    pixelDialogue?: string;
-  };
+    pixelDialogue?: string
+  }
   colonyResources: {
-    energy: number;
-    minerals: number;
-    water: number;
-    food: number;
-  };
-  htmlStructure: GameStructureNode[];
-  cssRules: ParsedCSSRule[];
-  jsExecutionContext: JSExecutionContext | null;
+    energy: number
+    minerals: number
+    water: number
+    food: number
+  }
+  htmlStructure: GameStructureNode[]
+  cssRules: ParsedCSSRule[]
+  jsExecutionContext: JSExecutionContext | null
 }
 
 const initialState: GameState = {
@@ -76,58 +76,58 @@ const initialState: GameState = {
     energy: 100,
     minerals: 50,
     water: 100,
-    food: 50
+    food: 50,
   },
   htmlStructure: [],
   cssRules: [],
-  jsExecutionContext: null
-};
+  jsExecutionContext: null,
+}
 
 export const gameSlice = createSlice({
   name: 'game',
   initialState,
   reducers: {
     setPlayerPosition: (state, action: PayloadAction<Position>) => {
-      state.playerPosition = action.payload;
+      state.playerPosition = action.payload
     },
     setPixelPosition: (state, action: PayloadAction<Position>) => {
-      state.pixelPosition = action.payload;
+      state.pixelPosition = action.payload
     },
     setPixelTarget: (state, action: PayloadAction<Position | undefined>) => {
-      state.pixelTarget = action.payload;
+      state.pixelTarget = action.payload
     },
     setIsPlayerMoving: (state, action: PayloadAction<boolean>) => {
-      state.isPlayerMoving = action.payload;
+      state.isPlayerMoving = action.payload
     },
     setIsPixelMoving: (state, action: PayloadAction<boolean>) => {
-      state.isPixelMoving = action.payload;
+      state.isPixelMoving = action.payload
     },
     setPixelMood: (state, action: PayloadAction<GameState['pixelMood']>) => {
-      state.pixelMood = action.payload;
+      state.pixelMood = action.payload
     },
     updatePlayerPosition: (state, action: PayloadAction<Partial<Position>>) => {
       state.playerPosition = {
         ...state.playerPosition,
-        ...action.payload
-      };
+        ...action.payload,
+      }
     },
     updatePixelPosition: (state, action: PayloadAction<Partial<Position>>) => {
       state.pixelPosition = {
         ...state.pixelPosition,
-        ...action.payload
-      };
+        ...action.payload,
+      }
     },
     updateHtmlStructure: (state, action: PayloadAction<GameStructureNode[]>) => {
-      state.htmlStructure = action.payload;
+      state.htmlStructure = action.payload
     },
     updateCssRules: (state, action: PayloadAction<ParsedCSSRule[]>) => {
-      state.cssRules = action.payload;
+      state.cssRules = action.payload
     },
     updateJsExecution: (state, action: PayloadAction<JSExecutionContext | null>) => {
-      state.jsExecutionContext = action.payload;
-    }
-  }
-});
+      state.jsExecutionContext = action.payload
+    },
+  },
+})
 
 export const {
   setPlayerPosition,
@@ -140,7 +140,7 @@ export const {
   updatePixelPosition,
   updateHtmlStructure,
   updateCssRules,
-  updateJsExecution
-} = gameSlice.actions;
+  updateJsExecution,
+} = gameSlice.actions
 
-export default gameSlice.reducer; 
+export default gameSlice.reducer

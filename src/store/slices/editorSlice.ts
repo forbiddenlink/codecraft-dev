@@ -1,22 +1,22 @@
 // File: /src/store/slices/editorSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ValidationError } from '@/utils/codeValidation';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import type { ValidationError } from '@/utils/codeValidation'
 
-export type EditorLanguage = 'html' | 'css' | 'javascript';
+export type EditorLanguage = 'html' | 'css' | 'javascript'
 
 interface CodeFiles {
-  html: string;
-  css: string;
-  javascript: string;
+  html: string
+  css: string
+  javascript: string
 }
 
 interface EditorState {
-  isVisible: boolean;
-  code: CodeFiles;
-  language: EditorLanguage;
-  errors: ValidationError[];
-  isExecuting: boolean;
-  lastExecutionSuccess: boolean | null;
+  isVisible: boolean
+  code: CodeFiles
+  language: EditorLanguage
+  errors: ValidationError[]
+  isExecuting: boolean
+  lastExecutionSuccess: boolean | null
 }
 
 const initialState: EditorState = {
@@ -24,47 +24,47 @@ const initialState: EditorState = {
   code: {
     html: '',
     css: '',
-    javascript: ''
+    javascript: '',
   },
   language: 'html',
   errors: [],
   isExecuting: false,
-  lastExecutionSuccess: null
-};
+  lastExecutionSuccess: null,
+}
 
 export const editorSlice = createSlice({
   name: 'editor',
   initialState,
   reducers: {
     setEditorVisible: (state, action: PayloadAction<boolean>) => {
-      state.isVisible = action.payload;
+      state.isVisible = action.payload
     },
     setCode: (state, action: PayloadAction<{ language: EditorLanguage; code: string }>) => {
-      state.code[action.payload.language] = action.payload.code;
+      state.code[action.payload.language] = action.payload.code
     },
     setLanguage: (state, action: PayloadAction<EditorLanguage>) => {
-      state.language = action.payload;
+      state.language = action.payload
     },
     setEditorErrors: (state, action: PayloadAction<ValidationError[]>) => {
-      state.errors = action.payload;
+      state.errors = action.payload
     },
     setIsExecuting: (state, action: PayloadAction<boolean>) => {
-      state.isExecuting = action.payload;
+      state.isExecuting = action.payload
     },
     setLastExecutionSuccess: (state, action: PayloadAction<boolean>) => {
-      state.lastExecutionSuccess = action.payload;
+      state.lastExecutionSuccess = action.payload
     },
     clearEditorState: (state) => {
       state.code = {
         html: '',
         css: '',
-        javascript: ''
-      };
-      state.errors = [];
-      state.lastExecutionSuccess = null;
-    }
-  }
-});
+        javascript: '',
+      }
+      state.errors = []
+      state.lastExecutionSuccess = null
+    },
+  },
+})
 
 export const {
   setEditorVisible,
@@ -73,7 +73,7 @@ export const {
   setEditorErrors,
   setIsExecuting,
   setLastExecutionSuccess,
-  clearEditorState
-} = editorSlice.actions;
+  clearEditorState,
+} = editorSlice.actions
 
-export default editorSlice.reducer;
+export default editorSlice.reducer

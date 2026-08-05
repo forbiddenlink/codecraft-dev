@@ -1,68 +1,66 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { challengeSystem, ValidationResult } from '@/game/systems/ChallengeSystem';
-import { setCurrentChallenge } from '@/store/slices/challengeSlice';
-import { setPixelMood } from '@/store/slices/gameSlice';
-import { getAvailableChallenges } from '@/data/challenges';
+import { useEffect, useMemo, useState } from 'react'
+import { getAvailableChallenges } from '@/data/challenges'
+import { challengeSystem, type ValidationResult } from '@/game/systems/ChallengeSystem'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { setCurrentChallenge } from '@/store/slices/challengeSlice'
+import { setPixelMood } from '@/store/slices/gameSlice'
 
 export function useChallengeSystem() {
-  const dispatch = useAppDispatch();
-  const currentIndex = useAppSelector((state) => state.challenges.currentIndex);
-  const completedChallengeIds = useAppSelector((state) => state.challenges.completed);
-  const editorCode = useAppSelector((state) => state.editor.code);
+  const dispatch = useAppDispatch()
+  const currentIndex = useAppSelector((state) => state.challenges.currentIndex)
+  const completedChallengeIds = useAppSelector((state) => state.challenges.completed)
+  const editorCode = useAppSelector((state) => state.editor.code)
   const availableChallenges = useMemo(
     () => getAvailableChallenges(completedChallengeIds),
-    [completedChallengeIds],
-  );
+    [completedChallengeIds]
+  )
 
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null)
+  const [isValidating, setIsValidating] = useState(false)
 
-  const safeIndex = Math.min(currentIndex, Math.max(availableChallenges.length - 1, 0));
-  const currentChallenge = availableChallenges[safeIndex];
+  const safeIndex = Math.min(currentIndex, Math.max(availableChallenges.length - 1, 0))
+  const currentChallenge = availableChallenges[safeIndex]
 
   useEffect(() => {
     if (currentChallenge) {
-      challengeSystem.startChallenge(currentChallenge.id);
+      challengeSystem.startChallenge(currentChallenge.id)
     }
-  }, [currentChallenge]);
+  }, [currentChallenge])
 
-  const isCompleted = currentChallenge
-    ? completedChallengeIds.includes(currentChallenge.id)
-    : false;
+  const isCompleted = currentChallenge ? completedChallengeIds.includes(currentChallenge.id) : false
 
   const validateCurrentChallenge = () => {
-    if (!currentChallenge) return;
+    if (!currentChallenge) return
 
-    setIsValidating(true);
+    setIsValidating(true)
 
     try {
-      const combined = `${editorCode.html}\n${editorCode.css}\n${editorCode.javascript}`;
-      const result = challengeSystem.validateChallenge(currentChallenge.id, combined);
+      const combined = `${editorCode.html}\n${editorCode.css}\n${editorCode.javascript}`
+      const result = challengeSystem.validateChallenge(currentChallenge.id, combined)
 
-      setValidationResult(result);
-      dispatch(setPixelMood(result.success ? 'happy' : 'concerned'));
+      setValidationResult(result)
+      dispatch(setPixelMood(result.success ? 'happy' : 'concerned'))
 
-      return result;
+      return result
     } finally {
-      setIsValidating(false);
+      setIsValidating(false)
     }
-  };
+  }
 
   const navigateToChallenge = (index: number) => {
     if (index >= 0 && index < availableChallenges.length) {
-      dispatch(setCurrentChallenge(index));
-      setValidationResult(null);
+      dispatch(setCurrentChallenge(index))
+      setValidationResult(null)
     }
-  };
+  }
 
   const navigateToNextChallenge = () => {
-    navigateToChallenge(safeIndex + 1);
-  };
+    navigateToChallenge(safeIndex + 1)
+  }
 
   const navigateToPreviousChallenge = () => {
-    navigateToChallenge(safeIndex - 1);
-  };
+    navigateToChallenge(safeIndex - 1)
+  }
 
   return {
     currentChallenge,
@@ -76,5 +74,5 @@ export function useChallengeSystem() {
     navigateToPreviousChallenge,
     availableChallenges,
     completedChallengeIds,
-  };
+  }
 }

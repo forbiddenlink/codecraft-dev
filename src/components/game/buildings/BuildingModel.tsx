@@ -1,19 +1,19 @@
-'use client';
-import { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { Box, Sphere, Cylinder, Text, RoundedBox } from '@react-three/drei';
-import { Color, Group, MeshStandardMaterial } from 'three';
-import { animated, useSpring } from '@react-spring/three';
+'use client'
+import { animated, useSpring } from '@react-spring/three'
+import { Box, Cylinder, RoundedBox, Sphere, Text } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
+import { Color, type Group, type MeshStandardMaterial } from 'three'
 
 // Building model types based on HTML elements
-export type BuildingModelType = 
-  | 'div' 
-  | 'section' 
-  | 'article' 
-  | 'nav' 
-  | 'header' 
-  | 'footer' 
-  | 'aside' 
+export type BuildingModelType =
+  | 'div'
+  | 'section'
+  | 'article'
+  | 'nav'
+  | 'header'
+  | 'footer'
+  | 'aside'
   | 'main'
   | 'habitat'
   | 'laboratory'
@@ -21,65 +21,65 @@ export type BuildingModelType =
   | 'generator'
   | 'dock'
   | 'command'
-  | 'storage';
+  | 'storage'
 
 interface BuildingModelProps {
-  elementType: BuildingModelType;
+  elementType: BuildingModelType
   styles: {
-    backgroundColor?: string;
-    color?: string;
-    borderRadius?: string | number;
-    width?: string | number;
-    height?: string | number;
-    depth?: string | number;
-    opacity?: number;
-    transform?: string;
-    animation?: string;
-    '--energy-level'?: string;
-  };
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: [number, number, number];
-  isHovered?: boolean;
-  isSelected?: boolean;
-  isActive?: boolean;
-  textContent?: string;
-  isError?: boolean;
-  onClick?: () => void;
+    backgroundColor?: string
+    color?: string
+    borderRadius?: string | number
+    width?: string | number
+    height?: string | number
+    depth?: string | number
+    opacity?: number
+    transform?: string
+    animation?: string
+    '--energy-level'?: string
+  }
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  scale?: [number, number, number]
+  isHovered?: boolean
+  isSelected?: boolean
+  isActive?: boolean
+  textContent?: string
+  isError?: boolean
+  onClick?: () => void
 }
 
-export default function BuildingModel({ 
-  elementType, 
-  styles, 
-  position, 
-  rotation = [0, 0, 0], 
+export default function BuildingModel({
+  elementType,
+  styles,
+  position,
+  rotation = [0, 0, 0],
   scale = [1, 1, 1],
-  isHovered = false, 
+  isHovered = false,
   isSelected = false,
   isActive = true,
   textContent,
   isError = false,
-  onClick
+  onClick,
 }: BuildingModelProps) {
-  const groupRef = useRef<Group>(null);
-  const materialRef = useRef<MeshStandardMaterial>(null);
-  
+  const groupRef = useRef<Group>(null)
+  const materialRef = useRef<MeshStandardMaterial>(null)
+
   // Convert style values to usable properties
   const properties = useMemo(() => {
     // Default values based on element type
-    const defaults = getBuildingDefaults(elementType);
-    
+    const defaults = getBuildingDefaults(elementType)
+
     // Extract and process CSS values
-    const width = parseSize(styles.width) || defaults.width;
-    const height = parseSize(styles.height) || defaults.height;
-    const depth = parseSize(styles.depth) || defaults.depth;
-    const borderRadius = parseSize(styles.borderRadius) || defaults.borderRadius;
-    const color = new Color(styles.backgroundColor || defaults.backgroundColor);
-    const textColor = new Color(styles.color || defaults.textColor);
-    
+    const width = parseSize(styles.width) || defaults.width
+    const height = parseSize(styles.height) || defaults.height
+    const depth = parseSize(styles.depth) || defaults.depth
+    const borderRadius = parseSize(styles.borderRadius) || defaults.borderRadius
+    const color = new Color(styles.backgroundColor || defaults.backgroundColor)
+    const textColor = new Color(styles.color || defaults.textColor)
+
     // Energy level custom property (for generators, etc.)
-    const energyLevel = parseInt(styles['--energy-level'] || '50') / 100;
-    
+    const energyLevel = parseInt(styles['--energy-level'] || '50') / 100
+
     return {
       width,
       height,
@@ -87,42 +87,43 @@ export default function BuildingModel({
       borderRadius,
       color,
       textColor,
-      energyLevel
-    };
-  }, [elementType, styles]);
-  
+      energyLevel,
+    }
+  }, [elementType, styles])
+
   // Animation spring for hover/selection
   // Higher emissive intensity values (>1) enable bloom effect
   const { hoverScale, emissiveIntensity } = useSpring({
     hoverScale: isHovered || isSelected ? 1.05 : 1,
     emissiveIntensity: isHovered ? 2.0 : isSelected ? 1.5 : isActive ? 0.4 : 0.1,
-    config: { tension: 170, friction: 26 }
-  });
-  
+    config: { tension: 170, friction: 26 },
+  })
+
   // Error animation spring
   const { errorPulse } = useSpring({
     errorPulse: isError ? 1 : 0,
     loop: isError,
-    config: { duration: 1000 }
-  });
-  
+    config: { duration: 1000 },
+  })
+
   // Handle animations
   useFrame((state) => {
-    if (!groupRef.current || !materialRef.current) return;
-    
-    const time = state.clock.getElapsedTime();
-    
+    if (!groupRef.current || !materialRef.current) return
+
+    const time = state.clock.getElapsedTime()
+
     // Apply CSS animations if present
     if (styles.animation) {
-      applyAnimation(groupRef.current, styles.animation, time);
+      applyAnimation(groupRef.current, styles.animation, time)
     }
-    
+
     // Animate energy systems for active buildings
     if (isActive && elementType === 'generator') {
-      materialRef.current.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1 * properties.energyLevel;
+      materialRef.current.emissiveIntensity =
+        0.2 + Math.sin(time * 2) * 0.1 * properties.energyLevel
     }
-  });
-  
+  })
+
   // Render the appropriate building model based on element type
   const BuildingShape = useMemo(() => {
     switch (elementType) {
@@ -147,8 +148,8 @@ export default function BuildingModel({
               toneMapped={false}
             />
           </RoundedBox>
-        );
-      
+        )
+
       case 'article':
       case 'laboratory':
         // Scientific looking module
@@ -182,15 +183,13 @@ export default function BuildingModel({
               />
             </Sphere>
           </group>
-        );
-      
+        )
+
       case 'nav':
       case 'dock':
         // Corridor-like structure
         return (
-          <Box
-            args={[properties.width, properties.height * 0.5, properties.depth * 2]}
-          >
+          <Box args={[properties.width, properties.height * 0.5, properties.depth * 2]}>
             <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
@@ -201,8 +200,8 @@ export default function BuildingModel({
               toneMapped={false}
             />
           </Box>
-        );
-      
+        )
+
       case 'header':
         // Top-heavy structure
         return (
@@ -220,8 +219,8 @@ export default function BuildingModel({
               toneMapped={false}
             />
           </Box>
-        );
-      
+        )
+
       case 'footer':
         // Base/foundation structure
         return (
@@ -239,8 +238,8 @@ export default function BuildingModel({
               toneMapped={false}
             />
           </Box>
-        );
-      
+        )
+
       case 'generator':
         // Energy producing structure
         return (
@@ -269,8 +268,8 @@ export default function BuildingModel({
               />
             </Box>
           </group>
-        );
-      
+        )
+
       case 'greenhouse':
         // Plant growing structure with dome
         return (
@@ -283,7 +282,7 @@ export default function BuildingModel({
                 ref={materialRef}
                 color={new Color(0xc1d9e8)} // Light blue glass
                 emissive={properties.color}
-                emissiveIntensity={emissiveIntensity.to(v => v * 0.5)}
+                emissiveIntensity={emissiveIntensity.to((v) => v * 0.5)}
                 metalness={0.1}
                 roughness={0.3}
                 transparent
@@ -295,22 +294,16 @@ export default function BuildingModel({
               args={[properties.width * 0.5, properties.width * 0.5, properties.height * 0.4, 16]}
               position={[0, -properties.height * 0.2, 0]}
             >
-              <meshStandardMaterial
-                color={properties.color}
-                metalness={0.4}
-                roughness={0.6}
-              />
+              <meshStandardMaterial color={properties.color} metalness={0.4} roughness={0.6} />
             </Cylinder>
           </group>
-        );
-      
+        )
+
       case 'storage':
         // Container-like structure
         return (
           <group>
-            <Box
-              args={[properties.width, properties.height, properties.depth]}
-            >
+            <Box args={[properties.width, properties.height, properties.depth]}>
               <animated.meshStandardMaterial
                 ref={materialRef}
                 color={properties.color}
@@ -332,14 +325,12 @@ export default function BuildingModel({
               />
             </Box>
           </group>
-        );
-      
+        )
+
       // Default case - basic div building
       default:
         return (
-          <Box
-            args={[properties.width, properties.height, properties.depth]}
-          >
+          <Box args={[properties.width, properties.height, properties.depth]}>
             <animated.meshStandardMaterial
               ref={materialRef}
               color={properties.color}
@@ -350,23 +341,27 @@ export default function BuildingModel({
               toneMapped={false}
             />
           </Box>
-        );
+        )
     }
-  }, [elementType, properties, emissiveIntensity]);
+  }, [elementType, properties, emissiveIntensity])
 
   return (
     <animated.group
       ref={groupRef}
       position={position}
       rotation={rotation}
-      scale={hoverScale.to(s => [s * scale[0], s * scale[1], s * scale[2]]) as unknown as [number, number, number]}
+      scale={
+        hoverScale.to((s) => [s * scale[0], s * scale[1], s * scale[2]]) as unknown as [
+          number,
+          number,
+          number,
+        ]
+      }
       onClick={onClick}
     >
       {/* Error effect */}
-      <animated.group scale={errorPulse.to(p => 1 + p * 0.05)}>
-        {BuildingShape}
-      </animated.group>
-      
+      <animated.group scale={errorPulse.to((p) => 1 + p * 0.05)}>{BuildingShape}</animated.group>
+
       {/* Text content if provided */}
       {textContent && (
         <Text
@@ -381,7 +376,7 @@ export default function BuildingModel({
         </Text>
       )}
     </animated.group>
-  );
+  )
 }
 
 // Helper function to get default properties based on element type
@@ -396,8 +391,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.2,
         backgroundColor: '#7bb5d4', // Light blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'article':
     case 'laboratory':
       return {
@@ -407,8 +402,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.1,
         backgroundColor: '#a8c6d9', // Medium blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'nav':
     case 'dock':
       return {
@@ -418,8 +413,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.2,
         backgroundColor: '#5d8ca8', // Darker blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'header':
       return {
         width: 3,
@@ -428,8 +423,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.2,
         backgroundColor: '#5d8ca8', // Darker blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'footer':
       return {
         width: 3,
@@ -438,8 +433,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.2,
         backgroundColor: '#5d8ca8', // Darker blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'habitat':
       return {
         width: 2.5,
@@ -448,8 +443,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.3,
         backgroundColor: '#7bb5d4', // Light blue
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'generator':
       return {
         width: 1.5,
@@ -458,8 +453,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.1,
         backgroundColor: '#4a5568', // Dark gray
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'greenhouse':
       return {
         width: 2,
@@ -468,8 +463,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.3,
         backgroundColor: '#10b981', // Green
         textColor: '#ffffff',
-      };
-    
+      }
+
     case 'storage':
       return {
         width: 2,
@@ -478,8 +473,8 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.1,
         backgroundColor: '#6b7280', // Gray
         textColor: '#ffffff',
-      };
-    
+      }
+
     // Default case for div and others
     default:
       return {
@@ -489,65 +484,66 @@ function getBuildingDefaults(elementType: BuildingModelType) {
         borderRadius: 0.1,
         backgroundColor: '#4a5568', // Dark gray
         textColor: '#ffffff',
-      };
+      }
   }
 }
 
 // Helper to parse CSS size values
 function parseSize(size: string | number | undefined): number | undefined {
-  if (size === undefined) return undefined;
-  
-  if (typeof size === 'number') return size;
-  
+  if (size === undefined) return undefined
+
+  if (typeof size === 'number') return size
+
   // Parse CSS units like px, em, rem, %
-  const sizeRegex = /(\d+\.?\d*)([a-z%]*)/i;
-  const matches = size.match(sizeRegex);
-  
-  if (!matches) return undefined;
-  
-  const value = parseFloat(matches[1]);
-  const unit = matches[2];
-  
+  const sizeRegex = /(\d+\.?\d*)([a-z%]*)/i
+  const matches = size.match(sizeRegex)
+
+  if (!matches) return undefined
+
+  const value = parseFloat(matches[1])
+  const unit = matches[2]
+
   // Convert to appropriate scale for 3D world
   switch (unit) {
     case 'px':
-      return value * 0.01; // 100px = 1 unit
+      return value * 0.01 // 100px = 1 unit
     case 'em':
     case 'rem':
-      return value; // 1em = 1 unit
+      return value // 1em = 1 unit
     case '%':
-      return value * 0.02; // 100% = 2 units
+      return value * 0.02 // 100% = 2 units
     default:
-      return value;
+      return value
   }
 }
 
 // Apply CSS animations to 3D objects
 function applyAnimation(group: Group, animation: string, time: number) {
   // Parse animation properties
-  const animationName = animation.split(' ')[0];
-  
+  const animationName = animation.split(' ')[0]
+
   // Apply different animations based on name
   switch (animationName) {
-    case 'pulse':
-      const scale = 1 + Math.sin(time * 3) * 0.05;
-      group.scale.set(scale, scale, scale);
-      break;
-    
+    case 'pulse': {
+      const scale = 1 + Math.sin(time * 3) * 0.05
+      group.scale.set(scale, scale, scale)
+      break
+    }
+
     case 'rotate':
-      group.rotation.y = time % (Math.PI * 2);
-      break;
-    
+      group.rotation.y = time % (Math.PI * 2)
+      break
+
     case 'fadeIn':
       // Handled by material opacity
-      break;
-    
+      break
+
     case 'hover':
-      group.position.y += Math.sin(time * 2) * 0.01;
-      break;
-    
+      group.position.y += Math.sin(time * 2) * 0.01
+      break
+
     default:
       // No animation applied
-      break;
+      break
   }
-} 
+}

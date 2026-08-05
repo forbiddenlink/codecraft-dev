@@ -1,22 +1,22 @@
 // File: /src/hooks/useChallengeCode.ts
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
-import { setCode } from '@/store/slices/editorSlice';
+import { useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
+import { setCode } from '@/store/slices/editorSlice'
 
 export default function useChallengeCode(challengeId: string) {
-  const dispatch = useAppDispatch();
-  const code = useAppSelector((state) => state.editor.code.html);
+  const dispatch = useAppDispatch()
+  const code = useAppSelector((state) => state.editor.code.html)
 
   // Load code from localStorage on challenge change
   useEffect(() => {
-    const saved = localStorage.getItem(`challenge-code:${challengeId}`);
+    const saved = localStorage.getItem(`challenge-code:${challengeId}`)
     if (saved) {
-      dispatch(setCode({ language: 'html', code: saved }));
+      dispatch(setCode({ language: 'html', code: saved }))
     }
-  }, [challengeId, dispatch]);
+  }, [challengeId, dispatch])
 
   // Save code to localStorage on code change
   useEffect(() => {
-    localStorage.setItem(`challenge-code:${challengeId}`, code);
-  }, [challengeId, code]);
+    localStorage.setItem(`challenge-code:${challengeId}`, code)
+  }, [challengeId, code])
 }

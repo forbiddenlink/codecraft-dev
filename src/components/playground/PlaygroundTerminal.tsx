@@ -1,22 +1,22 @@
 // File: /src/components/playground/PlaygroundTerminal.tsx
-'use client';
+'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export interface TerminalLine {
-  id: string;
-  type: 'stdout' | 'stderr' | 'system' | 'input' | 'command';
-  content: string;
-  timestamp: Date;
+  id: string
+  type: 'stdout' | 'stderr' | 'system' | 'input' | 'command'
+  content: string
+  timestamp: Date
 }
 
 interface PlaygroundTerminalProps {
-  lines: TerminalLine[];
-  isRunning?: boolean;
-  onClear?: () => void;
-  onInput?: (input: string) => void;
-  className?: string;
+  lines: TerminalLine[]
+  isRunning?: boolean
+  onClear?: () => void
+  onInput?: (input: string) => void
+  className?: string
 }
 
 export function PlaygroundTerminal({
@@ -26,68 +26,68 @@ export function PlaygroundTerminal({
   onInput,
   className = '',
 }: PlaygroundTerminalProps) {
-  const terminalRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [inputValue, setInputValue] = useState('');
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [inputValue, setInputValue] = useState('')
+  const [isInputFocused, setIsInputFocused] = useState(false)
 
   // Auto-scroll to bottom when new lines are added
   useEffect(() => {
     if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight
     }
-  }, [lines]);
+  }, [lines])
 
   const handleInputSubmit = useCallback(
     (e: React.FormEvent) => {
-      e.preventDefault();
+      e.preventDefault()
       if (inputValue.trim() && onInput) {
-        onInput(inputValue);
-        setInputValue('');
+        onInput(inputValue)
+        setInputValue('')
       }
     },
     [inputValue, onInput]
-  );
+  )
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === 'l' && e.ctrlKey) {
-        e.preventDefault();
-        onClear?.();
+        e.preventDefault()
+        onClear?.()
       }
     },
     [onClear]
-  );
+  )
 
   const getLineColor = (type: TerminalLine['type']): string => {
     switch (type) {
       case 'stderr':
-        return 'text-red-400';
+        return 'text-red-400'
       case 'system':
-        return 'text-yellow-400';
+        return 'text-yellow-400'
       case 'input':
-        return 'text-blue-400';
+        return 'text-blue-400'
       case 'command':
-        return 'text-green-400';
+        return 'text-green-400'
       default:
-        return 'text-gray-200';
+        return 'text-gray-200'
     }
-  };
+  }
 
   const getLinePrefix = (type: TerminalLine['type']): string => {
     switch (type) {
       case 'stderr':
-        return '[ERR]';
+        return '[ERR]'
       case 'system':
-        return '[SYS]';
+        return '[SYS]'
       case 'input':
-        return '>';
+        return '>'
       case 'command':
-        return '$';
+        return '$'
       default:
-        return '';
+        return ''
     }
-  };
+  }
 
   const formatTimestamp = (date: Date): string => {
     return date.toLocaleTimeString('en-US', {
@@ -95,8 +95,8 @@ export function PlaygroundTerminal({
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
-    });
-  };
+    })
+  }
 
   return (
     <div
@@ -145,11 +145,7 @@ export function PlaygroundTerminal({
       >
         <AnimatePresence mode="popLayout">
           {lines.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-gray-500"
-            >
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-gray-500">
               Terminal ready. Run your code to see output here.
             </motion.div>
           ) : (
@@ -227,7 +223,7 @@ export function PlaygroundTerminal({
         </form>
       )}
     </div>
-  );
+  )
 }
 
 // Helper function to create terminal lines
@@ -240,7 +236,7 @@ export function createTerminalLine(
     type,
     content,
     timestamp: new Date(),
-  };
+  }
 }
 
-export default PlaygroundTerminal;
+export default PlaygroundTerminal

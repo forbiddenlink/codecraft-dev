@@ -1,4 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from '@sentry/nextjs'
 
 Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
@@ -7,7 +7,7 @@ Sentry.init({
   enabled: !!process.env.NEXT_PUBLIC_SENTRY_DSN,
 
   // Adjust sample rate in production
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
 
   // Capture Replay for 10% of sessions, 100% on error
   replaysSessionSampleRate: 0.1,
@@ -22,11 +22,11 @@ Sentry.init({
     /extensions\//i,
     /^chrome-extension:\/\//,
     // Network errors users can't control
-    "Network request failed",
-    "Failed to fetch",
-    "Load failed",
+    'Network request failed',
+    'Failed to fetch',
+    'Load failed',
     // WebGL context lost (expected in 3D apps)
-    "WebGL context lost",
+    'WebGL context lost',
   ],
 
   // Integrations
@@ -36,4 +36,4 @@ Sentry.init({
       blockAllMedia: false,
     }),
   ],
-});
+})

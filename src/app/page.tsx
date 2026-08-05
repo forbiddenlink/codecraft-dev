@@ -1,27 +1,31 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import GameWorld from '@/components/game/world/GameWorld';
-import EditorOverlay from '@/components/editor/EditorOverlay';
-import { MainMenu } from '@/components/ui/MainMenu';
-import { SettingsModal } from '@/components/ui/SettingsModal';
-import { HelpModal } from '@/components/ui/HelpModal';
-import { FeatureHub } from '@/components/integration/FeatureHub';
-import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
-import { ColonyEventModal } from '@/components/game/events/ColonyEventModal';
-import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { useGameLoop } from '@/hooks/useGameLoop';
-import { useColonyEvents } from '@/hooks/useColonyEvents';
-import { soundSystem } from '@/utils/soundSystem';
+import { useEffect } from 'react'
+import EditorOverlay from '@/components/editor/EditorOverlay'
+import { ColonyEventModal } from '@/components/game/events/ColonyEventModal'
+import GameWorld from '@/components/game/world/GameWorld'
+import { FeatureHub } from '@/components/integration/FeatureHub'
+import OnboardingFlow from '@/components/onboarding/OnboardingFlow'
+import { HelpModal } from '@/components/ui/HelpModal'
+import { MainMenu } from '@/components/ui/MainMenu'
+import { SettingsModal } from '@/components/ui/SettingsModal'
+import { useColonyEvents } from '@/hooks/useColonyEvents'
+import { useGameLoop } from '@/hooks/useGameLoop'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { createScreenReaderAnnouncer } from '@/utils/accessibilityUtils'
+import { soundSystem } from '@/utils/soundSystem'
 
 export default function Home() {
-  useKeyboardShortcuts();
-  useGameLoop(1000);
-  useColonyEvents();
+  useKeyboardShortcuts()
+  useGameLoop(1000)
+  useColonyEvents()
 
   useEffect(() => {
-    soundSystem.init();
-  }, []);
+    soundSystem.init()
+    // Mount the live-region node so announceToScreenReader() (used by
+    // AccessibleButton) actually reaches assistive tech instead of no-op'ing.
+    createScreenReaderAnnouncer()
+  }, [])
 
   return (
     <main id="main" className="relative h-screen">
@@ -35,5 +39,5 @@ export default function Home() {
       <HelpModal />
       <ColonyEventModal />
     </main>
-  );
+  )
 }

@@ -1,14 +1,14 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 /**
  * Challenge progress only — challenge definitions live in src/data/challenges.ts
  * (validate functions are not Redux-serializable).
  */
 interface ChallengeState {
-  currentIndex: number;
-  completed: string[];
-  inProgress: string | null;
-  lastCompletedAt: number | null;
+  currentIndex: number
+  completed: string[]
+  inProgress: string | null
+  lastCompletedAt: number | null
 }
 
 const initialState: ChallengeState = {
@@ -16,7 +16,7 @@ const initialState: ChallengeState = {
   completed: [],
   inProgress: null,
   lastCompletedAt: null,
-};
+}
 
 export const challengeSlice = createSlice({
   name: 'challenges',
@@ -24,40 +24,40 @@ export const challengeSlice = createSlice({
   reducers: {
     setCurrentChallenge: (state, action: PayloadAction<number>) => {
       if (action.payload >= 0) {
-        state.currentIndex = action.payload;
+        state.currentIndex = action.payload
       }
     },
 
     startChallenge: (state, action: PayloadAction<string>) => {
-      state.inProgress = action.payload;
+      state.inProgress = action.payload
     },
 
     completeChallenge: (state, action: PayloadAction<string>) => {
       if (!state.completed.includes(action.payload)) {
-        state.completed.push(action.payload);
-        state.lastCompletedAt = Date.now();
+        state.completed.push(action.payload)
+        state.lastCompletedAt = Date.now()
       }
       if (state.inProgress === action.payload) {
-        state.inProgress = null;
+        state.inProgress = null
       }
     },
 
     hydrateCompletedChallenges: (state, action: PayloadAction<string[]>) => {
       for (const id of action.payload) {
         if (!state.completed.includes(id)) {
-          state.completed.push(id);
+          state.completed.push(id)
         }
       }
     },
 
     resetChallenges: (state) => {
-      state.completed = [];
-      state.inProgress = null;
-      state.currentIndex = 0;
-      state.lastCompletedAt = null;
+      state.completed = []
+      state.inProgress = null
+      state.currentIndex = 0
+      state.lastCompletedAt = null
     },
   },
-});
+})
 
 export const {
   setCurrentChallenge,
@@ -65,6 +65,6 @@ export const {
   completeChallenge,
   hydrateCompletedChallenges,
   resetChallenges,
-} = challengeSlice.actions;
+} = challengeSlice.actions
 
-export default challengeSlice.reducer;
+export default challengeSlice.reducer

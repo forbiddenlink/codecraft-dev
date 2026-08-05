@@ -1,45 +1,45 @@
-'use client';
-import { useMemo } from 'react';
-import BuildingModel, { BuildingModelType } from './BuildingModel';
-import DataFlowShader from './DataFlowShader';
-import { Html, Line } from '@react-three/drei';
-import { useAppSelector } from '@/hooks/reduxHooks';
-import { applyStyles } from '@/utils/cssParser';
-import type { HtmlNode } from '@/types/html';
+'use client'
+import { Html, Line } from '@react-three/drei'
+import { useMemo } from 'react'
+import { useAppSelector } from '@/hooks/reduxHooks'
+import type { HtmlNode } from '@/types/html'
+import { applyStyles } from '@/utils/cssParser'
+import BuildingModel, { type BuildingModelType } from './BuildingModel'
+import DataFlowShader from './DataFlowShader'
 
 interface HtmlStructureVisualizationProps {
-  htmlStructure: HtmlNode[];
-  onBuildingSelect?: (node: HtmlNode) => void;
-  selectedNodeId?: string | null;
+  htmlStructure: HtmlNode[]
+  onBuildingSelect?: (node: HtmlNode) => void
+  selectedNodeId?: string | null
 }
 
 // Extended type with position info for 3D rendering
 type ProcessedHtmlNode = HtmlNode & {
-  level: number;
-  index: number;
-  position?: [number, number, number];
-  children?: ProcessedHtmlNode[];
-};
+  level: number
+  index: number
+  position?: [number, number, number]
+  children?: ProcessedHtmlNode[]
+}
 
-const NODE_VERTICAL_SPACING = 3;
-const NODE_HORIZONTAL_SPACING = 4;
-const BASE_HEIGHT = 0;
+const NODE_VERTICAL_SPACING = 3
+const NODE_HORIZONTAL_SPACING = 4
+const BASE_HEIGHT = 0
 
 export default function HtmlStructureVisualization({
   htmlStructure,
   onBuildingSelect,
-  selectedNodeId
+  selectedNodeId,
 }: HtmlStructureVisualizationProps) {
-  const editorErrors = useAppSelector(state => state.editor.errors);
-  const cssRules = useAppSelector(state => state.game.cssRules);
-  
+  const editorErrors = useAppSelector((state) => state.editor.errors)
+  const cssRules = useAppSelector((state) => state.game.cssRules)
+
   // Process HTML structure and layout buildings in 3D space
   const processedStructure = useMemo(() => {
     if (!htmlStructure || htmlStructure.length === 0) {
-      return { roots: [], all: [] };
+      return { roots: [], all: [] }
     }
 
-    const processedNodes: ProcessedHtmlNode[] = [];
+    const processedNodes: ProcessedHtmlNode[] = []
 
     // Calculate horizontal positions based on tree structure
     function processNode(
@@ -50,121 +50,113 @@ export default function HtmlStructureVisualization({
       siblingCount: number = 1
     ): ProcessedHtmlNode {
       // Apply CSS styles to the node if cssRules are available
-      const appliedStyles = cssRules.length > 0 ? applyStyles(node as any, cssRules) : undefined;
+      const appliedStyles = cssRules.length > 0 ? applyStyles(node as any, cssRules) : undefined
 
       // Create a copy of the node with styles
       const processedNode: ProcessedHtmlNode = {
         ...node,
         level,
         index,
-        styles: appliedStyles ? {
-          ...node.styles,
-          color: appliedStyles.color,
-          opacity: appliedStyles.opacity,
-          scale: appliedStyles.scale,
-          backgroundColor: appliedStyles.emissive || appliedStyles.color,
-        } : node.styles
-      };
-      
+        styles: appliedStyles
+          ? {
+              ...node.styles,
+              color: appliedStyles.color,
+              opacity: appliedStyles.opacity,
+              scale: appliedStyles.scale,
+              backgroundColor: appliedStyles.emissive || appliedStyles.color,
+            }
+          : node.styles,
+      }
+
       // Calculate node position
-      let nodePosition: [number, number, number];
-      
+      let nodePosition: [number, number, number]
+
       if (parentPosition) {
         // Position relative to parent
-        const xOffset = (index - (siblingCount - 1) / 2) * NODE_HORIZONTAL_SPACING;
+        const xOffset = (index - (siblingCount - 1) / 2) * NODE_HORIZONTAL_SPACING
         nodePosition = [
           parentPosition[0] + xOffset,
-          BASE_HEIGHT - (level * NODE_VERTICAL_SPACING),
-          parentPosition[2] + NODE_HORIZONTAL_SPACING/2
-        ];
+          BASE_HEIGHT - level * NODE_VERTICAL_SPACING,
+          parentPosition[2] + NODE_HORIZONTAL_SPACING / 2,
+        ]
       } else {
         // Root node positioning
-        nodePosition = [
-          (index - (siblingCount - 1) / 2) * NODE_HORIZONTAL_SPACING,
-          BASE_HEIGHT,
-          0
-        ];
+        nodePosition = [(index - (siblingCount - 1) / 2) * NODE_HORIZONTAL_SPACING, BASE_HEIGHT, 0]
       }
-      
+
       // Store position in the node
-      processedNode.position = nodePosition;
-      
+      processedNode.position = nodePosition
+
       // Process children recursively
       if (node.children && node.children.length > 0) {
-        const children = node.children; // Store in const for type narrowing
-        processedNode.children = children.map((child, childIndex) => 
-          processNode(
-            child, 
-            level + 1, 
-            nodePosition, 
-            childIndex, 
-            children.length
-          )
-        );
+        const children = node.children // Store in const for type narrowing
+        processedNode.children = children.map((child, childIndex) =>
+          processNode(child, level + 1, nodePosition, childIndex, children.length)
+        )
       } else {
-        processedNode.children = [];
+        processedNode.children = []
       }
-      
-      // Add to flattened list for rendering
-      processedNodes.push(processedNode);
-      
-      return processedNode;
-    }
-    
-    // Start processing from root nodes
-    const rootNodes = htmlStructure.map((node, index) => 
-      processNode(node, 0, null, index, htmlStructure.length)
-    );
 
-    return { roots: rootNodes, all: processedNodes };
-  }, [htmlStructure, cssRules]);
-  
+      // Add to flattened list for rendering
+      processedNodes.push(processedNode)
+
+      return processedNode
+    }
+
+    // Start processing from root nodes
+    const rootNodes = htmlStructure.map((node, index) =>
+      processNode(node, 0, null, index, htmlStructure.length)
+    )
+
+    return { roots: rootNodes, all: processedNodes }
+  }, [htmlStructure, cssRules])
+
   // Connect nodes with lines to show hierarchy
   const connectionLines = useMemo(() => {
-    const lines: Array<{ from: [number, number, number], to: [number, number, number] }> = [];
-    
+    const lines: Array<{ from: [number, number, number]; to: [number, number, number] }> = []
+
     function addConnectionLines(node: ProcessedHtmlNode) {
-      if (!node.position || !node.children) return;
-      
+      if (!node.position || !node.children) return
+
       // Connect parent to each child
       node.children.forEach((child: ProcessedHtmlNode) => {
         if (child.position) {
           lines.push({
             from: node.position as [number, number, number],
-            to: child.position as [number, number, number]
-          });
-          
+            to: child.position as [number, number, number],
+          })
+
           // Process child's connections recursively
-          addConnectionLines(child);
+          addConnectionLines(child)
         }
-      });
+      })
     }
-    
+
     // Process all root nodes
     if (processedStructure.roots) {
-      processedStructure.roots.forEach(root => addConnectionLines(root));
+      processedStructure.roots.forEach((root) => addConnectionLines(root))
     }
-    
-    return lines;
-  }, [processedStructure]);
-  
+
+    return lines
+  }, [processedStructure])
+
   // Check if a node has errors
   const nodeHasError = (_node: HtmlNode) => {
     // Error checking not implemented yet - would need lineNumber in HtmlNode type
-    return false;
-  };
-  
+    return false
+  }
+
   // Find error message for a node if it exists
   const getNodeErrorMessage = (_node: HtmlNode) => {
     // Error checking not implemented yet - would need lineNumber in HtmlNode type
-    return null;
-  };
-  
+    return null
+  }
+
   // Return null if no structure
   if (!processedStructure.all || processedStructure.all.length === 0) {
-    return null;
+    return null
   }
-  
+
   return (
     <group>
       {/* Connection lines between nodes */}
@@ -177,16 +169,16 @@ export default function HtmlStructureVisualization({
           dashed={false}
         />
       ))}
-      
+
       {/* Building models for each node */}
       {processedStructure.all.map((node) => {
-        if (!node.position) return null;
-        
+        if (!node.position) return null
+
         // Map HTML element type to building model type
-        const buildingType = mapElementToBuilding(node.elementType);
-        const hasError = nodeHasError(node);
-        const isSelected = selectedNodeId === `${node.elementType}-${node.index}-${node.level}`;
-        
+        const buildingType = mapElementToBuilding(node.elementType)
+        const hasError = nodeHasError(node)
+        const isSelected = selectedNodeId === `${node.elementType}-${node.index}-${node.level}`
+
         return (
           <group key={`${node.elementType}-${node.index}-${node.level}`}>
             <BuildingModel
@@ -196,7 +188,8 @@ export default function HtmlStructureVisualization({
                 color: node.styles?.color as string | undefined,
                 borderRadius: node.styles?.borderRadius as string | number | undefined,
                 width: (node.styles?.width as string | number | undefined) || getDefaultWidth(node),
-                height: (node.styles?.height as string | number | undefined) || getDefaultHeight(node),
+                height:
+                  (node.styles?.height as string | number | undefined) || getDefaultHeight(node),
                 depth: node.styles?.depth as string | number | undefined,
                 opacity: node.styles?.opacity as number | undefined,
               }}
@@ -211,9 +204,9 @@ export default function HtmlStructureVisualization({
             {/* Data flow shader effect for code-generated buildings */}
             <group position={node.position}>
               <DataFlowShader
-                width={((node.styles?.width as number | undefined) || getDefaultWidth(node))}
-                height={((node.styles?.height as number | undefined) || getDefaultHeight(node))}
-                depth={((node.styles?.depth as number | undefined) || getDefaultDepth(node))}
+                width={(node.styles?.width as number | undefined) || getDefaultWidth(node)}
+                height={(node.styles?.height as number | undefined) || getDefaultHeight(node)}
+                depth={(node.styles?.depth as number | undefined) || getDefaultDepth(node)}
                 color={getDataFlowColor(node.elementType)}
                 opacity={0.35}
                 speed={0.8}
@@ -222,7 +215,7 @@ export default function HtmlStructureVisualization({
                 isActive={true}
               />
             </group>
-            
+
             {/* Error message tooltip */}
             {hasError && (
               <Html
@@ -236,7 +229,7 @@ export default function HtmlStructureVisualization({
                 </div>
               </Html>
             )}
-            
+
             {/* Element type label */}
             <Html
               position={[node.position[0], node.position[1] - 1.5, node.position[2]]}
@@ -248,55 +241,71 @@ export default function HtmlStructureVisualization({
               </div>
             </Html>
           </group>
-        );
+        )
       })}
     </group>
-  );
+  )
 }
 
 // Map HTML elements to building types
 function mapElementToBuilding(elementType: string): BuildingModelType {
   switch (elementType.toLowerCase()) {
-    case 'div': return 'div';
-    case 'section': return 'section';
-    case 'article': return 'article';
-    case 'nav': return 'nav';
-    case 'header': return 'header';
-    case 'footer': return 'footer';
-    case 'aside': return 'aside';
-    case 'main': return 'main';
-    case 'habitat': return 'habitat';
-    case 'laboratory': return 'laboratory';
-    case 'greenhouse': return 'greenhouse';
-    case 'generator': return 'generator';
-    case 'dock': return 'dock';
-    case 'command': return 'command';
-    case 'storage': return 'storage';
-    default: return 'div';
+    case 'div':
+      return 'div'
+    case 'section':
+      return 'section'
+    case 'article':
+      return 'article'
+    case 'nav':
+      return 'nav'
+    case 'header':
+      return 'header'
+    case 'footer':
+      return 'footer'
+    case 'aside':
+      return 'aside'
+    case 'main':
+      return 'main'
+    case 'habitat':
+      return 'habitat'
+    case 'laboratory':
+      return 'laboratory'
+    case 'greenhouse':
+      return 'greenhouse'
+    case 'generator':
+      return 'generator'
+    case 'dock':
+      return 'dock'
+    case 'command':
+      return 'command'
+    case 'storage':
+      return 'storage'
+    default:
+      return 'div'
   }
 }
 
 // Get default width based on node type and children
 function getDefaultWidth(node: HtmlNode): number {
   if (node.children && node.children.length > 3) {
-    return 3 + (node.children.length - 3) * 0.5; // Wider for more children
+    return 3 + (node.children.length - 3) * 0.5 // Wider for more children
   }
-  
+
   switch (node.elementType.toLowerCase()) {
     case 'section':
     case 'main':
-      return 3;
+      return 3
     case 'article':
     case 'laboratory':
-      return 2;
+      return 2
     case 'nav':
     case 'dock':
-      return 3;
+      return 3
     case 'header':
     case 'footer':
-      return 3;
+      return 3
     default:
-      return 2;
+      return 2
   }
 }
 
@@ -305,19 +314,19 @@ function getDefaultHeight(node: HtmlNode): number {
   switch (node.elementType.toLowerCase()) {
     case 'section':
     case 'main':
-      return 2;
+      return 2
     case 'article':
     case 'laboratory':
-      return 2;
+      return 2
     case 'nav':
     case 'dock':
-      return 1;
+      return 1
     case 'header':
-      return 1;
+      return 1
     case 'footer':
-      return 0.7;
+      return 0.7
     default:
-      return 1.5;
+      return 1.5
   }
 }
 
@@ -326,18 +335,18 @@ function getDefaultDepth(node: HtmlNode): number {
   switch (node.elementType.toLowerCase()) {
     case 'section':
     case 'main':
-      return 3;
+      return 3
     case 'article':
     case 'laboratory':
-      return 2;
+      return 2
     case 'nav':
     case 'dock':
-      return 1.5;
+      return 1.5
     case 'header':
     case 'footer':
-      return 3;
+      return 3
     default:
-      return 2;
+      return 2
   }
 }
 
@@ -348,32 +357,32 @@ function getDataFlowColor(elementType: string): string {
     case 'div':
     case 'section':
     case 'article':
-      return '#00aaff';
+      return '#00aaff'
     // Navigation - purple theme
     case 'nav':
     case 'header':
     case 'footer':
-      return '#aa66ff';
+      return '#aa66ff'
     // Main content - green theme
     case 'main':
     case 'aside':
-      return '#00ff88';
+      return '#00ff88'
     // Game-specific elements - special colors
     case 'habitat':
-      return '#66ffcc';
+      return '#66ffcc'
     case 'laboratory':
-      return '#ff66aa';
+      return '#ff66aa'
     case 'greenhouse':
-      return '#88ff44';
+      return '#88ff44'
     case 'generator':
-      return '#ffaa00';
+      return '#ffaa00'
     case 'dock':
-      return '#6699ff';
+      return '#6699ff'
     case 'command':
-      return '#ff6666';
+      return '#ff6666'
     case 'storage':
-      return '#aaaaff';
+      return '#aaaaff'
     default:
-      return '#00ff88';
+      return '#00ff88'
   }
-} 
+}

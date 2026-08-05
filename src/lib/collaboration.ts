@@ -1,7 +1,7 @@
-import * as Y from 'yjs'
-import { WebsocketProvider } from 'y-websocket'
-import { MonacoBinding } from 'y-monaco'
 import type * as monaco from 'monaco-editor'
+import { MonacoBinding } from 'y-monaco'
+import { WebsocketProvider } from 'y-websocket'
+import * as Y from 'yjs'
 
 export interface CollaborationConfig {
   /** WebSocket server URL (e.g., 'wss://your-server.com') */
@@ -69,16 +69,13 @@ export function setupCollaboration(
   // Get the editor model (will throw if model is null)
   const model = editor.getModel()
   if (!model) {
-    throw new Error('Editor model is null. Ensure the editor has a model before setting up collaboration.')
+    throw new Error(
+      'Editor model is null. Ensure the editor has a model before setting up collaboration.'
+    )
   }
 
   // Bind Yjs text to Monaco editor with awareness
-  const binding = new MonacoBinding(
-    ytext,
-    model,
-    new Set([editor]),
-    provider.awareness
-  )
+  const binding = new MonacoBinding(ytext, model, new Set([editor]), provider.awareness)
 
   return {
     doc,

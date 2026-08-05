@@ -1,18 +1,18 @@
-"use client";
-import { RoundedBox, Capsule, Sphere, Plane } from "@react-three/drei";
-import { GameObject } from "@/utils/parseHtmlToGameObjects";
-import { animated, useSpring } from "@react-spring/three";
-import { useState } from "react";
-import { useAppSelector } from "@/hooks/reduxHooks";
+'use client'
+import { animated, useSpring } from '@react-spring/three'
+import { Capsule, Plane, RoundedBox, Sphere } from '@react-three/drei'
+import { useState } from 'react'
+import { useAppSelector } from '@/hooks/reduxHooks'
+import type { GameObject } from '@/utils/parseHtmlToGameObjects'
 
 export default function GameObjectMesh({
   el,
   onClick,
   objectKey,
 }: {
-  el: GameObject;
-  onClick: (tag: string) => void;
-  objectKey: number;
+  el: GameObject
+  onClick: (tag: string) => void
+  objectKey: number
 }) {
   const {
     tag,
@@ -22,17 +22,17 @@ export default function GameObjectMesh({
     color,
     opacity = 1,
     children = [],
-  } = el;
+  } = el
 
-  const isEditorVisible = useAppSelector(state => state.editor.isVisible);
-  const [hovered, setHovered] = useState(false);
-  
+  const isEditorVisible = useAppSelector((state) => state.editor.isVisible)
+  const [hovered, setHovered] = useState(false)
+
   // Animate scale and opacity based on hover and editor state
   const { scale: animatedScale, opacity: animatedOpacity } = useSpring({
     scale: hovered ? 1.15 : 1,
     opacity: isEditorVisible ? 1 : 0.8,
     config: { tension: 170, friction: 12 },
-  });
+  })
 
   const shape = (() => {
     const commonProps = {
@@ -40,29 +40,29 @@ export default function GameObjectMesh({
       scale,
       rotation,
       children: (
-        <meshStandardMaterial 
-          color={color} 
-          transparent 
+        <meshStandardMaterial
+          color={color}
+          transparent
           opacity={opacity}
           emissive={hovered ? color : undefined}
           emissiveIntensity={hovered ? 0.5 : 0}
         />
       ),
-    };
+    }
 
     switch (tag) {
-      case "header":
-        return <RoundedBox radius={0.2} smoothness={4} {...commonProps} />;
-      case "section":
-        return <Capsule {...commonProps} />;
-      case "footer":
-        return <Plane {...commonProps} />;
-      case "article":
-        return <Sphere {...commonProps} />;
+      case 'header':
+        return <RoundedBox radius={0.2} smoothness={4} {...commonProps} />
+      case 'section':
+        return <Capsule {...commonProps} />
+      case 'footer':
+        return <Plane {...commonProps} />
+      case 'article':
+        return <Sphere {...commonProps} />
       default:
-        return <RoundedBox radius={0.1} {...commonProps} />;
+        return <RoundedBox radius={0.1} {...commonProps} />
     }
-  })();
+  })()
 
   return (
     <animated.group
@@ -72,17 +72,10 @@ export default function GameObjectMesh({
       onPointerOut={() => setHovered(false)}
       onClick={() => onClick(tag)}
     >
-      <animated.mesh material-opacity={animatedOpacity}>
-        {shape}
-      </animated.mesh>
+      <animated.mesh material-opacity={animatedOpacity}>{shape}</animated.mesh>
       {children.map((child, i) => (
-        <GameObjectMesh
-          el={child}
-          onClick={onClick}
-          objectKey={i + objectKey * 10}
-          key={i}
-        />
+        <GameObjectMesh el={child} onClick={onClick} objectKey={i + objectKey * 10} key={i} />
       ))}
     </animated.group>
-  );
+  )
 }

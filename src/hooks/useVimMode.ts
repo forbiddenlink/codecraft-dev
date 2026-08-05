@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
-import { useEffect, useRef, useCallback, useState, type RefObject } from 'react';
-import type { editor } from 'monaco-editor';
+import type { editor } from 'monaco-editor'
+import { type RefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 interface VimModeState {
-  isEnabled: boolean;
-  mode: string;
+  isEnabled: boolean
+  mode: string
 }
 
 interface UseVimModeReturn {
-  isEnabled: boolean;
-  mode: string;
-  enable: () => void;
-  disable: () => void;
-  toggle: () => void;
-  statusBarRef: RefObject<HTMLDivElement | null>;
+  isEnabled: boolean
+  mode: string
+  enable: () => void
+  disable: () => void
+  toggle: () => void
+  statusBarRef: RefObject<HTMLDivElement | null>
 }
 
 /**
@@ -36,53 +36,51 @@ interface UseVimModeReturn {
  * }
  * ```
  */
-export function useVimMode(
-  editor: editor.IStandaloneCodeEditor | null
-): UseVimModeReturn {
+export function useVimMode(editor: editor.IStandaloneCodeEditor | null): UseVimModeReturn {
   const [state, setState] = useState<VimModeState>({
     isEnabled: false,
     mode: 'NORMAL',
-  });
-  const vimModeRef = useRef<{ dispose: () => void } | null>(null);
-  const statusBarRef = useRef<HTMLDivElement>(null);
+  })
+  const vimModeRef = useRef<{ dispose: () => void } | null>(null)
+  const statusBarRef = useRef<HTMLDivElement>(null)
 
   const enable = useCallback(async () => {
-    if (!editor || !statusBarRef.current || vimModeRef.current) return;
+    if (!editor || !statusBarRef.current || vimModeRef.current) return
 
     try {
-      const { initVimMode } = await import('monaco-vim');
-      vimModeRef.current = initVimMode(editor, statusBarRef.current);
-      setState({ isEnabled: true, mode: 'NORMAL' });
+      const { initVimMode } = await import('monaco-vim')
+      vimModeRef.current = initVimMode(editor, statusBarRef.current)
+      setState({ isEnabled: true, mode: 'NORMAL' })
     } catch (error) {
-      console.error('Failed to initialize Vim mode:', error);
+      console.error('Failed to initialize Vim mode:', error)
     }
-  }, [editor]);
+  }, [editor])
 
   const disable = useCallback(() => {
     if (vimModeRef.current) {
-      vimModeRef.current.dispose();
-      vimModeRef.current = null;
-      setState({ isEnabled: false, mode: 'NORMAL' });
+      vimModeRef.current.dispose()
+      vimModeRef.current = null
+      setState({ isEnabled: false, mode: 'NORMAL' })
     }
-  }, []);
+  }, [])
 
   const toggle = useCallback(() => {
     if (state.isEnabled) {
-      disable();
+      disable()
     } else {
-      enable();
+      enable()
     }
-  }, [state.isEnabled, enable, disable]);
+  }, [state.isEnabled, enable, disable])
 
   // Cleanup on unmount or editor change
   useEffect(() => {
     return () => {
       if (vimModeRef.current) {
-        vimModeRef.current.dispose();
-        vimModeRef.current = null;
+        vimModeRef.current.dispose()
+        vimModeRef.current = null
       }
-    };
-  }, [editor]);
+    }
+  }, [editor])
 
   return {
     isEnabled: state.isEnabled,
@@ -91,7 +89,7 @@ export function useVimMode(
     disable,
     toggle,
     statusBarRef,
-  };
+  }
 }
 
-export default useVimMode;
+export default useVimMode

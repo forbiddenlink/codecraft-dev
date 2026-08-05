@@ -1,31 +1,31 @@
-'use client';
+'use client'
 
-import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import type { LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion'
+import type { LucideIcon } from 'lucide-react'
 import {
-  Home,
-  Cog,
-  Package,
-  FlaskConical,
-  Sparkles,
   Building2,
-  Zap,
-  Gem,
+  Cog,
   Droplets,
-  Wind,
-  Wheat,
-  Users,
-  Microscope,
+  FlaskConical,
+  Gem,
+  Home,
   Lock,
-} from 'lucide-react';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { buildingTemplates } from '@/data/buildingTemplates';
-import { BUILDING_TEMPLATE_ICONS } from '@/data/buildingIds';
-import { toggleBuildMode, setSelectedTemplateId } from '@/store/slices/buildingSlice';
-import { setCode, setLanguage } from '@/store/slices/editorSlice';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+  Microscope,
+  Package,
+  Sparkles,
+  Users,
+  Wheat,
+  Wind,
+  Zap,
+} from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
+import { BUILDING_TEMPLATE_ICONS } from '@/data/buildingIds'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { setSelectedTemplateId, toggleBuildMode } from '@/store/slices/buildingSlice'
+import { setCode, setLanguage } from '@/store/slices/editorSlice'
 
 const CATEGORIES: { id: string; name: string; icon: LucideIcon }[] = [
   { id: 'habitat', name: 'Habitat', icon: Home },
@@ -33,106 +33,99 @@ const CATEGORIES: { id: string; name: string; icon: LucideIcon }[] = [
   { id: 'storage', name: 'Storage', icon: Package },
   { id: 'research', name: 'Research', icon: FlaskConical },
   { id: 'special', name: 'Special', icon: Sparkles },
-];
+]
 
 function getResourceIcon(resourceId: string): LucideIcon {
   switch (resourceId) {
     case 'energy':
-      return Zap;
+      return Zap
     case 'minerals':
-      return Gem;
+      return Gem
     case 'water':
-      return Droplets;
+      return Droplets
     case 'oxygen':
-      return Wind;
+      return Wind
     case 'food':
-      return Wheat;
+      return Wheat
     case 'colonists':
-      return Users;
+      return Users
     case 'research':
-      return Microscope;
+      return Microscope
     default:
-      return Package;
+      return Package
   }
 }
 
 export default function BuildingMenu() {
-  const dispatch = useAppDispatch();
-  const selectedTemplateId = useAppSelector((state) => state.building.selectedTemplateId);
-  const isBuildModeActive = useAppSelector((state) => state.building.buildMode);
-  const unlockedTemplates = useAppSelector((state) => state.building.unlockedTemplates);
-  const playerLevel = useAppSelector((state) => state.user.progress.level);
-  const completedChallenges = useAppSelector((state) => state.user.progress.completedChallenges);
-  const resources = useAppSelector((state) => state.resource.storage);
+  const dispatch = useAppDispatch()
+  const selectedTemplateId = useAppSelector((state) => state.building.selectedTemplateId)
+  const isBuildModeActive = useAppSelector((state) => state.building.buildMode)
+  const unlockedTemplates = useAppSelector((state) => state.building.unlockedTemplates)
+  const playerLevel = useAppSelector((state) => state.user.progress.level)
+  const completedChallenges = useAppSelector((state) => state.user.progress.completedChallenges)
+  const resources = useAppSelector((state) => state.resource.storage)
 
-  const [activeCategory, setActiveCategory] = useState('habitat');
+  const [activeCategory, setActiveCategory] = useState('habitat')
 
   const categoryBuildings = useMemo(() => {
     return Object.entries(buildingTemplates)
       .filter(([, template]) => template.category === activeCategory)
       .map(([id, template]) => {
-        const levelOk = template.requiredLevel <= playerLevel;
-        const rewardUnlocked = unlockedTemplates.includes(id);
-        let requirementMet = !template.unlockRequirement;
-        let lockReason: string | null = null;
+        const levelOk = template.requiredLevel <= playerLevel
+        const rewardUnlocked = unlockedTemplates.includes(id)
+        let requirementMet = !template.unlockRequirement
+        let lockReason: string | null = null
 
         if (!levelOk) {
-          lockReason = `Requires level ${template.requiredLevel}`;
+          lockReason = `Requires level ${template.requiredLevel}`
         } else if (template.unlockRequirement) {
           if (template.unlockRequirement.type === 'level') {
-            requirementMet =
-              playerLevel >= (template.unlockRequirement.value as number);
+            requirementMet = playerLevel >= (template.unlockRequirement.value as number)
             if (!requirementMet) {
-              lockReason = `Requires level ${template.unlockRequirement.value}`;
+              lockReason = `Requires level ${template.unlockRequirement.value}`
             }
           } else if (template.unlockRequirement.type === 'challenge') {
             requirementMet = completedChallenges.includes(
-              template.unlockRequirement.value as string,
-            );
+              template.unlockRequirement.value as string
+            )
             if (!requirementMet && !rewardUnlocked) {
-              lockReason = 'Complete a coding challenge to unlock';
+              lockReason = 'Complete a coding challenge to unlock'
             }
           }
         }
 
-        const unlocked = levelOk && (rewardUnlocked || requirementMet);
+        const unlocked = levelOk && (rewardUnlocked || requirementMet)
         const missingCosts = template.costs.filter(
-          (cost) => (resources as Record<string, number>)[cost.resourceId] < cost.amount,
-        );
-        const canAfford = missingCosts.length === 0;
+          (cost) => (resources as Record<string, number>)[cost.resourceId] < cost.amount
+        )
+        const canAfford = missingCosts.length === 0
 
-        return { id, template, unlocked, lockReason, canAfford, missingCosts };
-      });
-  }, [
-    activeCategory,
-    playerLevel,
-    unlockedTemplates,
-    completedChallenges,
-    resources,
-  ]);
+        return { id, template, unlocked, lockReason, canAfford, missingCosts }
+      })
+  }, [activeCategory, playerLevel, unlockedTemplates, completedChallenges, resources])
 
   const handleBuildingSelect = (templateId: string, unlocked: boolean, canAfford: boolean) => {
-    if (!unlocked) return;
+    if (!unlocked) return
 
     if (selectedTemplateId === templateId) {
-      dispatch(setSelectedTemplateId(null));
-      dispatch(toggleBuildMode(false));
-      return;
+      dispatch(setSelectedTemplateId(null))
+      dispatch(toggleBuildMode(false))
+      return
     }
 
-    dispatch(setSelectedTemplateId(templateId));
-    dispatch(toggleBuildMode(true));
+    dispatch(setSelectedTemplateId(templateId))
+    dispatch(toggleBuildMode(true))
 
-    const template = buildingTemplates[templateId];
+    const template = buildingTemplates[templateId]
     if (template) {
-      dispatch(setLanguage('html'));
-      dispatch(setCode({ language: 'html', code: template.defaultHtml }));
+      dispatch(setLanguage('html'))
+      dispatch(setCode({ language: 'html', code: template.defaultHtml }))
     }
 
     if (!canAfford) {
       // Still enter build mode so the player sees costs, but placement will fail.
     }
-  };
+  }
 
   return (
     <HudPanel className="w-[300px] text-[rgb(var(--text-primary))]">
@@ -166,8 +159,8 @@ export default function BuildingMenu() {
           </div>
         ) : (
           categoryBuildings.map(({ id, template, unlocked, lockReason, canAfford }) => {
-            const TemplateIcon = BUILDING_TEMPLATE_ICONS[id] || Building2;
-            const selected = selectedTemplateId === id;
+            const TemplateIcon = BUILDING_TEMPLATE_ICONS[id] || Building2
+            const selected = selectedTemplateId === id
 
             return (
               <motion.button
@@ -218,8 +211,8 @@ export default function BuildingMenu() {
                 {unlocked && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {template.costs.map((cost, index) => {
-                      const have = (resources as Record<string, number>)[cost.resourceId] ?? 0;
-                      const ok = have >= cost.amount;
+                      const have = (resources as Record<string, number>)[cost.resourceId] ?? 0
+                      const ok = have >= cost.amount
                       return (
                         <span
                           key={`${cost.resourceId}-${index}`}
@@ -237,12 +230,12 @@ export default function BuildingMenu() {
                           <Icon icon={getResourceIcon(cost.resourceId)} size={11} />
                           {cost.amount}
                         </span>
-                      );
+                      )
                     })}
                   </div>
                 )}
               </motion.button>
-            );
+            )
           })
         )}
       </div>
@@ -269,5 +262,5 @@ export default function BuildingMenu() {
         }
       `}</style>
     </HudPanel>
-  );
+  )
 }

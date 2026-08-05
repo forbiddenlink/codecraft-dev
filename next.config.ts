@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
-import { withAxiom } from 'next-axiom';
-import withBundleAnalyzerInit from "@next/bundle-analyzer";
-const withBundleAnalyzer = withBundleAnalyzerInit({ enabled: process.env.ANALYZE === "true" });
+import withBundleAnalyzerInit from '@next/bundle-analyzer'
+import { withSentryConfig } from '@sentry/nextjs'
+import type { NextConfig } from 'next'
+import { withAxiom } from 'next-axiom'
 
+const withBundleAnalyzer = withBundleAnalyzerInit({ enabled: process.env.ANALYZE === 'true' })
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -35,9 +35,9 @@ const nextConfig: NextConfig = {
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
         ],
       },
-    ];
+    ]
   },
-};
+}
 
 // Sentry configuration - only active when DSN is set
 const sentryConfig = {
@@ -45,7 +45,7 @@ const sentryConfig = {
   silent: !process.env.SENTRY_AUTH_TOKEN,
 
   // Disable source map upload in development
-  disableSourceMapUpload: process.env.NODE_ENV !== "production",
+  disableSourceMapUpload: process.env.NODE_ENV !== 'production',
 
   // Hide source maps from client bundles
 
@@ -54,6 +54,6 @@ const sentryConfig = {
 
   // Tunnel requests to avoid ad blockers (optional)
   // tunnelRoute: "/monitoring",
-};
+}
 
-export default withBundleAnalyzer(withAxiom(withSentryConfig(nextConfig, sentryConfig)));
+export default withBundleAnalyzer(withAxiom(withSentryConfig(nextConfig, sentryConfig)))

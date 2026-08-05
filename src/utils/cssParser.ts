@@ -1,35 +1,35 @@
 interface GameStructureStyle {
-  color?: string;
-  scale?: number;
-  rotation?: [number, number, number];
-  position?: [number, number, number];
-  opacity?: number;
-  emissive?: string;
-  metalness?: number;
-  roughness?: number;
-  wireframe?: boolean;
-  animation?: string;
-  glow?: boolean;
-  shadow?: boolean;
+  color?: string
+  scale?: number
+  rotation?: [number, number, number]
+  position?: [number, number, number]
+  opacity?: number
+  emissive?: string
+  metalness?: number
+  roughness?: number
+  wireframe?: boolean
+  animation?: string
+  glow?: boolean
+  shadow?: boolean
 }
 
 interface ParsedRule {
-  selector: string;
-  properties: GameStructureStyle;
+  selector: string
+  properties: GameStructureStyle
 }
 
 interface HtmlNode {
-  elementType: string;
+  elementType: string
   attributes?: {
-    id?: string;
-    class?: string;
-    [key: string]: string | undefined;
-  };
-  children?: HtmlNode[];
-  parent?: HtmlNode;
+    id?: string
+    class?: string
+    [key: string]: string | undefined
+  }
+  children?: HtmlNode[]
+  parent?: HtmlNode
 }
 
-type CSSValue = string | number | boolean | number[];
+type CSSValue = string | number | boolean | number[]
 
 /**
  * Convert CSS property values to game structure properties
@@ -37,148 +37,145 @@ type CSSValue = string | number | boolean | number[];
 const convertCSSValue = (property: string, value: string): CSSValue => {
   // Handle numeric values with units
   if (value.endsWith('px') || value.endsWith('em') || value.endsWith('%')) {
-    return parseFloat(value);
+    return parseFloat(value)
   }
 
   // Handle colors
   if (property.includes('color') || property === 'emissive') {
-    return value;
+    return value
   }
 
   // Handle transforms
   if (value.startsWith('rotate')) {
-    const angles = value.match(/\d+/g)?.map(Number) || [0, 0, 0];
-    return angles.map(angle => (angle * Math.PI) / 180);
+    const angles = value.match(/\d+/g)?.map(Number) || [0, 0, 0]
+    return angles.map((angle) => (angle * Math.PI) / 180)
   }
 
   if (value.startsWith('scale')) {
-    const scale = value.match(/\d+(\.\d+)?/)?.[0] || '1';
-    return parseFloat(scale);
+    const scale = value.match(/\d+(\.\d+)?/)?.[0] || '1'
+    return parseFloat(scale)
   }
 
   // Handle boolean values
   if (value === 'true' || value === 'false') {
-    return value === 'true';
+    return value === 'true'
   }
 
   // Handle arrays
   if (value.startsWith('[') && value.endsWith(']')) {
-    return JSON.parse(value);
+    return JSON.parse(value)
   }
 
-  return value;
-};
+  return value
+}
 
 /**
  * Parse a CSS rule string into a structured format
  */
 export const parseCSSRule = (rule: string): ParsedRule | null => {
   try {
-    const [selector, propertiesStr] = rule.split('{').map(str => str.trim());
-    if (!selector || !propertiesStr) return null;
+    const [selector, propertiesStr] = rule.split('{').map((str) => str.trim())
+    if (!selector || !propertiesStr) return null
 
-    const properties: GameStructureStyle = {};
-    const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g;
-    let match;
+    const properties: GameStructureStyle = {}
+    const propertyRegex = /([a-zA-Z-]+)\s*:\s*([^;]+);/g
+    let match
 
     while ((match = propertyRegex.exec(propertiesStr))) {
-      const [, property, value] = match;
-      const camelCaseProperty = property.replace(/-([a-z])/g, g => g[1].toUpperCase());
-      (properties as any)[camelCaseProperty] = convertCSSValue(property, value.trim());
+      const [, property, value] = match
+      const camelCaseProperty = property.replace(/-([a-z])/g, (g) => g[1].toUpperCase())
+      ;(properties as any)[camelCaseProperty] = convertCSSValue(property, value.trim())
     }
 
     return {
       selector: selector.replace(/\s+/g, ' ').trim(),
-      properties
-    };
+      properties,
+    }
   } catch (error) {
-    console.error('Error parsing CSS rule:', error);
-    return null;
+    console.error('Error parsing CSS rule:', error)
+    return null
   }
-};
+}
 
 /**
  * Parse all CSS rules from a CSS string
  */
 export const parseCSSRules = (cssString: string): ParsedRule[] => {
-  const rules: ParsedRule[] = [];
+  const rules: ParsedRule[] = []
 
   // Remove comments
-  const cleaned = cssString.replace(/\/\*[\s\S]*?\*\//g, '');
+  const cleaned = cssString.replace(/\/\*[\s\S]*?\*\//g, '')
 
   // Split by closing braces and process each rule
-  const ruleStrings = cleaned.split('}').filter(s => s.trim());
+  const ruleStrings = cleaned.split('}').filter((s) => s.trim())
 
   for (const ruleStr of ruleStrings) {
     if (ruleStr.trim()) {
-      const rule = parseCSSRule(ruleStr + '}');
+      const rule = parseCSSRule(ruleStr + '}')
       if (rule) {
-        rules.push(rule);
+        rules.push(rule)
       }
     }
   }
 
-  return rules;
-};
+  return rules
+}
 
 /**
  * Check if a CSS selector matches an HTML node
  */
 function selectorMatchesNode(selector: string, node: HtmlNode): boolean {
-  selector = selector.trim();
-  
+  selector = selector.trim()
+
   // Element selector
   if (selector === node.elementType) {
-    return true;
+    return true
   }
-  
+
   // Class selector
   if (selector.startsWith('.') && node.attributes?.class) {
-    const className = selector.substring(1);
-    const classNames = node.attributes.class.split(' ');
-    return classNames.includes(className);
+    const className = selector.substring(1)
+    const classNames = node.attributes.class.split(' ')
+    return classNames.includes(className)
   }
-  
+
   // ID selector
   if (selector.startsWith('#') && node.attributes?.id) {
-    const id = selector.substring(1);
-    return node.attributes.id === id;
+    const id = selector.substring(1)
+    return node.attributes.id === id
   }
-  
+
   // Descendant selector
   if (selector.includes(' ')) {
-    const [parentSelector, ...childSelectors] = selector.split(' ').reverse();
-    let currentNode: HtmlNode | undefined = node;
-    const currentSelector = parentSelector;
-    
+    const [parentSelector, ...childSelectors] = selector.split(' ').reverse()
+    let currentNode: HtmlNode | undefined = node
+    const currentSelector = parentSelector
+
     // Check if the current node matches the most specific part of the selector
     if (!selectorMatchesNode(currentSelector, currentNode)) {
-      return false;
+      return false
     }
-    
+
     // Check ancestor selectors
     for (const ancestorSelector of childSelectors) {
-      currentNode = currentNode.parent;
-      if (!currentNode) return false;
-      
+      currentNode = currentNode.parent
+      if (!currentNode) return false
+
       if (!selectorMatchesNode(ancestorSelector, currentNode)) {
-        return false;
+        return false
       }
     }
-    
-    return true;
+
+    return true
   }
-  
-  return false;
+
+  return false
 }
 
 /**
  * Apply CSS rules to game structures
  */
-export const applyStyles = (
-  node: HtmlNode,
-  cssRules: ParsedRule[]
-): GameStructureStyle => {
+export const applyStyles = (node: HtmlNode, cssRules: ParsedRule[]): GameStructureStyle => {
   const styles: GameStructureStyle = {
     color: '#ffffff',
     scale: 1,
@@ -189,18 +186,18 @@ export const applyStyles = (
     roughness: 0.5,
     wireframe: false,
     glow: false,
-    shadow: true
-  };
+    shadow: true,
+  }
 
   // Apply rules in order of specificity
   for (const rule of cssRules) {
     if (selectorMatchesNode(rule.selector, node)) {
-      Object.assign(styles, rule.properties);
+      Object.assign(styles, rule.properties)
     }
   }
 
-  return styles;
-};
+  return styles
+}
 
 /**
  * Convert game structure style to Three.js material properties
@@ -215,8 +212,8 @@ export const styleToMaterialProps = (style: GameStructureStyle) => {
     opacity: style.opacity,
     transparent: (style.opacity !== undefined && style.opacity < 1) || false,
     wireframe: style.wireframe,
-  };
-};
+  }
+}
 
 /**
  * Convert game structure style to Three.js object properties
@@ -228,5 +225,5 @@ export const styleToObjectProps = (style: GameStructureStyle) => {
     position: style.position || [0, 0, 0],
     castShadow: style.shadow,
     receiveShadow: style.shadow,
-  };
-}; 
+  }
+}

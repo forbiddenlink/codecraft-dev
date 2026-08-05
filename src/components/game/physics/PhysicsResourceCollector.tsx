@@ -1,16 +1,16 @@
-'use client';
-import { useRef } from 'react';
-import { RigidBody, BallCollider } from '@react-three/rapier';
-import type { RapierRigidBody } from '@react-three/rapier';
-import { Html } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { Mesh } from 'three';
-import { ResourceType } from '@/utils/resourceManagement';
+'use client'
+import { Html } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import type { RapierRigidBody } from '@react-three/rapier'
+import { BallCollider, RigidBody } from '@react-three/rapier'
+import { useRef } from 'react'
+import type { Mesh } from 'three'
+import type { ResourceType } from '@/utils/resourceManagement'
 
 interface PhysicsResourceCollectorProps {
-  position: [number, number, number];
-  resource: ResourceType;
-  collectionRadius?: number;
+  position: [number, number, number]
+  resource: ResourceType
+  collectionRadius?: number
 }
 
 const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; name: string }> = {
@@ -19,8 +19,8 @@ const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; nam
   water: { color: '#60A5FA', label: 'H2O', name: 'Water' },
   food: { color: '#10B981', label: 'FOOD', name: 'Food' },
   knowledge: { color: '#38BDF8', label: 'KNW', name: 'Knowledge' },
-  bytes: { color: '#22D3EE', label: 'BYT', name: 'Bytes' }
-};
+  bytes: { color: '#22D3EE', label: 'BYT', name: 'Bytes' },
+}
 
 /**
  * Physics-enabled resource collector with Rapier collision detection.
@@ -29,27 +29,22 @@ const RESOURCE_DISPLAY: Record<ResourceType, { color: string; label: string; nam
 export default function PhysicsResourceCollector({
   position,
   resource,
-  collectionRadius = 3.5
+  collectionRadius = 3.5,
 }: PhysicsResourceCollectorProps) {
-  const rigidBodyRef = useRef<RapierRigidBody>(null);
-  const meshRef = useRef<Mesh>(null);
-  const resourceDisplay = RESOURCE_DISPLAY[resource];
+  const rigidBodyRef = useRef<RapierRigidBody>(null)
+  const meshRef = useRef<Mesh>(null)
+  const resourceDisplay = RESOURCE_DISPLAY[resource]
 
   // Animate the collector with a subtle pulse
   useFrame((state) => {
-    if (!meshRef.current) return;
-    const time = state.clock.getElapsedTime();
-    const pulse = 1 + Math.sin(time * 2) * 0.05;
-    meshRef.current.scale.set(pulse, pulse, pulse);
-  });
+    if (!meshRef.current) return
+    const time = state.clock.getElapsedTime()
+    const pulse = 1 + Math.sin(time * 2) * 0.05
+    meshRef.current.scale.set(pulse, pulse, pulse)
+  })
 
   return (
-    <RigidBody
-      ref={rigidBodyRef}
-      type="fixed"
-      position={position}
-      colliders={false}
-    >
+    <RigidBody ref={rigidBodyRef} type="fixed" position={position} colliders={false}>
       <BallCollider args={[0.5]} />
 
       {/* Main collector sphere */}
@@ -96,5 +91,5 @@ export default function PhysicsResourceCollector({
         </div>
       </Html>
     </RigidBody>
-  );
+  )
 }

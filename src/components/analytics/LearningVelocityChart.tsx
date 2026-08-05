@@ -3,33 +3,31 @@
  * Shows learning speed trends over time
  */
 
-import type { LucideIcon } from 'lucide-react';
-import { Rocket, Zap, Sparkles, Turtle, Sprout, Lightbulb } from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+import type { LucideIcon } from 'lucide-react'
+import { Lightbulb, Rocket, Sparkles, Sprout, Turtle, Zap } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface LearningVelocityChartProps {
-  analytics: LearningAnalytics;
+  analytics: LearningAnalytics
 }
 
 export function LearningVelocityChart({ analytics }: LearningVelocityChartProps) {
-  const velocity = analytics.learningVelocity;
-  const avgTime = analytics.averageChallengeTime / 60000;
+  const velocity = analytics.learningVelocity
+  const avgTime = analytics.averageChallengeTime / 60000
 
-  const getVelocityRating = (
-    vel: number,
-  ): { label: string; color: string; icon: LucideIcon } => {
-    if (vel >= 3) return { label: 'Exceptional', color: 'text-green-400', icon: Rocket };
-    if (vel >= 2) return { label: 'Great', color: 'text-blue-400', icon: Zap };
-    if (vel >= 1) return { label: 'Good', color: 'text-yellow-400', icon: Sparkles };
-    if (vel >= 0.5) return { label: 'Steady', color: 'text-orange-400', icon: Turtle };
-    return { label: 'Take your time', color: 'text-gray-400', icon: Sprout };
-  };
+  const getVelocityRating = (vel: number): { label: string; color: string; icon: LucideIcon } => {
+    if (vel >= 3) return { label: 'Exceptional', color: 'text-green-400', icon: Rocket }
+    if (vel >= 2) return { label: 'Great', color: 'text-blue-400', icon: Zap }
+    if (vel >= 1) return { label: 'Good', color: 'text-yellow-400', icon: Sparkles }
+    if (vel >= 0.5) return { label: 'Steady', color: 'text-orange-400', icon: Turtle }
+    return { label: 'Take your time', color: 'text-gray-400', icon: Sprout }
+  }
 
-  const rating = getVelocityRating(velocity);
+  const rating = getVelocityRating(velocity)
 
-  const maxBars = 10;
-  const filledBars = Math.min(Math.ceil((velocity / 3) * maxBars), maxBars);
+  const maxBars = 10
+  const filledBars = Math.min(Math.ceil((velocity / 3) * maxBars), maxBars)
 
   return (
     <div className="card">
@@ -57,9 +55,7 @@ export function LearningVelocityChart({ analytics }: LearningVelocityChartProps)
             <div
               key={i}
               className={`flex-1 rounded-[var(--radius-sm)] transition-all duration-300 ${
-                i < filledBars
-                  ? 'bg-accent'
-                  : 'bg-elevated'
+                i < filledBars ? 'bg-accent' : 'bg-elevated'
               }`}
               style={{
                 height: `${((i + 1) / maxBars) * 100}%`,
@@ -100,5 +96,5 @@ export function LearningVelocityChart({ analytics }: LearningVelocityChartProps)
         </p>
       </div>
     </div>
-  );
+  )
 }

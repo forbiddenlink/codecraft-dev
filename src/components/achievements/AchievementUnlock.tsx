@@ -3,25 +3,25 @@
  * Beautiful reveal animation for unlocking achievements
  */
 
-import { useState, useEffect } from 'react';
-import confetti from 'canvas-confetti';
-import { Icon } from '@/components/ui/Icon';
-import { getAchievementIcon } from '@/components/ui/achievementIcons';
+import confetti from 'canvas-confetti'
+import { useEffect, useState } from 'react'
+import { getAchievementIcon } from '@/components/ui/achievementIcons'
+import { Icon } from '@/components/ui/Icon'
 
 export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  xpReward: number;
-  unlockedAt?: Date;
+  id: string
+  title: string
+  description: string
+  icon: string
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  xpReward: number
+  unlockedAt?: Date
 }
 
 export interface AchievementUnlockProps {
-  achievement: Achievement;
-  onClose: () => void;
-  autoCloseDelay?: number;
+  achievement: Achievement
+  onClose: () => void
+  autoCloseDelay?: number
 }
 
 const rarityConfig = {
@@ -53,39 +53,39 @@ const rarityConfig = {
     particles: '#10B981',
     label: 'Legendary',
   },
-};
+}
 
 export function AchievementUnlock({
   achievement,
   onClose,
   autoCloseDelay = 5000,
 }: AchievementUnlockProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
 
-  const config = rarityConfig[achievement.rarity];
+  const config = rarityConfig[achievement.rarity]
 
   useEffect(() => {
     // Entrance animation
-    setTimeout(() => setIsVisible(true), 100);
-    setTimeout(() => setIsAnimating(true), 200);
+    setTimeout(() => setIsVisible(true), 100)
+    setTimeout(() => setIsAnimating(true), 200)
 
     // Trigger confetti
-    triggerConfetti();
+    triggerConfetti()
 
     // Auto-close
     if (autoCloseDelay > 0) {
       const timer = setTimeout(() => {
-        handleClose();
-      }, autoCloseDelay);
+        handleClose()
+      }, autoCloseDelay)
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(timer)
     }
-  }, []);
+  }, [])
 
   const triggerConfetti = () => {
-    const colors = [config.particles, '#FFFFFF'];
-    const particleCount = achievement.rarity === 'legendary' ? 150 : 100;
+    const colors = [config.particles, '#FFFFFF']
+    const particleCount = achievement.rarity === 'legendary' ? 150 : 100
 
     // Center burst
     confetti({
@@ -93,7 +93,7 @@ export function AchievementUnlock({
       spread: 70,
       origin: { y: 0.5 },
       colors,
-    });
+    })
 
     // Side bursts for legendary
     if (achievement.rarity === 'legendary') {
@@ -104,8 +104,8 @@ export function AchievementUnlock({
           spread: 55,
           origin: { x: 0 },
           colors,
-        });
-      }, 250);
+        })
+      }, 250)
 
       setTimeout(() => {
         confetti({
@@ -114,15 +114,15 @@ export function AchievementUnlock({
           spread: 55,
           origin: { x: 1 },
           colors,
-        });
-      }, 400);
+        })
+      }, 400)
     }
-  };
+  }
 
   const handleClose = () => {
-    setIsVisible(false);
-    setTimeout(onClose, 300);
-  };
+    setIsVisible(false)
+    setTimeout(onClose, 300)
+  }
 
   return (
     <div
@@ -236,5 +236,5 @@ export function AchievementUnlock({
         </div>
       </div>
     </div>
-  );
+  )
 }

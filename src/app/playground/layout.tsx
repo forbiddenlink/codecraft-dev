@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Playground',
@@ -12,12 +12,8 @@ export const metadata: Metadata = {
     description: 'Live HTML/CSS/JS playground for CodeCraft: Galactic Developer.',
     url: '/playground',
   },
-};
+}
 
-export default function PlaygroundLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return children;
+export default function PlaygroundLayout({ children }: { children: React.ReactNode }) {
+  return children
 }

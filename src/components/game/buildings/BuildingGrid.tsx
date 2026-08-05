@@ -1,40 +1,45 @@
-'use client';
-import { useMemo } from 'react';
-import { Line } from '@react-three/drei';
+'use client'
+import { Line } from '@react-three/drei'
+import { useMemo } from 'react'
 
 interface BuildingGridProps {
-  width: number;
-  height: number;
-  cellSize: number;
-  showGridLines: boolean;
+  width: number
+  height: number
+  cellSize: number
+  showGridLines: boolean
 }
 
-export default function BuildingGrid({ width, height, cellSize, showGridLines }: BuildingGridProps) {
+export default function BuildingGrid({
+  width,
+  height,
+  cellSize,
+  showGridLines,
+}: BuildingGridProps) {
   const gridPoints = useMemo(() => {
-    if (!showGridLines) return [];
+    if (!showGridLines) return []
 
-    const points: [number, number, number][][] = [];
-    
+    const points: [number, number, number][][] = []
+
     // Create horizontal lines
-    for (let z = -height/2; z <= height/2; z += cellSize) {
+    for (let z = -height / 2; z <= height / 2; z += cellSize) {
       points.push([
-        [-width/2, 0.1, z],
-        [width/2, 0.1, z]
-      ]);
+        [-width / 2, 0.1, z],
+        [width / 2, 0.1, z],
+      ])
     }
-    
-    // Create vertical lines
-    for (let x = -width/2; x <= width/2; x += cellSize) {
-      points.push([
-        [x, 0.1, -height/2],
-        [x, 0.1, height/2]
-      ]);
-    }
-    
-    return points;
-  }, [width, height, cellSize, showGridLines]);
 
-  if (!showGridLines) return null;
+    // Create vertical lines
+    for (let x = -width / 2; x <= width / 2; x += cellSize) {
+      points.push([
+        [x, 0.1, -height / 2],
+        [x, 0.1, height / 2],
+      ])
+    }
+
+    return points
+  }, [width, height, cellSize, showGridLines])
+
+  if (!showGridLines) return null
 
   return (
     <group>
@@ -51,5 +56,5 @@ export default function BuildingGrid({ width, height, cellSize, showGridLines }:
         />
       ))}
     </group>
-  );
-} 
+  )
+}
