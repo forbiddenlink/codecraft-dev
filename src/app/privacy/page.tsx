@@ -1,11 +1,11 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
+import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
   description: 'How CodeCraft: Galactic Developer collects and uses data.',
   alternates: { canonical: '/privacy' },
-};
+}
 
 export default function PrivacyPage() {
   return (
@@ -20,8 +20,8 @@ export default function PrivacyPage() {
         <p className="text-slate-400">Last updated: July 28, 2026</p>
 
         <p>
-          CodeCraft: Galactic Developer (&quot;CodeCraft&quot;) is an educational coding game.
-          This policy explains what data we process when you use the site.
+          CodeCraft: Galactic Developer (&quot;CodeCraft&quot;) is an educational coding game. This
+          policy explains what data we process when you use the site.
         </p>
 
         <h2>What we store on your device</h2>
@@ -33,18 +33,16 @@ export default function PrivacyPage() {
 
         <h2>Analytics & error monitoring</h2>
         <p>
-          When enabled via environment configuration, we may use Vercel Analytics,
-          PostHog, and/or Sentry to understand product usage and diagnose errors.
-          These tools may collect approximate location, device/browser info, and
-          interaction events (for example challenge started/completed). Analytics
-          are optional and can be disabled by the site operator.
+          When enabled via environment configuration, we may use Vercel Analytics, PostHog, and/or
+          Sentry to understand product usage and diagnose errors. These tools may collect
+          approximate location, device/browser info, and interaction events (for example challenge
+          started/completed). Analytics are optional and can be disabled by the site operator.
         </p>
 
         <h2>Accounts</h2>
         <p>
-          The current game loop does not require an account. Multiplayer and
-          collaboration features may use third-party providers (for example Liveblocks)
-          when those keys are configured.
+          The current game loop does not require an account. Multiplayer and collaboration features
+          may use third-party providers (for example Liveblocks) when those keys are configured.
         </p>
 
         <h2>Contact</h2>
@@ -58,5 +56,5 @@ export default function PrivacyPage() {
         </p>
       </article>
     </main>
-  );
+  )
 }

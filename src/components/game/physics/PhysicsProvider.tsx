@@ -1,11 +1,11 @@
-'use client';
-import { ReactNode } from 'react';
-import { Physics } from '@react-three/rapier';
+'use client'
+import { Physics } from '@react-three/rapier'
+import type { ReactNode } from 'react'
 
 interface PhysicsProviderProps {
-  children: ReactNode;
-  debug?: boolean;
-  gravity?: [number, number, number];
+  children: ReactNode
+  debug?: boolean
+  gravity?: [number, number, number]
 }
 
 /**
@@ -15,11 +15,11 @@ interface PhysicsProviderProps {
 export default function PhysicsProvider({
   children,
   debug = false,
-  gravity = [0, -9.81, 0]
+  gravity = [0, -9.81, 0],
 }: PhysicsProviderProps) {
   return (
     <Physics gravity={gravity} debug={debug}>
       {children}
     </Physics>
-  );
+  )
 }

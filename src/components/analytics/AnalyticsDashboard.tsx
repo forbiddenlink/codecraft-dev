@@ -3,54 +3,54 @@
  * Comprehensive visualization of player progress and learning metrics
  */
 
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
 import {
   BarChart3,
-  Target,
-  Clock,
-  Code2,
-  Lightbulb,
-  X,
-  Rocket,
-  Flame,
-  Star,
-  Dumbbell,
   BookOpen,
   Calendar,
-  RefreshCw,
+  Clock,
+  Code2,
+  Dumbbell,
+  Flame,
+  Lightbulb,
   LineChart,
-} from 'lucide-react';
-import { getAnalytics } from '@/utils/analyticsSystem';
-import { StatsCard } from './StatsCard';
-import { ConceptMasteryChart } from './ConceptMasteryChart';
-import { LearningVelocityChart } from './LearningVelocityChart';
-import { TimeDistributionChart } from './TimeDistributionChart';
-import { StrengthsWeaknessesPanel } from './StrengthsWeaknessesPanel';
-import { RecommendationsPanel } from './RecommendationsPanel';
-import { CodeMetricsPanel } from './CodeMetricsPanel';
-import { Icon } from '@/components/ui/Icon';
+  RefreshCw,
+  Rocket,
+  Star,
+  Target,
+  X,
+} from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import { getAnalytics } from '@/utils/analyticsSystem'
+import { CodeMetricsPanel } from './CodeMetricsPanel'
+import { ConceptMasteryChart } from './ConceptMasteryChart'
+import { LearningVelocityChart } from './LearningVelocityChart'
+import { RecommendationsPanel } from './RecommendationsPanel'
+import { StatsCard } from './StatsCard'
+import { StrengthsWeaknessesPanel } from './StrengthsWeaknessesPanel'
+import { TimeDistributionChart } from './TimeDistributionChart'
 
 export interface AnalyticsDashboardProps {
-  playerId: string;
-  onClose?: () => void;
+  playerId: string
+  onClose?: () => void
 }
 
-type TabType = 'overview' | 'concepts' | 'time' | 'code' | 'recommendations';
+type TabType = 'overview' | 'concepts' | 'time' | 'code' | 'recommendations'
 
 export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProps) {
-  void playerId;
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [analytics, setAnalytics] = useState(getAnalytics());
+  void playerId
+  const [activeTab, setActiveTab] = useState<TabType>('overview')
+  const [analytics, setAnalytics] = useState(getAnalytics())
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setAnalytics(getAnalytics());
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+      setAnalytics(getAnalytics())
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const stats = {
     totalChallenges: analytics.challengesCompleted,
@@ -61,7 +61,7 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
     perfectScores: analytics.perfectScores,
     strongConcepts: analytics.strongConcepts.length,
     weakConcepts: analytics.weakConcepts.length,
-  };
+  }
 
   const tabs: { id: TabType; label: string; icon: LucideIcon }[] = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -69,7 +69,7 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
     { id: 'time', label: 'Time Management', icon: Clock },
     { id: 'code', label: 'Code Metrics', icon: Code2 },
     { id: 'recommendations', label: 'Recommendations', icon: Lightbulb },
-  ];
+  ]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
@@ -232,5 +232,5 @@ export function AnalyticsDashboard({ playerId, onClose }: AnalyticsDashboardProp
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -3,45 +3,45 @@
  * Personalized learning recommendations
  */
 
-'use client';
+'use client'
 
-import type { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
 import {
   BookOpen,
-  RefreshCw,
-  Rocket,
   Coffee,
   Flame,
-  Zap,
-  Star,
   Lightbulb,
   Map,
   PartyPopper,
-} from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+  RefreshCw,
+  Rocket,
+  Star,
+  Zap,
+} from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface RecommendationsPanelProps {
-  analytics: LearningAnalytics;
-  playerId: string;
+  analytics: LearningAnalytics
+  playerId: string
 }
 
 interface Recommendation {
-  id: string;
-  type: 'practice' | 'review' | 'advance' | 'break' | 'streak';
-  title: string;
-  description: string;
-  priority: 'high' | 'medium' | 'low';
-  icon: LucideIcon;
-  action?: string;
+  id: string
+  type: 'practice' | 'review' | 'advance' | 'break' | 'streak'
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+  icon: LucideIcon
+  action?: string
 }
 
 export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelProps, 'playerId'>) {
-  const recommendations: Recommendation[] = [];
+  const recommendations: Recommendation[] = []
 
   if (analytics.weakConcepts.length > 0) {
     analytics.weakConcepts.slice(0, 3).forEach((concept) => {
-      const successRate = analytics.successRatePerConcept.get(concept) || 0;
+      const successRate = analytics.successRatePerConcept.get(concept) || 0
       recommendations.push({
         id: `practice-${concept}`,
         type: 'practice',
@@ -50,13 +50,13 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
         priority: successRate < 40 ? 'high' : 'medium',
         icon: BookOpen,
         action: `Find ${concept} challenges`,
-      });
-    });
+      })
+    })
   }
 
   const oldChallenges = Array.from(analytics.attemptsPerChallenge.entries()).filter(
-    ([, attempts]) => attempts >= 1,
-  );
+    ([, attempts]) => attempts >= 1
+  )
 
   if (oldChallenges.length > 0) {
     recommendations.push({
@@ -67,10 +67,10 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'medium',
       icon: RefreshCw,
       action: 'Start review session',
-    });
+    })
   }
 
-  const strongConceptsCount = analytics.strongConcepts.length;
+  const strongConceptsCount = analytics.strongConcepts.length
   if (strongConceptsCount >= 3) {
     recommendations.push({
       id: 'advance',
@@ -80,11 +80,11 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'high',
       icon: Rocket,
       action: 'View advanced challenges',
-    });
+    })
   }
 
   if (analytics.totalPlayTime > 7200000) {
-    const hours = Math.round(analytics.totalPlayTime / 3600000);
+    const hours = Math.round(analytics.totalPlayTime / 3600000)
     recommendations.push({
       id: 'break',
       type: 'break',
@@ -93,7 +93,7 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'medium',
       icon: Coffee,
       action: 'Set reminder for later',
-    });
+    })
   }
 
   if (analytics.streakDays >= 7) {
@@ -105,7 +105,7 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'high',
       icon: Flame,
       action: 'Quick challenge',
-    });
+    })
   }
 
   if (analytics.learningVelocity < 1) {
@@ -117,7 +117,7 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'low',
       icon: Zap,
       action: 'Try timed mode',
-    });
+    })
   }
 
   if (analytics.perfectScores === 0 && analytics.challengesCompleted >= 5) {
@@ -130,33 +130,33 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
       priority: 'medium',
       icon: Star,
       action: 'Review grading criteria',
-    });
+    })
   }
 
-  const priorityOrder = { high: 0, medium: 1, low: 2 };
-  recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+  const priorityOrder = { high: 0, medium: 1, low: 2 }
+  recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
 
   const getPriorityColor = (priority: Recommendation['priority']) => {
     switch (priority) {
       case 'high':
-        return 'border-[rgb(var(--error)/0.35)] bg-[rgb(var(--error)/0.08)]';
+        return 'border-[rgb(var(--error)/0.35)] bg-[rgb(var(--error)/0.08)]'
       case 'medium':
-        return 'border-[rgb(var(--energy)/0.35)] bg-[rgb(var(--energy)/0.08)]';
+        return 'border-[rgb(var(--energy)/0.35)] bg-[rgb(var(--energy)/0.08)]'
       case 'low':
-        return 'border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.08)]';
+        return 'border-[rgb(var(--accent-subtle)/0.35)] bg-[rgb(var(--accent)/0.08)]'
     }
-  };
+  }
 
   const getPriorityBadge = (priority: Recommendation['priority']) => {
     switch (priority) {
       case 'high':
-        return 'bg-[rgb(var(--error)/0.2)] text-[rgb(var(--error))]';
+        return 'bg-[rgb(var(--error)/0.2)] text-[rgb(var(--error))]'
       case 'medium':
-        return 'bg-[rgb(var(--energy)/0.2)] text-[rgb(var(--energy))]';
+        return 'bg-[rgb(var(--energy)/0.2)] text-[rgb(var(--energy))]'
       case 'low':
-        return 'bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]';
+        return 'bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]'
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -188,13 +188,15 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
                     </h4>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium uppercase ${getPriorityBadge(
-                        rec.priority,
+                        rec.priority
                       )}`}
                     >
                       {rec.priority}
                     </span>
                   </div>
-                  <p className="mb-4 text-sm text-[rgb(var(--text-secondary))]">{rec.description}</p>
+                  <p className="mb-4 text-sm text-[rgb(var(--text-secondary))]">
+                    {rec.description}
+                  </p>
                   {rec.action && (
                     <button
                       type="button"
@@ -249,5 +251,5 @@ export function RecommendationsPanel({ analytics }: Omit<RecommendationsPanelPro
         </div>
       </div>
     </div>
-  );
+  )
 }

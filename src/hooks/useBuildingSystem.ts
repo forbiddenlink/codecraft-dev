@@ -1,71 +1,71 @@
-import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Vector3 } from 'three';
-import { buildingSystem } from '@/game/systems/BuildingSystem';
-import type { RootState } from '@/store/store';
-import { buildingTemplates } from '@/data/buildingTemplates';
+import { useCallback } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import type { Vector3 } from 'three'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { buildingSystem } from '@/game/systems/BuildingSystem'
 import {
   cancelPlacement as cancelPlacementAction,
   rotatePreview,
-} from '@/store/slices/buildingSlice';
+} from '@/store/slices/buildingSlice'
+import type { RootState } from '@/store/store'
 
-export type ResourceType = 'energy' | 'minerals' | 'water' | 'food';
+export type ResourceType = 'energy' | 'minerals' | 'water' | 'food'
 
 export interface BuildingPlacementError {
-  type: 'collision' | 'resources' | 'invalid_position';
-  message: string;
+  type: 'collision' | 'resources' | 'invalid_position'
+  message: string
 }
 
 export const useBuildingSystem = (templateId: string) => {
-  const dispatch = useDispatch();
-  const resources = useSelector((state: RootState) => state.resource.storage);
-  const rotation = useSelector((state: RootState) => state.building.previewRotation);
-  const isPlacing = useSelector((state: RootState) => state.building.buildMode);
-  const template = buildingTemplates[templateId];
+  const dispatch = useDispatch()
+  const resources = useSelector((state: RootState) => state.resource.storage)
+  const rotation = useSelector((state: RootState) => state.building.previewRotation)
+  const isPlacing = useSelector((state: RootState) => state.building.buildMode)
+  const template = buildingTemplates[templateId]
 
   const checkResourceRequirements = useCallback(() => {
-    if (!template) return false;
+    if (!template) return false
     return template.costs.every((cost) => {
-      const available = resources[cost.resourceId as ResourceType] || 0;
-      return available >= cost.amount;
-    });
-  }, [template, resources]);
+      const available = resources[cost.resourceId as ResourceType] || 0
+      return available >= cost.amount
+    })
+  }, [template, resources])
 
   const startPlacement = useCallback(() => {
     // Template selection already enables build mode via setSelectedTemplateId
-  }, []);
+  }, [])
 
   const cancelPlacement = useCallback(() => {
-    dispatch(cancelPlacementAction());
-  }, [dispatch]);
+    dispatch(cancelPlacementAction())
+  }, [dispatch])
 
   const rotateBuilding = useCallback(() => {
-    dispatch(rotatePreview());
-  }, [dispatch]);
+    dispatch(rotatePreview())
+  }, [dispatch])
 
   const tryPlaceBuilding = useCallback(
     (position: Vector3) => {
       if (!template || !checkResourceRequirements()) {
-        return null;
+        return null
       }
-      return buildingSystem.placeBuilding(templateId, position, rotation);
+      return buildingSystem.placeBuilding(templateId, position, rotation)
     },
-    [templateId, rotation, template, checkResourceRequirements],
-  );
+    [templateId, rotation, template, checkResourceRequirements]
+  )
 
   const getMissingResources = useCallback(() => {
-    if (!template) return [];
+    if (!template) return []
     return template.costs
       .filter((cost) => {
-        const available = resources[cost.resourceId as ResourceType] || 0;
-        return available < cost.amount;
+        const available = resources[cost.resourceId as ResourceType] || 0
+        return available < cost.amount
       })
       .map((cost) => ({
         resourceId: cost.resourceId,
         required: cost.amount,
         available: resources[cost.resourceId as ResourceType] || 0,
-      }));
-  }, [template, resources]);
+      }))
+  }, [template, resources])
 
   return {
     isPlacing,
@@ -78,5 +78,5 @@ export const useBuildingSystem = (templateId: string) => {
     tryPlaceBuilding,
     checkResourceRequirements,
     getMissingResources,
-  };
-};
+  }
+}

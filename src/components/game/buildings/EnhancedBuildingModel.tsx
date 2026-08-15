@@ -1,42 +1,42 @@
-'use client';
-import { useRef, useState, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import { useSpring, animated } from '@react-spring/three';
-import { Text, Sphere, Box, Cylinder, Cone, Sparkles, Billboard } from '@react-three/drei';
-import * as THREE from 'three';
+'use client'
+import { animated, useSpring } from '@react-spring/three'
+import { Billboard, Box, Cone, Cylinder, Sparkles, Sphere, Text } from '@react-three/drei'
+import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef, useState } from 'react'
+import * as THREE from 'three'
 
 interface BuildingModelProps {
-  type: string;
-  position: [number, number, number];
-  rotation?: [number, number, number];
-  scale?: number;
-  isActive?: boolean;
-  level?: number;
-  onClick?: () => void;
-  onHover?: (hovered: boolean) => void;
+  type: string
+  position: [number, number, number]
+  rotation?: [number, number, number]
+  scale?: number
+  isActive?: boolean
+  level?: number
+  onClick?: () => void
+  onHover?: (hovered: boolean) => void
 }
 
-const AnimatedGroup = animated.group;
-const AnimatedMesh = animated.mesh;
+const AnimatedGroup = animated.group
+const AnimatedMesh = animated.mesh
 
 // Energy Generator Building
 function EnergyGenerator({ isActive, level = 1 }: { isActive?: boolean; level?: number }) {
-  const coreRef = useRef<THREE.Mesh>(null);
-  const ringsRef = useRef<THREE.Group>(null);
+  const coreRef = useRef<THREE.Mesh>(null)
+  const ringsRef = useRef<THREE.Group>(null)
 
   useFrame((_state) => {
     if (isActive && coreRef.current) {
-      coreRef.current.rotation.y += 0.02;
+      coreRef.current.rotation.y += 0.02
     }
     if (ringsRef.current) {
-      ringsRef.current.rotation.y += isActive ? 0.01 : 0.002;
+      ringsRef.current.rotation.y += isActive ? 0.01 : 0.002
     }
-  });
+  })
 
   const { glowIntensity } = useSpring({
     glowIntensity: isActive ? 1.5 : 0.3,
-    config: { tension: 200, friction: 20 }
-  });
+    config: { tension: 200, friction: 20 },
+  })
 
   return (
     <group>
@@ -47,9 +47,9 @@ function EnergyGenerator({ isActive, level = 1 }: { isActive?: boolean; level?: 
 
       {/* Main tower */}
       <Cylinder args={[1, 1.2, 4, 8]} position={[0, 2.5, 0]}>
-        <meshStandardMaterial 
-          color="#3b82f6" 
-          metalness={0.6} 
+        <meshStandardMaterial
+          color="#3b82f6"
+          metalness={0.6}
           roughness={0.3}
           emissive="#3b82f6"
           emissiveIntensity={isActive ? 0.3 : 0.1}
@@ -74,11 +74,11 @@ function EnergyGenerator({ isActive, level = 1 }: { isActive?: boolean; level?: 
         {[0, 1, 2].map((i) => (
           <mesh
             key={i}
-            rotation={[Math.PI / 2 + (i * Math.PI / 6), 0, 0]}
+            rotation={[Math.PI / 2 + (i * Math.PI) / 6, 0, 0]}
             position={[
-              Math.cos(i * Math.PI * 2 / 3) * 1.5,
+              Math.cos((i * Math.PI * 2) / 3) * 1.5,
               0,
-              Math.sin(i * Math.PI * 2 / 3) * 1.5
+              Math.sin((i * Math.PI * 2) / 3) * 1.5,
             ]}
           >
             <torusGeometry args={[1.2, 0.05, 16, 100]} />
@@ -94,46 +94,31 @@ function EnergyGenerator({ isActive, level = 1 }: { isActive?: boolean; level?: 
       </group>
 
       {/* Energy particles */}
-      {isActive && (
-        <EnergyParticles count={20} radius={2} height={6} />
-      )}
+      {isActive && <EnergyParticles count={20} radius={2} height={6} />}
 
       {/* Level indicator */}
       {level > 1 && (
-        <Text
-          position={[0, 6, 0]}
-          fontSize={0.5}
-          color="#fbbf24"
-          anchorX="center"
-          anchorY="middle"
-        >
+        <Text position={[0, 6, 0]} fontSize={0.5} color="#fbbf24" anchorX="center" anchorY="middle">
           Lv.{level}
         </Text>
       )}
 
       {/* Point light */}
-      {isActive && (
-        <pointLight
-          position={[0, 5, 0]}
-          intensity={2}
-          distance={10}
-          color="#60a5fa"
-        />
-      )}
+      {isActive && <pointLight position={[0, 5, 0]} intensity={2} distance={10} color="#60a5fa" />}
     </group>
-  );
+  )
 }
 
 // Resource Collector Building
 function ResourceCollector({ isActive }: { isActive?: boolean; level?: number }) {
-  const drillRef = useRef<THREE.Group>(null);
+  const drillRef = useRef<THREE.Group>(null)
 
   useFrame(() => {
     if (drillRef.current && isActive) {
-      drillRef.current.rotation.y += 0.05;
-      drillRef.current.position.y = Math.sin(Date.now() * 0.003) * 0.3;
+      drillRef.current.rotation.y += 0.05
+      drillRef.current.position.y = Math.sin(Date.now() * 0.003) * 0.3
     }
-  });
+  })
 
   return (
     <group>
@@ -145,11 +130,7 @@ function ResourceCollector({ isActive }: { isActive?: boolean; level?: number })
       {/* Support legs */}
       {[-1, 1].map((x) =>
         [-1, 1].map((z) => (
-          <Cylinder
-            key={`${x}-${z}`}
-            args={[0.2, 0.3, 2, 8]}
-            position={[x * 1.2, 1, z * 1.2]}
-          >
+          <Cylinder key={`${x}-${z}`} args={[0.2, 0.3, 2, 8]} position={[x * 1.2, 1, z * 1.2]}>
             <meshStandardMaterial color="#334155" metalness={0.8} roughness={0.2} />
           </Cylinder>
         ))
@@ -192,19 +173,19 @@ function ResourceCollector({ isActive }: { isActive?: boolean; level?: number })
       {/* Resource flow effect */}
       {isActive && <ResourceFlowEffect />}
     </group>
-  );
+  )
 }
 
 // Living Quarters Building
 function LivingQuarters({}: { level?: number }) {
-  const [lightsOn, setLightsOn] = useState(true);
+  const [lightsOn, setLightsOn] = useState(true)
 
   useFrame(() => {
     // Flickering window lights
     if (Math.random() > 0.98) {
-      setLightsOn(l => !l);
+      setLightsOn((l) => !l)
     }
-  });
+  })
 
   return (
     <group>
@@ -224,7 +205,7 @@ function LivingQuarters({}: { level?: number }) {
           <group key={`${x}-${i}`} position={[x * 1.5, y, 1.51]}>
             <Box args={[0.6, 0.6, 0.05]}>
               <meshStandardMaterial
-                color={lightsOn ? "#fbbf24" : "#78350f"}
+                color={lightsOn ? '#fbbf24' : '#78350f'}
                 emissive="#fbbf24"
                 emissiveIntensity={lightsOn ? 0.8 : 0.1}
               />
@@ -246,18 +227,18 @@ function LivingQuarters({}: { level?: number }) {
       {/* Smoke particles */}
       <SmokeParticles position={[1, 5.5, 0]} />
     </group>
-  );
+  )
 }
 
 // Command Center Building
 function CommandCenter({}: { level?: number }) {
-  const antennaRef = useRef<THREE.Group>(null);
+  const antennaRef = useRef<THREE.Group>(null)
 
   useFrame((state) => {
     if (antennaRef.current) {
-      antennaRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
+      antennaRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3
     }
-  });
+  })
 
   return (
     <group>
@@ -282,19 +263,12 @@ function CommandCenter({}: { level?: number }) {
             emissiveIntensity={0.5}
           />
         </Sphere>
-        
+
         {/* Rotating data rings */}
         {[0, 1, 2].map((i) => (
-          <mesh
-            key={i}
-            rotation={[0, (i * Math.PI * 2) / 3, 0]}
-          >
+          <mesh key={i} rotation={[0, (i * Math.PI * 2) / 3, 0]}>
             <torusGeometry args={[1.2 + i * 0.2, 0.02, 16, 100]} />
-            <meshStandardMaterial
-              color="#60a5fa"
-              emissive="#3b82f6"
-              emissiveIntensity={1}
-            />
+            <meshStandardMaterial color="#60a5fa" emissive="#3b82f6" emissiveIntensity={1} />
           </mesh>
         ))}
       </group>
@@ -304,7 +278,7 @@ function CommandCenter({}: { level?: number }) {
         <Cylinder args={[0.1, 0.1, 2, 8]}>
           <meshStandardMaterial color="#94a3b8" metalness={0.9} roughness={0.1} />
         </Cylinder>
-        
+
         {/* Antenna dish */}
         <mesh position={[0, 1.5, 0]} rotation={[Math.PI / 4, 0, 0]}>
           <sphereGeometry args={[0.8, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
@@ -325,39 +299,47 @@ function CommandCenter({}: { level?: number }) {
         />
       </mesh>
     </group>
-  );
+  )
 }
 
 // Energy Particles Effect
-function EnergyParticles({ count, radius, height }: { count: number; radius: number; height: number }) {
-  const particlesRef = useRef<THREE.Points>(null);
-  
+function EnergyParticles({
+  count,
+  radius,
+  height,
+}: {
+  count: number
+  radius: number
+  height: number
+}) {
+  const particlesRef = useRef<THREE.Points>(null)
+
   const particles = useMemo(() => {
-    const positions = new Float32Array(count * 3);
+    const positions = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      positions[i * 3] = Math.cos(angle) * radius;
-      positions[i * 3 + 1] = Math.random() * height;
-      positions[i * 3 + 2] = Math.sin(angle) * radius;
+      const angle = Math.random() * Math.PI * 2
+      positions[i * 3] = Math.cos(angle) * radius
+      positions[i * 3 + 1] = Math.random() * height
+      positions[i * 3 + 2] = Math.sin(angle) * radius
     }
-    return positions;
-  }, [count, radius, height]);
+    return positions
+  }, [count, radius, height])
 
   useFrame(() => {
     if (particlesRef.current) {
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
       for (let i = 0; i < count; i++) {
-        positions[i * 3 + 1] += 0.02;
+        positions[i * 3 + 1] += 0.02
         if (positions[i * 3 + 1] > height) {
-          positions[i * 3 + 1] = 0;
+          positions[i * 3 + 1] = 0
         }
       }
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      particlesRef.current.geometry.attributes.position.needsUpdate = true
     }
-  });
+  })
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3))
 
   return (
     <points ref={particlesRef} geometry={geometry}>
@@ -369,39 +351,39 @@ function EnergyParticles({ count, radius, height }: { count: number; radius: num
         blending={THREE.AdditiveBlending}
       />
     </points>
-  );
+  )
 }
 
 // Resource Flow Effect
 function ResourceFlowEffect() {
-  const particlesRef = useRef<THREE.Points>(null);
-  const count = 10;
+  const particlesRef = useRef<THREE.Points>(null)
+  const count = 10
 
   const particles = useMemo(() => {
-    const positions = new Float32Array(count * 3);
+    const positions = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = 0;
-      positions[i * 3 + 1] = (i / count) * 3;
-      positions[i * 3 + 2] = 0;
+      positions[i * 3] = 0
+      positions[i * 3 + 1] = (i / count) * 3
+      positions[i * 3 + 2] = 0
     }
-    return positions;
-  }, []);
+    return positions
+  }, [])
 
   useFrame(() => {
     if (particlesRef.current) {
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
       for (let i = 0; i < count; i++) {
-        positions[i * 3 + 1] += 0.05;
+        positions[i * 3 + 1] += 0.05
         if (positions[i * 3 + 1] > 3) {
-          positions[i * 3 + 1] = 0;
+          positions[i * 3 + 1] = 0
         }
       }
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      particlesRef.current.geometry.attributes.position.needsUpdate = true
     }
-  });
+  })
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3))
 
   return (
     <points ref={particlesRef} geometry={geometry}>
@@ -413,79 +395,71 @@ function ResourceFlowEffect() {
         blending={THREE.AdditiveBlending}
       />
     </points>
-  );
+  )
 }
 
 // Smoke Particles
 function SmokeParticles({ position }: { position: [number, number, number] }) {
-  const particlesRef = useRef<THREE.Points>(null);
-  const count = 5;
+  const particlesRef = useRef<THREE.Points>(null)
+  const count = 5
 
   const particles = useMemo(() => {
-    const positions = new Float32Array(count * 3);
+    const positions = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 0.2;
-      positions[i * 3 + 1] = i * 0.3;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 0.2;
+      positions[i * 3] = (Math.random() - 0.5) * 0.2
+      positions[i * 3 + 1] = i * 0.3
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 0.2
     }
-    return positions;
-  }, []);
+    return positions
+  }, [])
 
   useFrame(() => {
     if (particlesRef.current) {
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
+      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array
       for (let i = 0; i < count; i++) {
-        positions[i * 3 + 1] += 0.02;
+        positions[i * 3 + 1] += 0.02
         if (positions[i * 3 + 1] > 2) {
-          positions[i * 3 + 1] = 0;
+          positions[i * 3 + 1] = 0
         }
       }
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
+      particlesRef.current.geometry.attributes.position.needsUpdate = true
     }
-  });
+  })
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3));
+  const geometry = new THREE.BufferGeometry()
+  geometry.setAttribute('position', new THREE.BufferAttribute(particles, 3))
 
   return (
     <points ref={particlesRef} position={position} geometry={geometry}>
-      <pointsMaterial
-        size={0.2}
-        color="#94a3b8"
-        transparent
-        opacity={0.4}
-      />
+      <pointsMaterial size={0.2} color="#94a3b8" transparent opacity={0.4} />
     </points>
-  );
+  )
 }
 
 // Orbiting Satellites (Level 5+)
-function OrbitingSatellites({ count = 3, radius = 4, speed = 0.5 }: {
-  count?: number;
-  radius?: number;
-  speed?: number;
+function OrbitingSatellites({
+  count = 3,
+  radius = 4,
+  speed = 0.5,
+}: {
+  count?: number
+  radius?: number
+  speed?: number
 }) {
-  const groupRef = useRef<THREE.Group>(null);
+  const groupRef = useRef<THREE.Group>(null)
 
   useFrame(({ clock }) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = clock.elapsedTime * speed;
+      groupRef.current.rotation.y = clock.elapsedTime * speed
     }
-  });
+  })
 
   return (
     <group ref={groupRef}>
       {Array.from({ length: count }, (_, i) => {
-        const angle = (i / count) * Math.PI * 2;
+        const angle = (i / count) * Math.PI * 2
         return (
-          <group
-            key={i}
-            position={[
-              Math.cos(angle) * radius,
-              2,
-              Math.sin(angle) * radius
-            ]}
-          >
+          <group key={i} position={[Math.cos(angle) * radius, 2, Math.sin(angle) * radius]}>
             {/* Satellite body */}
             <Box args={[0.3, 0.1, 0.3]}>
               <meshStandardMaterial
@@ -504,32 +478,29 @@ function OrbitingSatellites({ count = 3, radius = 4, speed = 0.5 }: {
               <meshStandardMaterial color="#1e3a5f" metalness={0.3} />
             </Box>
           </group>
-        );
+        )
       })}
     </group>
-  );
+  )
 }
 
 // Energy Shield (Level 3+)
-function EnergyShield({ radius = 3, color = '#60a5fa' }: {
-  radius?: number;
-  color?: string;
-}) {
-  const shieldRef = useRef<THREE.Mesh>(null);
+function EnergyShield({ radius = 3, color = '#60a5fa' }: { radius?: number; color?: string }) {
+  const shieldRef = useRef<THREE.Mesh>(null)
 
   useFrame(({ clock }) => {
     if (shieldRef.current && shieldRef.current.material instanceof THREE.ShaderMaterial) {
-      shieldRef.current.material.uniforms.time.value = clock.elapsedTime;
+      shieldRef.current.material.uniforms.time.value = clock.elapsedTime
     }
-  });
+  })
 
   // Simple animated shield using standard material
   const { opacity } = useSpring({
     opacity: 0.15,
     from: { opacity: 0.1 },
     loop: { reverse: true },
-    config: { duration: 2000 }
-  });
+    config: { duration: 2000 },
+  })
 
   return (
     <animated.mesh ref={shieldRef}>
@@ -544,25 +515,28 @@ function EnergyShield({ radius = 3, color = '#60a5fa' }: {
         toneMapped={false}
       />
     </animated.mesh>
-  );
+  )
 }
 
 // Communication Antenna (Level 2+)
-function CommunicationAntenna({ height = 1.5, isActive = true }: {
-  height?: number;
-  isActive?: boolean;
+function CommunicationAntenna({
+  height = 1.5,
+  isActive = true,
+}: {
+  height?: number
+  isActive?: boolean
 }) {
-  const tipRef = useRef<THREE.Mesh>(null);
+  const tipRef = useRef<THREE.Mesh>(null)
 
   useFrame(({ clock }) => {
     if (tipRef.current) {
       // Pulsing glow effect
-      const intensity = 0.5 + Math.sin(clock.elapsedTime * 3) * 0.3;
+      const intensity = 0.5 + Math.sin(clock.elapsedTime * 3) * 0.3
       if (tipRef.current.material instanceof THREE.MeshStandardMaterial) {
-        tipRef.current.material.emissiveIntensity = isActive ? intensity : 0.2;
+        tipRef.current.material.emissiveIntensity = isActive ? intensity : 0.2
       }
     }
-  });
+  })
 
   return (
     <group position={[0, 3, 0]}>
@@ -580,29 +554,27 @@ function CommunicationAntenna({ height = 1.5, isActive = true }: {
         />
       </Sphere>
       {/* Signal rings when active */}
-      {isActive && (
-        <SignalRings position={[0, height / 2 + 0.1, 0]} />
-      )}
+      {isActive && <SignalRings position={[0, height / 2 + 0.1, 0]} />}
     </group>
-  );
+  )
 }
 
 // Signal Rings for antenna
 function SignalRings({ position }: { position: [number, number, number] }) {
-  const ringsRef = useRef<THREE.Group>(null);
+  const ringsRef = useRef<THREE.Group>(null)
 
   useFrame(({ clock }) => {
     if (ringsRef.current) {
       ringsRef.current.children.forEach((ring, i) => {
-        const scale = 0.5 + ((clock.elapsedTime * 0.5 + i * 0.3) % 1) * 1.5;
-        const opacity = 1 - ((clock.elapsedTime * 0.5 + i * 0.3) % 1);
-        ring.scale.set(scale, scale, scale);
+        const scale = 0.5 + ((clock.elapsedTime * 0.5 + i * 0.3) % 1) * 1.5
+        const opacity = 1 - ((clock.elapsedTime * 0.5 + i * 0.3) % 1)
+        ring.scale.set(scale, scale, scale)
         if (ring instanceof THREE.Mesh && ring.material instanceof THREE.MeshStandardMaterial) {
-          ring.material.opacity = opacity * 0.5;
+          ring.material.opacity = opacity * 0.5
         }
-      });
+      })
     }
-  });
+  })
 
   return (
     <group ref={ringsRef} position={position}>
@@ -619,7 +591,7 @@ function SignalRings({ position }: { position: [number, number, number] }) {
         </mesh>
       ))}
     </group>
-  );
+  )
 }
 
 // Level Badge
@@ -630,10 +602,10 @@ function LevelBadge({ level }: { level: number }) {
     3: '#8b5cf6',
     4: '#f59e0b',
     5: '#ef4444',
-    6: '#fbbf24'
-  };
+    6: '#fbbf24',
+  }
 
-  const color = colors[Math.min(level, 6) as keyof typeof colors] || colors[6];
+  const color = colors[Math.min(level, 6) as keyof typeof colors] || colors[6]
 
   return (
     <Billboard position={[0, 4, 0]}>
@@ -657,50 +629,37 @@ function LevelBadge({ level }: { level: number }) {
         {level}
       </Text>
     </Billboard>
-  );
+  )
 }
 
 // Progressive Upgrade Visuals Component
-function BuildingUpgradeVisuals({ level, isActive = true }: {
-  level: number;
-  isActive?: boolean;
-}) {
-  const enhancements = useMemo(() => ({
-    hasAntenna: level >= 2,
-    hasShield: level >= 3,
-    hasParticles: level >= 4,
-    hasSatellites: level >= 5,
-    hasAura: level >= 6
-  }), [level]);
+function BuildingUpgradeVisuals({ level, isActive = true }: { level: number; isActive?: boolean }) {
+  const enhancements = useMemo(
+    () => ({
+      hasAntenna: level >= 2,
+      hasShield: level >= 3,
+      hasParticles: level >= 4,
+      hasSatellites: level >= 5,
+      hasAura: level >= 6,
+    }),
+    [level]
+  )
 
   return (
     <group>
       {/* Level 2+: Communication antenna */}
-      {enhancements.hasAntenna && (
-        <CommunicationAntenna isActive={isActive} />
-      )}
+      {enhancements.hasAntenna && <CommunicationAntenna isActive={isActive} />}
 
       {/* Level 3+: Energy shield */}
-      {enhancements.hasShield && (
-        <EnergyShield radius={3.5} />
-      )}
+      {enhancements.hasShield && <EnergyShield radius={3.5} />}
 
       {/* Level 4+: Ambient particles */}
       {enhancements.hasParticles && (
-        <Sparkles
-          count={30}
-          size={1}
-          speed={0.4}
-          opacity={0.6}
-          color="#60a5fa"
-          scale={[4, 4, 4]}
-        />
+        <Sparkles count={30} size={1} speed={0.4} opacity={0.6} color="#60a5fa" scale={[4, 4, 4]} />
       )}
 
       {/* Level 5+: Orbiting satellites */}
-      {enhancements.hasSatellites && (
-        <OrbitingSatellites count={3} radius={4} speed={0.3} />
-      )}
+      {enhancements.hasSatellites && <OrbitingSatellites count={3} radius={4} speed={0.3} />}
 
       {/* Level 6+: Legendary aura */}
       {enhancements.hasAura && (
@@ -718,11 +677,9 @@ function BuildingUpgradeVisuals({ level, isActive = true }: {
       )}
 
       {/* Level indicator badge (level 2+) */}
-      {level >= 2 && (
-        <LevelBadge level={level} />
-      )}
+      {level >= 2 && <LevelBadge level={level} />}
     </group>
-  );
+  )
 }
 
 // Main Building Model Component
@@ -734,27 +691,27 @@ export default function EnhancedBuildingModel({
   isActive = true,
   level = 1,
   onClick,
-  onHover
+  onHover,
 }: BuildingModelProps) {
-  const groupRef = useRef<THREE.Group>(null);
-  const [hovered, setHovered] = useState(false);
+  const groupRef = useRef<THREE.Group>(null)
+  const [hovered, setHovered] = useState(false)
 
   const { groupScale } = useSpring({
     groupScale: hovered ? scale * 1.05 : scale,
-    config: { tension: 300, friction: 20 }
-  });
+    config: { tension: 300, friction: 20 },
+  })
 
   const handlePointerOver = () => {
-    setHovered(true);
-    onHover?.(true);
-    document.body.style.cursor = 'pointer';
-  };
+    setHovered(true)
+    onHover?.(true)
+    document.body.style.cursor = 'pointer'
+  }
 
   const handlePointerOut = () => {
-    setHovered(false);
-    onHover?.(false);
-    document.body.style.cursor = 'default';
-  };
+    setHovered(false)
+    onHover?.(false)
+    document.body.style.cursor = 'default'
+  }
 
   // Select building model based on type
   const getBuildingModel = () => {
@@ -762,25 +719,25 @@ export default function EnhancedBuildingModel({
       case 'energyGenerator':
       case 'powerGrid':
       case 'communicationBeacon':
-        return <EnergyGenerator isActive={isActive} level={level} />;
+        return <EnergyGenerator isActive={isActive} level={level} />
       case 'resourceCollector':
       case 'miningStation':
-        return <ResourceCollector isActive={isActive} level={level} />;
+        return <ResourceCollector isActive={isActive} level={level} />
       case 'livingQuarters':
       case 'habitat':
-        return <LivingQuarters level={level} />;
+        return <LivingQuarters level={level} />
       case 'commandCenter':
       case 'controlHub':
-        return <CommandCenter level={level} />;
+        return <CommandCenter level={level} />
       default:
         // Default building
         return (
           <Box args={[2, 2, 2]}>
             <meshStandardMaterial color="#64748b" />
           </Box>
-        );
+        )
     }
-  };
+  }
 
   return (
     <AnimatedGroup
@@ -812,6 +769,5 @@ export default function EnhancedBuildingModel({
         </mesh>
       )}
     </AnimatedGroup>
-  );
+  )
 }
-

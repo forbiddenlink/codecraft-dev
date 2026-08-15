@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart3, ChevronDown, RefreshCw, FileCode2, Palette, Zap } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion'
+import { BarChart3, ChevronDown, FileCode2, Palette, RefreshCw, Zap } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
 import {
-  getMasteryByCategory,
-  getConceptsNeedingReview,
   getConceptDisplayName,
+  getConceptsNeedingReview,
+  getMasteryByCategory,
   type ReviewCard,
-} from '@/utils/spacedRepetition';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+} from '@/utils/spacedRepetition'
 
 interface MasteryDashboardProps {
-  className?: string;
-  onReviewConcept?: (concept: string) => void;
+  className?: string
+  onReviewConcept?: (concept: string) => void
 }
 
 interface CategoryMastery {
-  html: number;
-  css: number;
-  javascript: number;
-  overall: number;
+  html: number
+  css: number
+  javascript: number
+  overall: number
 }
 
 interface ConceptsNeedingReview {
-  html: ReviewCard[];
-  css: ReviewCard[];
-  javascript: ReviewCard[];
+  html: ReviewCard[]
+  css: ReviewCard[]
+  javascript: ReviewCard[]
 }
 
 /**
@@ -45,41 +45,41 @@ export default function MasteryDashboard({
     css: 0,
     javascript: 0,
     overall: 0,
-  });
+  })
   const [needsReview, setNeedsReview] = useState<ConceptsNeedingReview>({
     html: [],
     css: [],
     javascript: [],
-  });
-  const [isExpanded, setIsExpanded] = useState(false);
+  })
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const refreshData = useCallback(() => {
-    setMastery(getMasteryByCategory());
-    setNeedsReview(getConceptsNeedingReview());
-  }, []);
+    setMastery(getMasteryByCategory())
+    setNeedsReview(getConceptsNeedingReview())
+  }, [])
 
   useEffect(() => {
-    refreshData();
-    const interval = setInterval(refreshData, 30000);
-    return () => clearInterval(interval);
-  }, [refreshData]);
+    refreshData()
+    const interval = setInterval(refreshData, 30000)
+    return () => clearInterval(interval)
+  }, [refreshData])
 
   const getMasteryColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-[rgb(var(--success))]';
-    if (percentage >= 50) return 'bg-[rgb(var(--energy))]';
-    if (percentage >= 25) return 'bg-[rgb(var(--accent-subtle))]';
-    return 'bg-[rgb(var(--error))]';
-  };
+    if (percentage >= 80) return 'bg-[rgb(var(--success))]'
+    if (percentage >= 50) return 'bg-[rgb(var(--energy))]'
+    if (percentage >= 25) return 'bg-[rgb(var(--accent-subtle))]'
+    return 'bg-[rgb(var(--error))]'
+  }
 
   const getMasteryLabel = (percentage: number) => {
-    if (percentage >= 80) return 'Expert';
-    if (percentage >= 50) return 'Proficient';
-    if (percentage >= 25) return 'Developing';
-    return 'Beginner';
-  };
+    if (percentage >= 80) return 'Expert'
+    if (percentage >= 50) return 'Proficient'
+    if (percentage >= 25) return 'Developing'
+    return 'Beginner'
+  }
 
   const totalDueForReview =
-    needsReview.html.length + needsReview.css.length + needsReview.javascript.length;
+    needsReview.html.length + needsReview.css.length + needsReview.javascript.length
 
   const categories = [
     {
@@ -100,7 +100,7 @@ export default function MasteryDashboard({
       icon: Zap,
       color: 'text-[rgb(var(--success))]',
     },
-  ];
+  ]
 
   return (
     <HudPanel className={className} padding="sm">
@@ -163,7 +163,9 @@ export default function MasteryDashboard({
                       <Icon icon={icon} size={12} />
                       <span>{label}</span>
                     </span>
-                    <span className="text-[rgb(var(--text-muted))]">{Math.round(mastery[key])}%</span>
+                    <span className="text-[rgb(var(--text-muted))]">
+                      {Math.round(mastery[key])}%
+                    </span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.08]">
                     <motion.div
@@ -201,7 +203,7 @@ export default function MasteryDashboard({
                           {card.repetitions} reviews
                         </span>
                       </motion.button>
-                    )),
+                    ))
                   )}
                 </div>
               </div>
@@ -216,5 +218,5 @@ export default function MasteryDashboard({
         )}
       </AnimatePresence>
     </HudPanel>
-  );
+  )
 }

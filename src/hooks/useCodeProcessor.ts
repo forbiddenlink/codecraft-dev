@@ -1,44 +1,43 @@
-import { useState } from 'react';
-import { codeProcessor } from '@/game/systems/CodeToGamePipeline';
-import { useAppDispatch } from '@/store/hooks';
-import { setEditorErrors } from '@/store/slices/editorSlice';
-import { GameStructureNode } from '@/utils/htmlParser';
-import { BuildingLayout } from '@/game/systems/CodeToGamePipeline';
-import { ValidationError } from '@/utils/codeValidation';
+import { useState } from 'react'
+import { type BuildingLayout, codeProcessor } from '@/game/systems/CodeToGamePipeline'
+import { useAppDispatch } from '@/store/hooks'
+import { setEditorErrors } from '@/store/slices/editorSlice'
+import type { ValidationError } from '@/utils/codeValidation'
+import type { GameStructureNode } from '@/utils/htmlParser'
 
 interface CodeProcessingResult {
-  success: boolean;
-  htmlStructure: GameStructureNode[];
-  buildings: BuildingLayout[];
-  behaviors: Record<string, unknown>;
-  errors: ValidationError[];
-  warnings: ValidationError[];
+  success: boolean
+  htmlStructure: GameStructureNode[]
+  buildings: BuildingLayout[]
+  behaviors: Record<string, unknown>
+  errors: ValidationError[]
+  warnings: ValidationError[]
 }
 
 export function useCodeProcessor() {
-  const dispatch = useAppDispatch();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [lastResult, setLastResult] = useState<CodeProcessingResult | null>(null);
+  const dispatch = useAppDispatch()
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [lastResult, setLastResult] = useState<CodeProcessingResult | null>(null)
 
   /**
    * Process code and update game state
    */
   const processCode = async (html: string, css: string, js?: string) => {
-    setIsProcessing(true);
-    
+    setIsProcessing(true)
+
     try {
-      const result = codeProcessor.processCode(html, css, js);
-      
+      const result = codeProcessor.processCode(html, css, js)
+
       // Update editor errors
-      const allErrors = [...result.errors, ...result.warnings];
-      dispatch(setEditorErrors(allErrors));
-      
+      const allErrors = [...result.errors, ...result.warnings]
+      dispatch(setEditorErrors(allErrors))
+
       // Store result
-      setLastResult(result);
-      
-      return result;
+      setLastResult(result)
+
+      return result
     } catch (error: any) {
-      console.error('Error processing code:', error);
+      console.error('Error processing code:', error)
 
       // Create error object
       const errorResult: CodeProcessingResult = {
@@ -46,31 +45,33 @@ export function useCodeProcessor() {
         htmlStructure: [],
         buildings: [],
         behaviors: {},
-        errors: [{
-          line: 1,
-          column: 1,
-          message: `Code processing error: ${error?.message || 'Unknown error'}`,
-          severity: 'error' as const,
-          source: 'html' as const
-        }],
-        warnings: []
-      };
-      
+        errors: [
+          {
+            line: 1,
+            column: 1,
+            message: `Code processing error: ${error?.message || 'Unknown error'}`,
+            severity: 'error' as const,
+            source: 'html' as const,
+          },
+        ],
+        warnings: [],
+      }
+
       // Update editor errors
-      dispatch(setEditorErrors(errorResult.errors));
-      
+      dispatch(setEditorErrors(errorResult.errors))
+
       // Store result
-      setLastResult(errorResult);
-      
-      return errorResult;
+      setLastResult(errorResult)
+
+      return errorResult
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  };
+  }
 
   return {
     processCode,
     isProcessing,
-    lastResult
-  };
-} 
+    lastResult,
+  }
+}

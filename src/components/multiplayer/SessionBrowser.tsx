@@ -3,18 +3,18 @@
  * Browse and join active collaboration sessions
  */
 
-import { useState, useEffect } from 'react';
-import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { Pencil, Eye, Target, Lock, Check } from 'lucide-react';
-import { getCollaborationSystem } from '@/utils/collaborationSystem';
-import type { CollaborationSession, User } from '@/utils/collaborationSystem';
-import { Icon } from '@/components/ui/Icon';
+import { useAutoAnimate } from '@formkit/auto-animate/react'
+import { Check, Eye, Lock, Pencil, Target } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import type { CollaborationSession, User } from '@/utils/collaborationSystem'
+import { getCollaborationSystem } from '@/utils/collaborationSystem'
 
 export interface SessionBrowserProps {
-  currentUser: User;
-  onJoinSession: (sessionId: string) => void;
-  onCreateSession: () => void;
-  onClose?: () => void;
+  currentUser: User
+  onJoinSession: (sessionId: string) => void
+  onCreateSession: () => void
+  onClose?: () => void
 }
 
 export function SessionBrowser({
@@ -23,50 +23,47 @@ export function SessionBrowser({
   onCreateSession,
   onClose,
 }: SessionBrowserProps) {
-  const [sessions, setSessions] = useState<CollaborationSession[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState<'all' | 'open' | 'friends'>('all');
-  const [sessionsListRef] = useAutoAnimate<HTMLDivElement>();
+  const [sessions, setSessions] = useState<CollaborationSession[]>([])
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterMode, setFilterMode] = useState<'all' | 'open' | 'friends'>('all')
+  const [sessionsListRef] = useAutoAnimate<HTMLDivElement>()
 
-  const collabSystem = getCollaborationSystem();
+  const collabSystem = getCollaborationSystem()
 
   useEffect(() => {
-    loadSessions();
+    loadSessions()
 
     // Refresh every 10 seconds
-    const interval = setInterval(loadSessions, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    const interval = setInterval(loadSessions, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
   const loadSessions = () => {
-    const activeSessions = collabSystem.getActiveSessions();
-    setSessions(activeSessions);
-  };
+    const activeSessions = collabSystem.getActiveSessions()
+    setSessions(activeSessions)
+  }
 
   const filteredSessions = sessions.filter((session) => {
     // Search filter
-    const matchesSearch = searchQuery === '' ||
-      session.participants.some((p) =>
-        p.username.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+    const matchesSearch =
+      searchQuery === '' ||
+      session.participants.some((p) => p.username.toLowerCase().includes(searchQuery.toLowerCase()))
 
     // Mode filter
-    const isFull = session.participants.length >= session.settings.maxParticipants;
-    const matchesMode =
-      filterMode === 'all' ||
-      (filterMode === 'open' && !isFull);
+    const isFull = session.participants.length >= session.settings.maxParticipants
+    const matchesMode = filterMode === 'all' || (filterMode === 'open' && !isFull)
 
-    return matchesSearch && matchesMode;
-  });
+    return matchesSearch && matchesMode
+  })
 
   const handleJoin = (sessionId: string) => {
-    const result = collabSystem.joinSession(sessionId, currentUser);
+    const result = collabSystem.joinSession(sessionId, currentUser)
     if (result.success) {
-      onJoinSession(sessionId);
+      onJoinSession(sessionId)
     } else {
-      alert(result.error);
+      alert(result.error)
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-50 modal-backdrop flex items-center justify-center p-4">
@@ -125,10 +122,7 @@ export function SessionBrowser({
             </div>
 
             {/* Create Session */}
-            <button
-              onClick={onCreateSession}
-              className="btn-primary focus-ring"
-            >
+            <button onClick={onCreateSession} className="btn-primary focus-ring">
               + Create Session
             </button>
           </div>
@@ -139,20 +133,19 @@ export function SessionBrowser({
           {filteredSessions.length > 0 ? (
             <div ref={sessionsListRef} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {filteredSessions.map((session) => {
-                const isFull = session.participants.length >= session.settings.maxParticipants;
-                const isInSession = session.participants.some((p) => p.id === currentUser.id);
+                const isFull = session.participants.length >= session.settings.maxParticipants
+                const isInSession = session.participants.some((p) => p.id === currentUser.id)
 
                 return (
-                  <div
-                    key={session.id}
-                    className="card card-interactive"
-                  >
+                  <div key={session.id} className="card card-interactive">
                     {/* Host Info */}
                     <div className="flex items-center gap-3 mb-4">
                       <div
                         className="w-11 h-11 rounded-full flex items-center justify-center font-semibold text-white"
                         style={{
-                          backgroundColor: session.participants.find((p) => p.id === session.hostId)?.color || '#8b5cf6',
+                          backgroundColor:
+                            session.participants.find((p) => p.id === session.hostId)?.color ||
+                            '#8b5cf6',
                         }}
                       >
                         {session.participants
@@ -162,7 +155,8 @@ export function SessionBrowser({
                       </div>
                       <div className="flex-1">
                         <p className="text-h4">
-                          {session.participants.find((p) => p.id === session.hostId)?.username}'s Session
+                          {session.participants.find((p) => p.id === session.hostId)?.username}'s
+                          Session
                         </p>
                         <p className="text-small">
                           Created {new Date(session.createdAt).toLocaleTimeString()}
@@ -185,7 +179,8 @@ export function SessionBrowser({
                         ))}
                       </div>
                       <p className="text-small">
-                        {session.participants.length}/{session.settings.maxParticipants} participants
+                        {session.participants.length}/{session.settings.maxParticipants}{' '}
+                        participants
                       </p>
                     </div>
 
@@ -235,7 +230,7 @@ export function SessionBrowser({
                       )}
                     </button>
                   </div>
-                );
+                )
               })}
             </div>
           ) : (
@@ -247,10 +242,7 @@ export function SessionBrowser({
                   ? 'Try adjusting your search or filters'
                   : 'Be the first to create a collaboration session!'}
               </p>
-              <button
-                onClick={onCreateSession}
-                className="btn-primary focus-ring"
-              >
+              <button onClick={onCreateSession} className="btn-primary focus-ring">
                 + Create Session
               </button>
             </div>
@@ -271,5 +263,5 @@ export function SessionBrowser({
         </div>
       </div>
     </div>
-  );
+  )
 }

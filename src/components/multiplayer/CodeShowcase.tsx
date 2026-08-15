@@ -3,43 +3,43 @@
  * Share and browse community code solutions
  */
 
-import React, { useState } from 'react';
-import type { SharedCode } from '@/utils/socialFeatures';
+import React, { useState } from 'react'
+import type { SharedCode } from '@/utils/socialFeatures'
 
 export interface CodeShowcaseProps {
-  challengeId?: string;
-  onClose?: () => void;
+  challengeId?: string
+  onClose?: () => void
 }
 
 export function CodeShowcase({ challengeId, onClose }: CodeShowcaseProps) {
-  const [sharedCodes, setSharedCodes] = useState<SharedCode[]>([]);
-  const [sortBy, setSortBy] = useState<'recent' | 'likes' | 'views'>('likes');
+  const [sharedCodes, setSharedCodes] = useState<SharedCode[]>([])
+  const [sortBy, setSortBy] = useState<'recent' | 'likes' | 'views'>('likes')
   const [_filterLanguage, _setFilterLanguage] = useState<'all' | 'html' | 'css' | 'javascript'>(
     'all'
-  );
+  )
 
   // const leaderboardSystem = getLeaderboardSystem();
 
   // Load shared codes
   React.useEffect(() => {
     // In real implementation, fetch from backend
-    const mockCodes: SharedCode[] = [];
-    setSharedCodes(mockCodes);
-  }, [challengeId]);
+    const mockCodes: SharedCode[] = []
+    setSharedCodes(mockCodes)
+  }, [challengeId])
 
   const filteredCodes = sharedCodes
     .filter((code) => !challengeId || code.challengeId === challengeId)
     .sort((a, b) => {
       switch (sortBy) {
         case 'likes':
-          return b.likes - a.likes;
+          return b.likes - a.likes
         case 'views':
-          return b.views - a.views;
+          return b.views - a.views
         case 'recent':
         default:
-          return b.createdAt.getTime() - a.createdAt.getTime();
+          return b.createdAt.getTime() - a.createdAt.getTime()
       }
-    });
+    })
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -189,5 +189,5 @@ export function CodeShowcase({ challengeId, onClose }: CodeShowcaseProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

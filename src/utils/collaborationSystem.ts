@@ -5,93 +5,89 @@
  * Uses Liveblocks for real-time sync when enabled, falls back to local state.
  */
 
-import { Room } from '@liveblocks/client';
-import {
-  isLiveblocksEnabled,
-  enterCollaborationRoom,
-  generateRoomCode,
-} from './liveblocks';
+import type { Room } from '@liveblocks/client'
+import { enterCollaborationRoom, generateRoomCode, isLiveblocksEnabled } from './liveblocks'
 
 export interface User {
-  id: string;
-  username: string;
-  avatar?: string;
-  color: string; // For cursor/highlight color
-  level: number;
-  xp: number;
+  id: string
+  username: string
+  avatar?: string
+  color: string // For cursor/highlight color
+  level: number
+  xp: number
 }
 
 export interface CollaborationSession {
-  id: string;
-  hostId: string;
-  participants: User[];
+  id: string
+  hostId: string
+  participants: User[]
   code: {
-    html: string;
-    css: string;
-    javascript: string;
-  };
-  challengeId?: string;
-  createdAt: Date;
-  isActive: boolean;
+    html: string
+    css: string
+    javascript: string
+  }
+  challengeId?: string
+  createdAt: Date
+  isActive: boolean
   settings: {
-    maxParticipants: number;
-    allowEditing: 'host-only' | 'all' | 'turn-based';
-    voiceChat: boolean;
-    allowSpectators: boolean;
-  };
+    maxParticipants: number
+    allowEditing: 'host-only' | 'all' | 'turn-based'
+    voiceChat: boolean
+    allowSpectators: boolean
+  }
 }
 
 export interface CursorPosition {
-  userId: string;
-  language: 'html' | 'css' | 'javascript';
-  line: number;
-  column: number;
+  userId: string
+  language: 'html' | 'css' | 'javascript'
+  line: number
+  column: number
   selection?: {
-    startLine: number;
-    startColumn: number;
-    endLine: number;
-    endColumn: number;
-  };
+    startLine: number
+    startColumn: number
+    endLine: number
+    endColumn: number
+  }
 }
 
 export interface CodeChange {
-  userId: string;
-  timestamp: number;
-  language: 'html' | 'css' | 'javascript';
+  userId: string
+  timestamp: number
+  language: 'html' | 'css' | 'javascript'
   changes: {
     range: {
-      startLine: number;
-      startColumn: number;
-      endLine: number;
-      endColumn: number;
-    };
-    text: string;
-  }[];
+      startLine: number
+      startColumn: number
+      endLine: number
+      endColumn: number
+    }
+    text: string
+  }[]
 }
 
 export interface ChatMessage {
-  id: string;
-  userId: string;
-  username: string;
-  message: string;
-  timestamp: Date;
-  type: 'text' | 'system' | 'code-snippet';
+  id: string
+  userId: string
+  username: string
+  message: string
+  timestamp: Date
+  type: 'text' | 'system' | 'code-snippet'
   codeSnippet?: {
-    language: string;
-    code: string;
-  };
+    language: string
+    code: string
+  }
 }
 
 class CollaborationSystem {
-  private sessions: Map<string, CollaborationSession> = new Map();
-  private cursors: Map<string, Map<string, CursorPosition>> = new Map(); // sessionId -> userId -> position
-  private chatHistory: Map<string, ChatMessage[]> = new Map(); // sessionId -> messages
+  private sessions: Map<string, CollaborationSession> = new Map()
+  private cursors: Map<string, Map<string, CursorPosition>> = new Map() // sessionId -> userId -> position
+  private chatHistory: Map<string, ChatMessage[]> = new Map() // sessionId -> messages
 
   // Liveblocks room connections (when enabled)
-  private liveblocksRooms: Map<string, { room: Room; leave: () => void }> = new Map();
+  private liveblocksRooms: Map<string, { room: Room; leave: () => void }> = new Map()
 
   // Event listeners for local fallback
-  private eventListeners: Map<string, Set<(event: unknown) => void>> = new Map();
+  private eventListeners: Map<string, Set<(event: unknown) => void>> = new Map()
 
   /**
    * Create a new collaboration session
@@ -104,9 +100,7 @@ class CollaborationSystem {
     settings?: Partial<CollaborationSession['settings']>
   ): CollaborationSession {
     // Use room code for Liveblocks, fallback to generated ID
-    const sessionId = isLiveblocksEnabled()
-      ? generateRoomCode()
-      : this.generateSessionId();
+    const sessionId = isLiveblocksEnabled() ? generateRoomCode() : this.generateSessionId()
 
     // Enter Liveblocks room if enabled
     if (isLiveblocksEnabled()) {
@@ -114,9 +108,9 @@ class CollaborationSystem {
         id: host.id,
         username: host.username,
         color: host.color,
-      });
+      })
       if (roomConnection) {
-        this.liveblocksRooms.set(sessionId, roomConnection);
+        this.liveblocksRooms.set(sessionId, roomConnection)
       }
     }
 
@@ -138,39 +132,42 @@ class CollaborationSystem {
         voiceChat: settings?.voiceChat || false,
         allowSpectators: settings?.allowSpectators || true,
       },
-    };
+    }
 
-    this.sessions.set(sessionId, session);
-    this.cursors.set(sessionId, new Map());
-    this.chatHistory.set(sessionId, []);
+    this.sessions.set(sessionId, session)
+    this.cursors.set(sessionId, new Map())
+    this.chatHistory.set(sessionId, [])
 
     // Add system message
-    this.addSystemMessage(sessionId, `${host.username} created the session`);
+    this.addSystemMessage(sessionId, `${host.username} created the session`)
 
-    return session;
+    return session
   }
 
   /**
    * Join an existing session
    */
-  joinSession(sessionId: string, user: User): { success: boolean; session?: CollaborationSession; error?: string } {
-    const session = this.sessions.get(sessionId);
+  joinSession(
+    sessionId: string,
+    user: User
+  ): { success: boolean; session?: CollaborationSession; error?: string } {
+    const session = this.sessions.get(sessionId)
 
     if (!session) {
-      return { success: false, error: 'Session not found' };
+      return { success: false, error: 'Session not found' }
     }
 
     if (!session.isActive) {
-      return { success: false, error: 'Session is no longer active' };
+      return { success: false, error: 'Session is no longer active' }
     }
 
     if (session.participants.length >= session.settings.maxParticipants) {
-      return { success: false, error: 'Session is full' };
+      return { success: false, error: 'Session is full' }
     }
 
     // Check if user already in session
     if (session.participants.some((p) => p.id === user.id)) {
-      return { success: true, session };
+      return { success: true, session }
     }
 
     // Enter Liveblocks room if enabled and not already connected
@@ -179,74 +176,79 @@ class CollaborationSystem {
         id: user.id,
         username: user.username,
         color: user.color,
-      });
+      })
       if (roomConnection) {
         // Track per-user room connection
-        this.liveblocksRooms.set(`${sessionId}-${user.id}`, roomConnection);
+        this.liveblocksRooms.set(`${sessionId}-${user.id}`, roomConnection)
       }
     }
 
-    session.participants.push(user);
-    this.addSystemMessage(sessionId, `${user.username} joined the session`);
-    this.broadcastEvent(sessionId, 'user-joined', { user });
+    session.participants.push(user)
+    this.addSystemMessage(sessionId, `${user.username} joined the session`)
+    this.broadcastEvent(sessionId, 'user-joined', { user })
 
-    return { success: true, session };
+    return { success: true, session }
   }
 
   /**
    * Leave a session
    */
   leaveSession(sessionId: string, userId: string): void {
-    const session = this.sessions.get(sessionId);
-    if (!session) return;
+    const session = this.sessions.get(sessionId)
+    if (!session) return
 
-    const user = session.participants.find((p) => p.id === userId);
-    if (!user) return;
+    const user = session.participants.find((p) => p.id === userId)
+    if (!user) return
 
     // Leave Liveblocks room if connected (check both host and joiner key formats)
-    const joinerKey = `${sessionId}-${userId}`;
-    const hostKey = sessionId;
+    const joinerKey = `${sessionId}-${userId}`
+    const hostKey = sessionId
     for (const key of [joinerKey, hostKey]) {
-      const roomConnection = this.liveblocksRooms.get(key);
+      const roomConnection = this.liveblocksRooms.get(key)
       if (roomConnection) {
-        roomConnection.leave();
-        this.liveblocksRooms.delete(key);
-        break;
+        roomConnection.leave()
+        this.liveblocksRooms.delete(key)
+        break
       }
     }
 
-    session.participants = session.participants.filter((p) => p.id !== userId);
-    this.addSystemMessage(sessionId, `${user.username} left the session`);
-    this.broadcastEvent(sessionId, 'user-left', { userId });
+    session.participants = session.participants.filter((p) => p.id !== userId)
+    this.addSystemMessage(sessionId, `${user.username} left the session`)
+    this.broadcastEvent(sessionId, 'user-left', { userId })
 
     // Remove cursor
-    this.cursors.get(sessionId)?.delete(userId);
+    this.cursors.get(sessionId)?.delete(userId)
 
     // If host leaves and there are still participants, transfer host
     if (userId === session.hostId && session.participants.length > 0) {
-      session.hostId = session.participants[0].id;
-      this.addSystemMessage(sessionId, `${session.participants[0].username} is now the host`);
+      session.hostId = session.participants[0].id
+      this.addSystemMessage(sessionId, `${session.participants[0].username} is now the host`)
     }
 
     // If no participants left, deactivate session
     if (session.participants.length === 0) {
-      session.isActive = false;
+      session.isActive = false
     }
   }
 
   /**
    * Update code in session
    */
-  updateCode(sessionId: string, userId: string, language: 'html' | 'css' | 'javascript', code: string): void {
-    const session = this.sessions.get(sessionId);
-    if (!session) return;
+  updateCode(
+    sessionId: string,
+    userId: string,
+    language: 'html' | 'css' | 'javascript',
+    code: string
+  ): void {
+    const session = this.sessions.get(sessionId)
+    if (!session) return
 
     // Check permissions
     if (session.settings.allowEditing === 'host-only' && userId !== session.hostId) {
-      return;
+      return
     }
 
-    session.code[language] = code;
+    session.code[language] = code
 
     // Broadcast change to other participants
     this.broadcastEvent(sessionId, 'code-updated', {
@@ -254,43 +256,48 @@ class CollaborationSystem {
       language,
       code,
       timestamp: Date.now(),
-    });
+    })
   }
 
   /**
    * Update cursor position
    */
   updateCursor(sessionId: string, userId: string, position: Omit<CursorPosition, 'userId'>): void {
-    const sessionCursors = this.cursors.get(sessionId);
-    if (!sessionCursors) return;
+    const sessionCursors = this.cursors.get(sessionId)
+    if (!sessionCursors) return
 
-    sessionCursors.set(userId, { userId, ...position });
+    sessionCursors.set(userId, { userId, ...position })
 
     // Broadcast cursor position
     this.broadcastEvent(sessionId, 'cursor-moved', {
       userId,
       position,
-    });
+    })
   }
 
   /**
    * Get all cursor positions for a session
    */
   getCursors(sessionId: string): CursorPosition[] {
-    const sessionCursors = this.cursors.get(sessionId);
-    if (!sessionCursors) return [];
-    return Array.from(sessionCursors.values());
+    const sessionCursors = this.cursors.get(sessionId)
+    if (!sessionCursors) return []
+    return Array.from(sessionCursors.values())
   }
 
   /**
    * Send chat message
    */
-  sendMessage(sessionId: string, userId: string, message: string, codeSnippet?: ChatMessage['codeSnippet']): void {
-    const session = this.sessions.get(sessionId);
-    if (!session) return;
+  sendMessage(
+    sessionId: string,
+    userId: string,
+    message: string,
+    codeSnippet?: ChatMessage['codeSnippet']
+  ): void {
+    const session = this.sessions.get(sessionId)
+    if (!session) return
 
-    const user = session.participants.find((p) => p.id === userId);
-    if (!user) return;
+    const user = session.participants.find((p) => p.id === userId)
+    if (!user) return
 
     const chatMessage: ChatMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -300,26 +307,26 @@ class CollaborationSystem {
       timestamp: new Date(),
       type: codeSnippet ? 'code-snippet' : 'text',
       codeSnippet,
-    };
+    }
 
-    const history = this.chatHistory.get(sessionId);
+    const history = this.chatHistory.get(sessionId)
     if (history) {
-      history.push(chatMessage);
+      history.push(chatMessage)
 
       // Keep only last 100 messages
       if (history.length > 100) {
-        history.shift();
+        history.shift()
       }
     }
 
-    this.broadcastEvent(sessionId, 'chat-message', chatMessage);
+    this.broadcastEvent(sessionId, 'chat-message', chatMessage)
   }
 
   /**
    * Get chat history
    */
   getChatHistory(sessionId: string): ChatMessage[] {
-    return this.chatHistory.get(sessionId) || [];
+    return this.chatHistory.get(sessionId) || []
   }
 
   /**
@@ -333,50 +340,50 @@ class CollaborationSystem {
       message,
       timestamp: new Date(),
       type: 'system',
-    };
-
-    const history = this.chatHistory.get(sessionId);
-    if (history) {
-      history.push(chatMessage);
     }
 
-    this.broadcastEvent(sessionId, 'chat-message', chatMessage);
+    const history = this.chatHistory.get(sessionId)
+    if (history) {
+      history.push(chatMessage)
+    }
+
+    this.broadcastEvent(sessionId, 'chat-message', chatMessage)
   }
 
   /**
    * Toggle user's editing permission
    */
   toggleUserPermission(sessionId: string, hostId: string, targetUserId: string): void {
-    const session = this.sessions.get(sessionId);
-    if (!session || session.hostId !== hostId) return;
+    const session = this.sessions.get(sessionId)
+    if (!session || session.hostId !== hostId) return
 
     // In a real implementation, track per-user permissions
-    this.broadcastEvent(sessionId, 'permission-changed', { targetUserId });
+    this.broadcastEvent(sessionId, 'permission-changed', { targetUserId })
   }
 
   /**
    * Kick user from session (host only)
    */
   kickUser(sessionId: string, hostId: string, targetUserId: string): void {
-    const session = this.sessions.get(sessionId);
-    if (!session || session.hostId !== hostId || targetUserId === hostId) return;
+    const session = this.sessions.get(sessionId)
+    if (!session || session.hostId !== hostId || targetUserId === hostId) return
 
-    this.leaveSession(sessionId, targetUserId);
-    this.broadcastEvent(sessionId, 'user-kicked', { userId: targetUserId });
+    this.leaveSession(sessionId, targetUserId)
+    this.broadcastEvent(sessionId, 'user-kicked', { userId: targetUserId })
   }
 
   /**
    * Get session details
    */
   getSession(sessionId: string): CollaborationSession | null {
-    return this.sessions.get(sessionId) || null;
+    return this.sessions.get(sessionId) || null
   }
 
   /**
    * Get all active sessions
    */
   getActiveSessions(): CollaborationSession[] {
-    return Array.from(this.sessions.values()).filter((s) => s.isActive);
+    return Array.from(this.sessions.values()).filter((s) => s.isActive)
   }
 
   /**
@@ -385,17 +392,17 @@ class CollaborationSystem {
    */
   getLiveblocksRoom(sessionId: string): Room | null {
     // Check host key first, then any participant key
-    const hostConnection = this.liveblocksRooms.get(sessionId);
-    if (hostConnection) return hostConnection.room;
+    const hostConnection = this.liveblocksRooms.get(sessionId)
+    if (hostConnection) return hostConnection.room
 
     // Find any participant connection for this session
     for (const [key, connection] of this.liveblocksRooms.entries()) {
       if (key.startsWith(`${sessionId}-`)) {
-        return connection.room;
+        return connection.room
       }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -403,84 +410,84 @@ class CollaborationSystem {
    */
   on(sessionId: string, callback: (event: any) => void): () => void {
     if (!this.eventListeners.has(sessionId)) {
-      this.eventListeners.set(sessionId, new Set());
+      this.eventListeners.set(sessionId, new Set())
     }
 
-    this.eventListeners.get(sessionId)!.add(callback);
+    this.eventListeners.get(sessionId)!.add(callback)
 
     // Return unsubscribe function
     return () => {
-      this.eventListeners.get(sessionId)?.delete(callback);
-    };
+      this.eventListeners.get(sessionId)?.delete(callback)
+    }
   }
 
   /**
    * Broadcast event to all session participants
    */
   private broadcastEvent(sessionId: string, eventType: string, data: any): void {
-    const listeners = this.eventListeners.get(sessionId);
-    if (!listeners) return;
+    const listeners = this.eventListeners.get(sessionId)
+    if (!listeners) return
 
     const event = {
       type: eventType,
       sessionId,
       data,
       timestamp: Date.now(),
-    };
+    }
 
     listeners.forEach((callback) => {
       try {
-        callback(event);
+        callback(event)
       } catch (error) {
-        console.error('Error in event listener:', error);
+        console.error('Error in event listener:', error)
       }
-    });
+    })
   }
 
   /**
    * Generate unique session ID
    */
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
   /**
    * End session
    */
   endSession(sessionId: string, hostId: string): void {
-    const session = this.sessions.get(sessionId);
-    if (!session || session.hostId !== hostId) return;
+    const session = this.sessions.get(sessionId)
+    if (!session || session.hostId !== hostId) return
 
     // Close all Liveblocks room connections for this session
     for (const [key, connection] of this.liveblocksRooms.entries()) {
       if (key === sessionId || key.startsWith(`${sessionId}-`)) {
-        connection.leave();
-        this.liveblocksRooms.delete(key);
+        connection.leave()
+        this.liveblocksRooms.delete(key)
       }
     }
 
-    session.isActive = false;
-    this.addSystemMessage(sessionId, 'Session ended by host');
-    this.broadcastEvent(sessionId, 'session-ended', { sessionId });
+    session.isActive = false
+    this.addSystemMessage(sessionId, 'Session ended by host')
+    this.broadcastEvent(sessionId, 'session-ended', { sessionId })
 
     // Clean up after 5 minutes
     setTimeout(() => {
-      this.sessions.delete(sessionId);
-      this.cursors.delete(sessionId);
-      this.chatHistory.delete(sessionId);
-      this.eventListeners.delete(sessionId);
-    }, 300000);
+      this.sessions.delete(sessionId)
+      this.cursors.delete(sessionId)
+      this.chatHistory.delete(sessionId)
+      this.eventListeners.delete(sessionId)
+    }, 300000)
   }
 }
 
 // Singleton instance
-let collaborationInstance: CollaborationSystem | null = null;
+let collaborationInstance: CollaborationSystem | null = null
 
 export function getCollaborationSystem(): CollaborationSystem {
   if (!collaborationInstance) {
-    collaborationInstance = new CollaborationSystem();
+    collaborationInstance = new CollaborationSystem()
   }
-  return collaborationInstance;
+  return collaborationInstance
 }
 
 // Convenience exports
@@ -489,27 +496,27 @@ export const createCollabSession = (
   host: User,
   challengeId?: string,
   settings?: Partial<CollaborationSession['settings']>
-) => getCollaborationSystem().createSession(hostId, host, challengeId, settings);
+) => getCollaborationSystem().createSession(hostId, host, challengeId, settings)
 
 export const joinCollabSession = (sessionId: string, user: User) =>
-  getCollaborationSystem().joinSession(sessionId, user);
+  getCollaborationSystem().joinSession(sessionId, user)
 
 export const leaveCollabSession = (sessionId: string, userId: string) =>
-  getCollaborationSystem().leaveSession(sessionId, userId);
+  getCollaborationSystem().leaveSession(sessionId, userId)
 
 export const updateCollabCode = (
   sessionId: string,
   userId: string,
   language: 'html' | 'css' | 'javascript',
   code: string
-) => getCollaborationSystem().updateCode(sessionId, userId, language, code);
+) => getCollaborationSystem().updateCode(sessionId, userId, language, code)
 
 export const sendCollabMessage = (
   sessionId: string,
   userId: string,
   message: string,
   codeSnippet?: ChatMessage['codeSnippet']
-) => getCollaborationSystem().sendMessage(sessionId, userId, message, codeSnippet);
+) => getCollaborationSystem().sendMessage(sessionId, userId, message, codeSnippet)
 
 export const getCollabRoom = (sessionId: string) =>
-  getCollaborationSystem().getLiveblocksRoom(sessionId);
+  getCollaborationSystem().getLiveblocksRoom(sessionId)

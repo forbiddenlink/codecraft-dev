@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
-import { Zap, Gem, Droplets, Wheat, Wind, Users, Microscope } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react'
+import { Droplets, Gem, Microscope, Users, Wheat, Wind, Zap } from 'lucide-react'
 
 export type ColonyResource =
   | 'energy'
@@ -8,7 +8,7 @@ export type ColonyResource =
   | 'food'
   | 'oxygen'
   | 'colonists'
-  | 'research';
+  | 'research'
 
 export const RESOURCE_ICONS: Record<ColonyResource, LucideIcon> = {
   energy: Zap,
@@ -18,7 +18,7 @@ export const RESOURCE_ICONS: Record<ColonyResource, LucideIcon> = {
   oxygen: Wind,
   colonists: Users,
   research: Microscope,
-};
+}
 
 export const RESOURCE_COLORS: Record<ColonyResource, string> = {
   energy: '#FBBF24',
@@ -28,4 +28,4 @@ export const RESOURCE_COLORS: Record<ColonyResource, string> = {
   oxygen: '#67E8F9',
   colonists: '#F97316',
   research: '#38BDF8',
-};
+}

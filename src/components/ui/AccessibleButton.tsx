@@ -1,18 +1,28 @@
-'use client';
+'use client'
 
-import React, { forwardRef, ButtonHTMLAttributes } from 'react';
-import { motion, MotionProps } from 'framer-motion';
-import { announceToScreenReader } from '@/utils/accessibilityUtils';
+import { type MotionProps, motion } from 'framer-motion'
+import type React from 'react'
+import { type ButtonHTMLAttributes, forwardRef } from 'react'
+import { announceToScreenReader } from '@/utils/accessibilityUtils'
 
-interface AccessibleButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'onAnimationStart' | 'onAnimationEnd' | 'onAnimationIteration' | 'onDrag' | 'onDragEnd' | 'onDragStart'> {
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  loading?: boolean;
-  icon?: React.ReactNode;
-  iconPosition?: 'left' | 'right';
-  fullWidth?: boolean;
-  announceOnClick?: string;
-  motionProps?: MotionProps;
+interface AccessibleButtonProps
+  extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    | 'onAnimationStart'
+    | 'onAnimationEnd'
+    | 'onAnimationIteration'
+    | 'onDrag'
+    | 'onDragEnd'
+    | 'onDragStart'
+  > {
+  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
+  size?: 'sm' | 'md' | 'lg'
+  loading?: boolean
+  icon?: React.ReactNode
+  iconPosition?: 'left' | 'right'
+  fullWidth?: boolean
+  announceOnClick?: string
+  motionProps?: MotionProps
 }
 
 export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonProps>(
@@ -34,7 +44,8 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
     },
     ref
   ) => {
-    const baseClasses = 'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses =
+      'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-4 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
 
     const variantClasses = {
       primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
@@ -42,33 +53,33 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
       success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
       ghost: 'bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-500',
-    };
+    }
 
     const sizeClasses = {
       sm: 'px-3 py-1.5 text-sm',
       md: 'px-4 py-2 text-base',
       lg: 'px-6 py-3 text-lg',
-    };
+    }
 
-    const widthClass = fullWidth ? 'w-full' : '';
+    const widthClass = fullWidth ? 'w-full' : ''
 
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (disabled || loading) return;
+      if (disabled || loading) return
 
       if (announceOnClick) {
-        announceToScreenReader(announceOnClick);
+        announceToScreenReader(announceOnClick)
       }
 
-      onClick?.(event);
-    };
+      onClick?.(event)
+    }
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
       // Allow Space and Enter to trigger button
       if (event.key === ' ' || event.key === 'Enter') {
-        event.preventDefault();
-        handleClick(event as unknown as React.MouseEvent<HTMLButtonElement>);
+        event.preventDefault()
+        handleClick(event as unknown as React.MouseEvent<HTMLButtonElement>)
       }
-    };
+    }
 
     const buttonContent = (
       <>
@@ -99,9 +110,9 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
         <span>{children}</span>
         {icon && iconPosition === 'right' && !loading && icon}
       </>
-    );
+    )
 
-    const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`;
+    const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`
 
     if (motionProps) {
       return (
@@ -118,7 +129,7 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
         >
           {buttonContent}
         </motion.button>
-      );
+      )
     }
 
     return (
@@ -134,8 +145,8 @@ export const AccessibleButton = forwardRef<HTMLButtonElement, AccessibleButtonPr
       >
         {buttonContent}
       </button>
-    );
+    )
   }
-);
+)
 
-AccessibleButton.displayName = 'AccessibleButton';
+AccessibleButton.displayName = 'AccessibleButton'

@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { Lightbulb, ChevronRight } from 'lucide-react';
-import { useProgressiveHints, formatTimeUntilHint } from '@/hooks/useProgressiveHints';
-import type { Challenge } from '@/types/challenges';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronRight, Lightbulb } from 'lucide-react'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
+import { formatTimeUntilHint, useProgressiveHints } from '@/hooks/useProgressiveHints'
+import type { Challenge } from '@/types/challenges'
 
 interface HintPanelProps {
-  challenge: Challenge | null | undefined;
-  className?: string;
+  challenge: Challenge | null | undefined
+  className?: string
 }
 
 export default function HintPanel({ challenge, className = '' }: HintPanelProps) {
@@ -21,10 +21,10 @@ export default function HintPanel({ challenge, className = '' }: HintPanelProps)
     progressToNextHint,
     allHintsRevealed,
     revealNextHint,
-  } = useProgressiveHints(challenge);
+  } = useProgressiveHints(challenge)
 
   if (!challenge || totalHints === 0) {
-    return null;
+    return null
   }
 
   return (
@@ -97,5 +97,5 @@ export default function HintPanel({ challenge, className = '' }: HintPanelProps)
         )}
       </AnimatePresence>
     </HudPanel>
-  );
+  )
 }

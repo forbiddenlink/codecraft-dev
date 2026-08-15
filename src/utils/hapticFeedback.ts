@@ -6,35 +6,35 @@
  */
 
 class HapticFeedbackSystem {
-  private static instance: HapticFeedbackSystem;
-  private isSupported: boolean;
-  private enabled: boolean = true;
+  private static instance: HapticFeedbackSystem
+  private isSupported: boolean
+  private enabled: boolean = true
 
   private constructor() {
-    this.isSupported = typeof navigator !== 'undefined' && 'vibrate' in navigator;
+    this.isSupported = typeof navigator !== 'undefined' && 'vibrate' in navigator
   }
 
   static getInstance(): HapticFeedbackSystem {
     if (!HapticFeedbackSystem.instance) {
-      HapticFeedbackSystem.instance = new HapticFeedbackSystem();
+      HapticFeedbackSystem.instance = new HapticFeedbackSystem()
     }
-    return HapticFeedbackSystem.instance;
+    return HapticFeedbackSystem.instance
   }
 
   setEnabled(enabled: boolean): void {
-    this.enabled = enabled;
+    this.enabled = enabled
   }
 
   isHapticSupported(): boolean {
-    return this.isSupported;
+    return this.isSupported
   }
 
   private vibrate(pattern: number | number[]): boolean {
-    if (!this.isSupported || !this.enabled) return false;
+    if (!this.isSupported || !this.enabled) return false
     try {
-      return navigator.vibrate(pattern);
+      return navigator.vibrate(pattern)
     } catch {
-      return false;
+      return false
     }
   }
 
@@ -66,31 +66,59 @@ class HapticFeedbackSystem {
     challengeComplete: [100, 50, 100, 50, 200],
     // Mastery achieved
     mastery: [50, 30, 50, 30, 100, 50, 100, 50, 200],
-  };
+  }
 
   // Convenience methods
-  success(): boolean { return this.vibrate(this.patterns.success); }
-  error(): boolean { return this.vibrate(this.patterns.error); }
-  levelUp(): boolean { return this.vibrate(this.patterns.levelUp); }
-  achievement(): boolean { return this.vibrate(this.patterns.achievement); }
-  tap(): boolean { return this.vibrate(this.patterns.tap); }
-  warning(): boolean { return this.vibrate(this.patterns.warning); }
-  streak(): boolean { return this.vibrate(this.patterns.streak); }
-  codeSuccess(): boolean { return this.vibrate(this.patterns.codeSuccess); }
-  buildingPlace(): boolean { return this.vibrate(this.patterns.buildingPlace); }
-  resourceCollect(): boolean { return this.vibrate(this.patterns.resourceCollect); }
-  perfectScore(): boolean { return this.vibrate(this.patterns.perfectScore); }
-  challengeComplete(): boolean { return this.vibrate(this.patterns.challengeComplete); }
-  mastery(): boolean { return this.vibrate(this.patterns.mastery); }
-  custom(pattern: number[]): boolean { return this.vibrate(pattern); }
+  success(): boolean {
+    return this.vibrate(this.patterns.success)
+  }
+  error(): boolean {
+    return this.vibrate(this.patterns.error)
+  }
+  levelUp(): boolean {
+    return this.vibrate(this.patterns.levelUp)
+  }
+  achievement(): boolean {
+    return this.vibrate(this.patterns.achievement)
+  }
+  tap(): boolean {
+    return this.vibrate(this.patterns.tap)
+  }
+  warning(): boolean {
+    return this.vibrate(this.patterns.warning)
+  }
+  streak(): boolean {
+    return this.vibrate(this.patterns.streak)
+  }
+  codeSuccess(): boolean {
+    return this.vibrate(this.patterns.codeSuccess)
+  }
+  buildingPlace(): boolean {
+    return this.vibrate(this.patterns.buildingPlace)
+  }
+  resourceCollect(): boolean {
+    return this.vibrate(this.patterns.resourceCollect)
+  }
+  perfectScore(): boolean {
+    return this.vibrate(this.patterns.perfectScore)
+  }
+  challengeComplete(): boolean {
+    return this.vibrate(this.patterns.challengeComplete)
+  }
+  mastery(): boolean {
+    return this.vibrate(this.patterns.mastery)
+  }
+  custom(pattern: number[]): boolean {
+    return this.vibrate(pattern)
+  }
 
   // Cancel ongoing vibration
   cancel(): void {
     if (this.isSupported) {
-      navigator.vibrate(0);
+      navigator.vibrate(0)
     }
   }
 }
 
-export const hapticFeedback = HapticFeedbackSystem.getInstance();
-export default hapticFeedback;
+export const hapticFeedback = HapticFeedbackSystem.getInstance()
+export default hapticFeedback

@@ -1,23 +1,19 @@
-import { store } from '@/store/store';
-import { v4 as uuidv4 } from 'uuid';
-import { Vector3 } from 'three';
-import { 
-  placeBuilding, 
-  demolishBuilding, 
-  updateConstructionProgress,
+import type { Vector3 } from 'three'
+import { v4 as uuidv4 } from 'uuid'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import {
+  connectBuildingToHtml,
+  demolishBuilding,
+  placeBuilding,
   setBuildingStatus,
   updateBuildingPosition,
   updateBuildingRotation,
-  connectBuildingToHtml
-} from '@/store/slices/buildingSlice';
-import { 
-  addResources,
-  consumeResources,
-  addGenerator
-} from '@/store/slices/resourceSlice';
-import { buildingTemplates } from '@/data/buildingTemplates';
-import { checkBuildingCollision } from '@/utils/buildingUtils';
-import { GameStructureNode } from '@/utils/htmlParser';
+  updateConstructionProgress,
+} from '@/store/slices/buildingSlice'
+import { addGenerator, addResources, consumeResources } from '@/store/slices/resourceSlice'
+import { store } from '@/store/store'
+import { checkBuildingCollision } from '@/utils/buildingUtils'
+import type { GameStructureNode } from '@/utils/htmlParser'
 
 export class BuildingSystem {
   /**
@@ -25,177 +21,193 @@ export class BuildingSystem {
    */
   placeBuilding(templateId: string, position: Vector3, rotation: number) {
     // 1. Get building template
-    const template = buildingTemplates[templateId];
-    if (!template) return null;
-    
+    const template = buildingTemplates[templateId]
+    if (!template) return null
+
     // 2. Check for valid placement
-    const existingBuildings = store.getState().building.placedBuildings;
+    const existingBuildings = store.getState().building.placedBuildings
     if (checkBuildingCollision(position, templateId, rotation, existingBuildings)) {
-      return null;
+      return null
     }
-    
+
     // 3. Check resource requirements
-    const resources = store.getState().resource.storage;
-    const hasSufficientResources = template.costs.every(cost => {
-      return (resources as any)[cost.resourceId] >= cost.amount;
-    });
-    
+    const resources = store.getState().resource.storage
+    const hasSufficientResources = template.costs.every((cost) => {
+      return (resources as any)[cost.resourceId] >= cost.amount
+    })
+
     if (!hasSufficientResources) {
-      return null;
+      return null
     }
-    
+
     // 4. Consume resources
-    template.costs.forEach(cost => {
-      store.dispatch(consumeResources({
-        type: cost.resourceId as any,
-        amount: cost.amount
-      }));
-    });
-    
+    template.costs.forEach((cost) => {
+      store.dispatch(
+        consumeResources({
+          type: cost.resourceId as any,
+          amount: cost.amount,
+        })
+      )
+    })
+
     // 5. Create and place building
-    store.dispatch(placeBuilding({
-      templateId,
-      position: { x: position.x, y: position.y, z: position.z },
-      rotation,
-      effects: template.effects || []
-    }));
+    store.dispatch(
+      placeBuilding({
+        templateId,
+        position: { x: position.x, y: position.y, z: position.z },
+        rotation,
+        effects: template.effects || [],
+      })
+    )
 
     // TODO: Get the building ID from the created building
     // For now, return a placeholder
-    return 'building-' + Date.now();
+    return 'building-' + Date.now()
   }
-  
+
   /**
    * Start construction process for a building
    */
   startConstruction(buildingId: string, time: number) {
     const interval = setInterval(() => {
-      const building = store.getState().building.placedBuildings.find((b: any) => b.id === buildingId);
+      const building = store
+        .getState()
+        .building.placedBuildings.find((b: any) => b.id === buildingId)
       if (!building) {
-        clearInterval(interval);
-        return;
+        clearInterval(interval)
+        return
       }
-      
+
       // Update construction progress
-      const progress = building.constructionProgress + (1 / (time * 10));
-      store.dispatch(updateConstructionProgress({
-        buildingId,
-        progress: Math.min(1, progress)
-      }));
-      
+      const progress = building.constructionProgress + 1 / (time * 10)
+      store.dispatch(
+        updateConstructionProgress({
+          buildingId,
+          progress: Math.min(1, progress),
+        })
+      )
+
       // Complete construction when progress reaches 1
       if (progress >= 1) {
-        clearInterval(interval);
-        store.dispatch(setBuildingStatus({
-          buildingId,
-          status: 'active'
-        }));
-        
+        clearInterval(interval)
+        store.dispatch(
+          setBuildingStatus({
+            buildingId,
+            status: 'active',
+          })
+        )
+
         // Set up resource generation
-        this.setupResourceGeneration(buildingId);
+        this.setupResourceGeneration(buildingId)
       }
-    }, 100);
+    }, 100)
   }
-  
+
   /**
    * Set up resource generation for a building
    */
   setupResourceGeneration(buildingId: string) {
-    const building = store.getState().building.placedBuildings.find((b: any) => b.id === buildingId);
-    if (!building) return;
-    
+    const building = store.getState().building.placedBuildings.find((b: any) => b.id === buildingId)
+    if (!building) return
+
     // Find resource production effects
-    const resourceEffects = building.effects.filter((effect: any) =>
-      effect.type === 'resource' && effect.value > 0
-    );
-    
+    const resourceEffects = building.effects.filter(
+      (effect: any) => effect.type === 'resource' && effect.value > 0
+    )
+
     // Add generator for each resource effect
     resourceEffects.forEach((effect: any) => {
-      store.dispatch(addGenerator({
-        id: uuidv4(),
-        type: building.templateId,
-        position: [building.position.x, building.position.y, building.position.z],
-        rotation: [0, building.rotation, 0],
-        outputRate: effect.value,
-        resourceType: effect.target as any,
-        status: 'active',
-        efficiency: building.efficiency,
-        lastCollection: Date.now()
-      }));
-    });
+      store.dispatch(
+        addGenerator({
+          id: uuidv4(),
+          type: building.templateId,
+          position: [building.position.x, building.position.y, building.position.z],
+          rotation: [0, building.rotation, 0],
+          outputRate: effect.value,
+          resourceType: effect.target as any,
+          status: 'active',
+          efficiency: building.efficiency,
+          lastCollection: Date.now(),
+        })
+      )
+    })
   }
-  
+
   /**
    * Demolish a building
    */
   demolishBuilding(buildingId: string) {
-    const building = store.getState().building.placedBuildings.find((b: any) => b.id === buildingId);
-    if (!building) return;
-    
+    const building = store.getState().building.placedBuildings.find((b: any) => b.id === buildingId)
+    if (!building) return
+
     // Return some resources (partial refund)
-    const template = buildingTemplates[building.templateId];
+    const template = buildingTemplates[building.templateId]
     if (template) {
-      template.costs.forEach(cost => {
+      template.costs.forEach((cost) => {
         // Return 50% of the original cost
-        const refundAmount = Math.floor(cost.amount * 0.5);
+        const refundAmount = Math.floor(cost.amount * 0.5)
         if (refundAmount > 0) {
-          store.dispatch(addResources({
-            type: cost.resourceId as any,
-            amount: refundAmount
-          }));
+          store.dispatch(
+            addResources({
+              type: cost.resourceId as any,
+              amount: refundAmount,
+            })
+          )
         }
-      });
+      })
     }
-    
+
     // Remove the building
-    store.dispatch(demolishBuilding(buildingId));
+    store.dispatch(demolishBuilding(buildingId))
   }
-  
+
   /**
    * Connect a building to an HTML node
    */
   connectBuildingToHtml(buildingId: string, htmlNode: GameStructureNode) {
-    if (!htmlNode) return;
-    
+    if (!htmlNode) return
+
     // Generate a reference for the node
-    const nodeReference = this.generateNodeReference(htmlNode);
-    
+    const nodeReference = this.generateNodeReference(htmlNode)
+
     // Get CSS selectors for this node
-    const cssRef = this.generateCssSelector(htmlNode);
-    
+    const cssRef = this.generateCssSelector(htmlNode)
+
     // Connect in Redux
-    store.dispatch(connectBuildingToHtml({
-      buildingId,
-      htmlNodeRef: nodeReference,
-      cssRef
-    }));
+    store.dispatch(
+      connectBuildingToHtml({
+        buildingId,
+        htmlNodeRef: nodeReference,
+        cssRef,
+      })
+    )
   }
-  
+
   /**
    * Generate reference for an HTML node
    */
   private generateNodeReference(node: GameStructureNode): string {
-    const idPart = node.attributes?.id ? `#${node.attributes.id}` : '';
-    const classPart = node.classes.length > 0 ? `.${node.classes.join('.')}` : '';
-    const linePart = node.lineNumber ? `:${node.lineNumber}` : '';
-    
-    return `${node.elementType}${idPart}${classPart}${linePart}`;
+    const idPart = node.attributes?.id ? `#${node.attributes.id}` : ''
+    const classPart = node.classes.length > 0 ? `.${node.classes.join('.')}` : ''
+    const linePart = node.lineNumber ? `:${node.lineNumber}` : ''
+
+    return `${node.elementType}${idPart}${classPart}${linePart}`
   }
-  
+
   /**
    * Generate CSS selector for an HTML node
    */
   private generateCssSelector(node: GameStructureNode): string {
     if (node.attributes?.id) {
-      return `#${node.attributes.id}`;
+      return `#${node.attributes.id}`
     }
-    
+
     if (node.classes.length > 0) {
-      return `.${node.classes.join('.')}`;
+      return `.${node.classes.join('.')}`
     }
-    
+
     // Create a selector based on the node's position in the document
-    let selector = node.elementType;
+    const selector = node.elementType
 
     // TODO: Add parent context when GameStructureNode type supports parent property
     /*
@@ -209,29 +221,33 @@ export class BuildingSystem {
     }
     */
 
-    return selector;
+    return selector
   }
-  
+
   /**
    * Move a building to a new position
    */
   moveBuilding(buildingId: string, position: Vector3) {
-    store.dispatch(updateBuildingPosition({
-      buildingId,
-      position: { x: position.x, y: position.y, z: position.z }
-    }));
+    store.dispatch(
+      updateBuildingPosition({
+        buildingId,
+        position: { x: position.x, y: position.y, z: position.z },
+      })
+    )
   }
-  
+
   /**
    * Rotate a building
    */
   rotateBuilding(buildingId: string, rotation: number) {
-    store.dispatch(updateBuildingRotation({
-      buildingId,
-      rotation
-    }));
+    store.dispatch(
+      updateBuildingRotation({
+        buildingId,
+        rotation,
+      })
+    )
   }
 }
 
 // Export singleton instance
-export const buildingSystem = new BuildingSystem(); 
+export const buildingSystem = new BuildingSystem()

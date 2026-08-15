@@ -1,29 +1,27 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { Volume2, RotateCcw, Scale, FileText, X } from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleSettings } from '@/store/slices/uiSlice';
-import { Icon } from '@/components/ui/Icon';
+import { FileText, RotateCcw, Scale, Volume2, X } from 'lucide-react'
+import Link from 'next/link'
+import { Icon } from '@/components/ui/Icon'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { toggleSettings } from '@/store/slices/uiSlice'
 
 export function SettingsModal() {
-  const dispatch = useAppDispatch();
-  const isOpen = useAppSelector((state) => state.ui.showSettings);
+  const dispatch = useAppDispatch()
+  const isOpen = useAppSelector((state) => state.ui.showSettings)
   const soundEnabled =
-    typeof window !== 'undefined'
-      ? localStorage.getItem('codecraft_sound') !== 'false'
-      : true;
+    typeof window !== 'undefined' ? localStorage.getItem('codecraft_sound') !== 'false' : true
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   const setSound = (enabled: boolean) => {
-    localStorage.setItem('codecraft_sound', enabled ? 'true' : 'false');
-  };
+    localStorage.setItem('codecraft_sound', enabled ? 'true' : 'false')
+  }
 
   const resetOnboarding = () => {
-    localStorage.removeItem('codecraft_onboarding_complete');
-    window.location.reload();
-  };
+    localStorage.removeItem('codecraft_onboarding_complete')
+    window.location.reload()
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -43,7 +41,10 @@ export function SettingsModal() {
             <p className="text-[11px] uppercase tracking-[0.18em] text-[rgb(var(--text-muted))]">
               Preferences
             </p>
-            <h2 id="settings-title" className="text-lg font-semibold text-[rgb(var(--text-primary))]">
+            <h2
+              id="settings-title"
+              className="text-lg font-semibold text-[rgb(var(--text-primary))]"
+            >
               Settings
             </h2>
           </div>
@@ -108,5 +109,5 @@ export function SettingsModal() {
         </div>
       </div>
     </div>
-  );
+  )
 }

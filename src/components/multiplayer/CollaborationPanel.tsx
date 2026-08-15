@@ -3,15 +3,20 @@
  * UI for real-time collaborative coding sessions
  */
 
-import React, { useState, useEffect, useRef } from 'react';
-import { getCollaborationSystem } from '@/utils/collaborationSystem';
-import type { CollaborationSession, User, ChatMessage, CursorPosition } from '@/utils/collaborationSystem';
+import React, { useEffect, useRef, useState } from 'react'
+import type {
+  ChatMessage,
+  CollaborationSession,
+  CursorPosition,
+  User,
+} from '@/utils/collaborationSystem'
+import { getCollaborationSystem } from '@/utils/collaborationSystem'
 
 export interface CollaborationPanelProps {
-  sessionId: string;
-  currentUser: User;
-  onCodeChange?: (language: 'html' | 'css' | 'javascript', code: string) => void;
-  onClose?: () => void;
+  sessionId: string
+  currentUser: User
+  onCodeChange?: (language: 'html' | 'css' | 'javascript', code: string) => void
+  onClose?: () => void
 }
 
 export function CollaborationPanel({
@@ -20,87 +25,88 @@ export function CollaborationPanel({
   onCodeChange,
   onClose,
 }: CollaborationPanelProps) {
-  const [session, setSession] = useState<CollaborationSession | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [cursors, setCursors] = useState<CursorPosition[]>([]);
-  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat');
+  const [session, setSession] = useState<CollaborationSession | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [newMessage, setNewMessage] = useState('')
+  const [cursors, setCursors] = useState<CursorPosition[]>([])
+  const [activeTab, setActiveTab] = useState<'chat' | 'participants'>('chat')
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const collabSystem = getCollaborationSystem();
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const collabSystem = getCollaborationSystem()
 
   useEffect(() => {
     // Load session data
-    const loadedSession = collabSystem.getSession(sessionId);
-    setSession(loadedSession);
-    setMessages(collabSystem.getChatHistory(sessionId));
-    setCursors(collabSystem.getCursors(sessionId));
+    const loadedSession = collabSystem.getSession(sessionId)
+    setSession(loadedSession)
+    setMessages(collabSystem.getChatHistory(sessionId))
+    setCursors(collabSystem.getCursors(sessionId))
 
     // Subscribe to session events
     const unsubscribe = collabSystem.on(sessionId, (event) => {
       switch (event.type) {
         case 'user-joined':
-          setSession(collabSystem.getSession(sessionId));
-          break;
+          setSession(collabSystem.getSession(sessionId))
+          break
         case 'user-left':
-          setSession(collabSystem.getSession(sessionId));
-          setCursors(collabSystem.getCursors(sessionId));
-          break;
+          setSession(collabSystem.getSession(sessionId))
+          setCursors(collabSystem.getCursors(sessionId))
+          break
         case 'code-updated':
           if (event.data.userId !== currentUser.id && onCodeChange) {
-            onCodeChange(event.data.language, event.data.code);
+            onCodeChange(event.data.language, event.data.code)
           }
-          break;
+          break
         case 'chat-message':
-          setMessages((prev) => [...prev, event.data]);
-          break;
+          setMessages((prev) => [...prev, event.data])
+          break
         case 'cursor-moved':
-          setCursors(collabSystem.getCursors(sessionId));
-          break;
+          setCursors(collabSystem.getCursors(sessionId))
+          break
         case 'session-ended':
           // Handle session end
-          break;
+          break
       }
-    });
+    })
 
     return () => {
-      unsubscribe();
-    };
-  }, [sessionId, currentUser.id]);
+      unsubscribe()
+    }
+  }, [sessionId, currentUser.id])
 
   // Auto-scroll chat to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSendMessage = () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim()) return
 
-    collabSystem.sendMessage(sessionId, currentUser.id, newMessage);
-    setNewMessage('');
-  };
+    collabSystem.sendMessage(sessionId, currentUser.id, newMessage)
+    setNewMessage('')
+  }
 
   const handleLeave = () => {
-    collabSystem.leaveSession(sessionId, currentUser.id);
-    onClose?.();
-  };
+    collabSystem.leaveSession(sessionId, currentUser.id)
+    onClose?.()
+  }
 
   const handleKickUser = (userId: string) => {
     if (session?.hostId === currentUser.id) {
-      collabSystem.kickUser(sessionId, currentUser.id, userId);
+      collabSystem.kickUser(sessionId, currentUser.id, userId)
     }
-  };
+  }
 
-  const isHost = session?.hostId === currentUser.id;
-  const canEdit = session?.settings.allowEditing === 'all' ||
-                  (session?.settings.allowEditing === 'host-only' && isHost);
+  const isHost = session?.hostId === currentUser.id
+  const canEdit =
+    session?.settings.allowEditing === 'all' ||
+    (session?.settings.allowEditing === 'host-only' && isHost)
 
   if (!session) {
     return (
       <div className="bg-gray-800 rounded-lg p-6 text-center">
         <p className="text-gray-400">Session not found</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -108,13 +114,12 @@ export function CollaborationPanel({
       {/* Header */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-            👥
-          </div>
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">👥</div>
           <div>
             <h3 className="font-bold text-white">Collaboration Session</h3>
             <p className="text-purple-100 text-xs">
-              {session.participants.length} participant{session.participants.length !== 1 ? 's' : ''}
+              {session.participants.length} participant
+              {session.participants.length !== 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -163,8 +168,8 @@ export function CollaborationPanel({
                     msg.type === 'system'
                       ? 'text-center text-gray-500 text-xs py-1'
                       : msg.userId === currentUser.id
-                      ? 'flex justify-end'
-                      : 'flex justify-start'
+                        ? 'flex justify-end'
+                        : 'flex justify-start'
                   }`}
                 >
                   {msg.type === 'system' ? (
@@ -172,14 +177,10 @@ export function CollaborationPanel({
                   ) : (
                     <div
                       className={`max-w-[80%] ${
-                        msg.userId === currentUser.id
-                          ? 'bg-purple-600'
-                          : 'bg-gray-700'
+                        msg.userId === currentUser.id ? 'bg-purple-600' : 'bg-gray-700'
                       } rounded-lg px-3 py-2`}
                     >
-                      <p className="text-xs text-gray-300 font-medium mb-1">
-                        {msg.username}
-                      </p>
+                      <p className="text-xs text-gray-300 font-medium mb-1">{msg.username}</p>
                       {msg.type === 'code-snippet' && msg.codeSnippet ? (
                         <div className="bg-gray-900 rounded p-2 mb-2 font-mono text-xs overflow-x-auto">
                           <pre className="text-green-400">{msg.codeSnippet.code}</pre>
@@ -222,7 +223,7 @@ export function CollaborationPanel({
         {activeTab === 'participants' && (
           <div className="p-4 space-y-3 overflow-y-auto h-full">
             {session.participants.map((participant) => {
-              const cursor = cursors.find((c) => c.userId === participant.id);
+              const cursor = cursors.find((c) => c.userId === participant.id)
               return (
                 <div
                   key={participant.id}
@@ -268,7 +269,7 @@ export function CollaborationPanel({
                     </button>
                   )}
                 </div>
-              );
+              )
             })}
 
             {/* Session Info */}
@@ -297,5 +298,5 @@ export function CollaborationPanel({
         )}
       </div>
     </div>
-  );
+  )
 }

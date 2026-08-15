@@ -1,10 +1,10 @@
 export async function register() {
-  if (process.env.NEXT_RUNTIME === "nodejs") {
-    await import("./sentry.server.config");
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config')
   }
 
-  if (process.env.NEXT_RUNTIME === "edge") {
-    await import("./sentry.edge.config");
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config')
   }
 }
 
@@ -14,8 +14,8 @@ export const onRequestError = async (
   context: { routerKind: string; routePath: string; routeType: string; revalidateReason?: string }
 ) => {
   // Only report if Sentry is configured
-  if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
+  if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return
 
-  const { captureRequestError } = await import("@sentry/nextjs");
-  captureRequestError(error, request, context);
-};
+  const { captureRequestError } = await import('@sentry/nextjs')
+  captureRequestError(error, request, context)
+}

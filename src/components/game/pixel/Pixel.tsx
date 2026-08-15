@@ -1,139 +1,141 @@
-'use client';
-import { useRef, useState, useEffect } from 'react';
-import { Sphere, Billboard, Text, Ring } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updatePixelPosition, setIsPixelMoving, setPixelMood } from '@/store/slices/gameSlice';
-import { Vector3, Mesh, Object3D, MeshBasicMaterial } from 'three';
-import PixelEmissiveParticles from './PixelEmissiveParticles';
-import React from 'react';
+'use client'
+import { Billboard, Ring, Sphere, Text } from '@react-three/drei'
+import { useFrame, useThree } from '@react-three/fiber'
+import React, { useEffect, useRef, useState } from 'react'
+import { type Mesh, type MeshBasicMaterial, type Object3D, Vector3 } from 'three'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { setIsPixelMoving, setPixelMood, updatePixelPosition } from '@/store/slices/gameSlice'
+import PixelEmissiveParticles from './PixelEmissiveParticles'
 
-type PixelMood = 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking';
-type ContextType = 'error' | 'tutorial' | 'lowResources' | 'default';
+type PixelMood = 'happy' | 'curious' | 'excited' | 'concerned' | 'neutral' | 'thinking'
+type ContextType = 'error' | 'tutorial' | 'lowResources' | 'default'
 
-const FOLLOW_DISTANCE = 2; // How far Pixel stays from player
-const MOVE_THRESHOLD = 4; // Distance at which Pixel starts following
-const MOOD_UPDATE_INTERVAL = 3000; // How often Pixel's mood can change
-const HOVER_HEIGHT = 1.5; // Height above ground
+const FOLLOW_DISTANCE = 2 // How far Pixel stays from player
+const MOVE_THRESHOLD = 4 // Distance at which Pixel starts following
+const MOOD_UPDATE_INTERVAL = 3000 // How often Pixel's mood can change
+const HOVER_HEIGHT = 1.5 // Height above ground
 
 // Educational feedback parameters
 const FEEDBACK_TYPES = {
   success: {
     color: '#10B981',
     icon: 'OK',
-    sound: 'success.mp3'
+    sound: 'success.mp3',
   },
   hint: {
     color: '#3B82F6',
     icon: 'HINT',
-    sound: 'hint.mp3'
+    sound: 'hint.mp3',
   },
   warning: {
     color: '#F59E0B',
     icon: 'WARN',
-    sound: 'warning.mp3'
+    sound: 'warning.mp3',
   },
   error: {
     color: '#EF4444',
     icon: 'ERR',
-    sound: 'error.mp3'
-  }
-};
+    sound: 'error.mp3',
+  },
+}
 
 // Helper to get color based on mood
 function getMoodColor(mood: PixelMood): string {
-  switch(mood) {
+  switch (mood) {
     case 'happy':
-      return '#10B981'; // Success Green
+      return '#10B981' // Success Green
     case 'curious':
-      return '#3B82F6'; // Interface Blue
+      return '#3B82F6' // Interface Blue
     case 'excited':
-      return '#FBBF24'; // Energy Yellow
+      return '#FBBF24' // Energy Yellow
     case 'concerned':
-      return '#EF4444'; // Alert Red
+      return '#EF4444' // Alert Red
     case 'thinking':
-      return '#8B5CF6'; // Lighter purple for thinking state
+      return '#8B5CF6' // Lighter purple for thinking state
     default:
-      return '#7C3AED'; // Nebula Purple for neutral
+      return '#7C3AED' // Nebula Purple for neutral
   }
 }
 
 // Animation parameters based on mood
-const MOOD_ANIMATION_PARAMS: Record<PixelMood, {
-  hoverFrequency: number;
-  hoverAmplitude: number;
-  particleCount: number;
-  emissiveIntensity: number;
-  pulseSpeed: number;
-}> = {
+const MOOD_ANIMATION_PARAMS: Record<
+  PixelMood,
+  {
+    hoverFrequency: number
+    hoverAmplitude: number
+    particleCount: number
+    emissiveIntensity: number
+    pulseSpeed: number
+  }
+> = {
   happy: {
     hoverFrequency: 2.0,
     hoverAmplitude: 0.15,
     particleCount: 25,
     emissiveIntensity: 1.0,
-    pulseSpeed: 1.5
+    pulseSpeed: 1.5,
   },
   curious: {
     hoverFrequency: 1.8,
     hoverAmplitude: 0.12,
     particleCount: 20,
     emissiveIntensity: 0.8,
-    pulseSpeed: 1.2
+    pulseSpeed: 1.2,
   },
   excited: {
     hoverFrequency: 2.5,
     hoverAmplitude: 0.18,
     particleCount: 30,
     emissiveIntensity: 1.2,
-    pulseSpeed: 2.0
+    pulseSpeed: 2.0,
   },
   concerned: {
     hoverFrequency: 1.2,
     hoverAmplitude: 0.08,
     particleCount: 15,
     emissiveIntensity: 0.6,
-    pulseSpeed: 0.8
+    pulseSpeed: 0.8,
   },
   thinking: {
     hoverFrequency: 1.0,
     hoverAmplitude: 0.1,
     particleCount: 18,
     emissiveIntensity: 0.7,
-    pulseSpeed: 1.0
+    pulseSpeed: 1.0,
   },
   neutral: {
     hoverFrequency: 1.5,
     hoverAmplitude: 0.1,
     particleCount: 20,
     emissiveIntensity: 0.8,
-    pulseSpeed: 1.0
-  }
-};
+    pulseSpeed: 1.0,
+  },
+}
 
 // Helper to get dialogue based on context and mood
 function getContextualDialogue(contextType: ContextType, mood: PixelMood): string {
   // This would connect to a more sophisticated dialogue system in production
   if (contextType === 'error') {
-    return "I see there's an issue with your code. Let me help you fix it!";
+    return "I see there's an issue with your code. Let me help you fix it!"
   } else if (contextType === 'tutorial') {
-    return "I'll guide you through this step by step. Let's learn together!";
+    return "I'll guide you through this step by step. Let's learn together!"
   } else if (contextType === 'lowResources') {
-    return "Your colony's resources are running low. We should build some collectors!";
+    return "Your colony's resources are running low. We should build some collectors!"
   } else if (mood === 'happy') {
-    return "Your colony is looking great! Keep up the good work!";
+    return 'Your colony is looking great! Keep up the good work!'
   } else if (mood === 'curious') {
-    return "Have you explored all the building options in the menu?";
+    return 'Have you explored all the building options in the menu?'
   }
-  
-  return "I'm Pixel, your AI companion. Let me know if you need anything!";
+
+  return "I'm Pixel, your AI companion. Let me know if you need anything!"
 }
 
 export interface PixelProps {
-  mood: PixelMood;
-  contextualTip: string;
+  mood: PixelMood
+  contextualTip: string
 }
 
-type LearningStyle = 'visual' | 'auditory' | 'kinesthetic' | 'reading';
+type LearningStyle = 'visual' | 'auditory' | 'kinesthetic' | 'reading'
 
 // Helper function to determine feedback type based on context
 function determineFeedbackType(
@@ -141,9 +143,9 @@ function determineFeedbackType(
   isLearning: boolean,
   progress: number
 ): keyof typeof FEEDBACK_TYPES {
-  if (errors && errors.length > 0) return 'error';
-  if (isLearning) return progress < 0.5 ? 'hint' : 'success';
-  return 'hint';
+  if (errors && errors.length > 0) return 'error'
+  if (isLearning) return progress < 0.5 ? 'hint' : 'success'
+  return 'hint'
 }
 
 // Helper function to adapt content based on learning style
@@ -157,179 +159,180 @@ function adaptContent(
     case 'visual':
       return {
         message: content,
-        extras: { visual: visualAid }
-      };
+        extras: { visual: visualAid },
+      }
     case 'auditory':
       return {
         message: content,
-        extras: { audio: audioClip }
-      };
+        extras: { audio: audioClip },
+      }
     case 'kinesthetic':
       return {
         message: `Try this: ${content}`,
-        extras: { visual: visualAid }
-      };
+        extras: { visual: visualAid },
+      }
     case 'reading':
       return {
         message: `${content}\n\nTip: Check the documentation for more details.`,
-        extras: {}
-      };
+        extras: {},
+      }
   }
 }
 
 export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) {
-  const pixelRef = useRef<Object3D>(null);
-  const coreRef = useRef<Mesh>(null);
-  const dispatch = useAppDispatch();
-  const { camera } = useThree();
-  
-  const { 
-    pixelPosition, 
-    playerPosition, 
+  const pixelRef = useRef<Object3D>(null)
+  const coreRef = useRef<Mesh>(null)
+  const dispatch = useAppDispatch()
+  const { camera } = useThree()
+
+  const {
+    pixelPosition,
+    playerPosition,
     movementSpeed,
     isPlayerMoving,
     playerInteractionRadius,
     colonyResources,
     editorErrors,
-    tutorialActive
-  } = useAppSelector((state) => state.game);
-  
-  const [currentMood, setCurrentMood] = useState<PixelMood>(initialMood);
-  const [hovering, setHovering] = useState(false);
-  const [showDialogue, setShowDialogue] = useState(false);
-  const [dialogueText, setDialogueText] = useState('');
-  const lastMoodUpdate = useRef<number>(Date.now());
-  const lastDialogueUpdate = useRef<number>(Date.now());
-  const interactionRadiusRef = useRef<Mesh>(null);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [feedbackType, setFeedbackType] = useState<keyof typeof FEEDBACK_TYPES>('hint');
-  const [learningStyle, setLearningStyle] = useState<LearningStyle>('visual');
+    tutorialActive,
+  } = useAppSelector((state) => state.game)
+
+  const [currentMood, setCurrentMood] = useState<PixelMood>(initialMood)
+  const [hovering, setHovering] = useState(false)
+  const [showDialogue, setShowDialogue] = useState(false)
+  const [dialogueText, setDialogueText] = useState('')
+  const lastMoodUpdate = useRef<number>(Date.now())
+  const lastDialogueUpdate = useRef<number>(Date.now())
+  const interactionRadiusRef = useRef<Mesh>(null)
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackType, setFeedbackType] = useState<keyof typeof FEEDBACK_TYPES>('hint')
+  const [learningStyle, setLearningStyle] = useState<LearningStyle>('visual')
 
   // Update mood when prop changes
   useEffect(() => {
-    setCurrentMood(initialMood);
-  }, [initialMood]);
+    setCurrentMood(initialMood)
+  }, [initialMood])
 
   // Use contextual tip for dialogue
   useEffect(() => {
     if (contextualTip) {
-      setDialogueText(contextualTip);
+      setDialogueText(contextualTip)
     }
-  }, [contextualTip]);
+  }, [contextualTip])
 
   // Determine contextual dialogue
   useEffect(() => {
-    let contextType: ContextType = 'default';
-    
+    let contextType: ContextType = 'default'
+
     // Prioritize contexts
     if (editorErrors && editorErrors.length > 0) {
-      contextType = 'error';
+      contextType = 'error'
     } else if (tutorialActive) {
-      contextType = 'tutorial';
+      contextType = 'tutorial'
     } else if (colonyResources && colonyResources.energy < 20) {
-      contextType = 'lowResources';
+      contextType = 'lowResources'
     }
-    
+
     // Update dialogue
     if (Date.now() - lastDialogueUpdate.current > 5000) {
-      setDialogueText(getContextualDialogue(contextType, currentMood));
-      lastDialogueUpdate.current = Date.now();
+      setDialogueText(getContextualDialogue(contextType, currentMood))
+      lastDialogueUpdate.current = Date.now()
     }
-  }, [currentMood, editorErrors, tutorialActive, colonyResources]);
+  }, [currentMood, editorErrors, tutorialActive, colonyResources])
 
   // Update interaction radius visualization
   useFrame((state) => {
-    if (!interactionRadiusRef.current) return;
-    
-    const time = state.clock.getElapsedTime();
-    const scale = 1 + Math.sin(time * 0.5) * 0.05; // Subtle breathing effect
-    const baseOpacity = 0.1 + Math.sin(time * 0.5) * 0.05;
-    
+    if (!interactionRadiusRef.current) return
+
+    const time = state.clock.getElapsedTime()
+    const scale = 1 + Math.sin(time * 0.5) * 0.05 // Subtle breathing effect
+    const baseOpacity = 0.1 + Math.sin(time * 0.5) * 0.05
+
     // Update radius material
-    const material = interactionRadiusRef.current.material as MeshBasicMaterial;
-    material.opacity = baseOpacity;
-    
+    const material = interactionRadiusRef.current.material as MeshBasicMaterial
+    material.opacity = baseOpacity
+
     // Scale the radius indicator
     interactionRadiusRef.current.scale.set(
       scale * playerInteractionRadius,
       scale * playerInteractionRadius,
       1
-    );
-  });
+    )
+  })
 
   // Handle animation and movement logic
   useFrame((state) => {
-    if (!pixelRef.current) return;
-    
-    const animParams = MOOD_ANIMATION_PARAMS[currentMood];
-    const time = state.clock.getElapsedTime();
-    
+    if (!pixelRef.current) return
+
+    const animParams = MOOD_ANIMATION_PARAMS[currentMood]
+    const time = state.clock.getElapsedTime()
+
     // Hover animation with mood-based parameters
-    const hoverY = HOVER_HEIGHT + 
-      Math.sin(time * animParams.hoverFrequency) * 
-      animParams.hoverAmplitude;
-    
+    const hoverY =
+      HOVER_HEIGHT + Math.sin(time * animParams.hoverFrequency) * animParams.hoverAmplitude
+
     // Update position with hover
     if (pixelRef.current) {
-      pixelRef.current.position.y = hoverY;
-      pixelRef.current.lookAt(camera.position);
+      pixelRef.current.position.y = hoverY
+      pixelRef.current.lookAt(camera.position)
     }
-    
+
     // Update core rotation and pulse
     if (coreRef.current) {
-      coreRef.current.rotation.y += 0.01;
-      const pulseScale = 1 + Math.sin(time * animParams.pulseSpeed) * 0.05;
-      coreRef.current.scale.set(pulseScale, pulseScale, pulseScale);
+      coreRef.current.rotation.y += 0.01
+      const pulseScale = 1 + Math.sin(time * animParams.pulseSpeed) * 0.05
+      coreRef.current.scale.set(pulseScale, pulseScale, pulseScale)
     }
-    
+
     // Create fresh Vector3 objects to avoid mutation issues
-    const pixelVec = new Vector3(pixelPosition.x, pixelPosition.y, pixelPosition.z);
-    const playerVec = new Vector3(playerPosition.x, playerPosition.y, playerPosition.z);
-    const distanceToPlayer = pixelVec.distanceTo(playerVec);
+    const pixelVec = new Vector3(pixelPosition.x, pixelPosition.y, pixelPosition.z)
+    const playerVec = new Vector3(playerPosition.x, playerPosition.y, playerPosition.z)
+    const distanceToPlayer = pixelVec.distanceTo(playerVec)
 
     // Update Pixel's mood based on context
     if (Date.now() - lastMoodUpdate.current > MOOD_UPDATE_INTERVAL) {
       if (editorErrors && editorErrors.length > 0) {
-        dispatch(setPixelMood('concerned'));
+        dispatch(setPixelMood('concerned'))
       } else if (distanceToPlayer > MOVE_THRESHOLD) {
-        dispatch(setPixelMood('curious'));
+        dispatch(setPixelMood('curious'))
       } else if (isPlayerMoving) {
-        dispatch(setPixelMood('excited'));
+        dispatch(setPixelMood('excited'))
       } else if (distanceToPlayer < playerInteractionRadius) {
-        dispatch(setPixelMood('happy'));
+        dispatch(setPixelMood('happy'))
       } else {
-        dispatch(setPixelMood('neutral'));
+        dispatch(setPixelMood('neutral'))
       }
-      lastMoodUpdate.current = Date.now();
+      lastMoodUpdate.current = Date.now()
     }
 
     // Move Pixel if too far from player
     if (distanceToPlayer > MOVE_THRESHOLD) {
       // Calculate direction to player (copy vectors to avoid mutation)
-      const direction = new Vector3().subVectors(playerVec, pixelVec).normalize();
-      
-      // Calculate target position
-      const targetPos = new Vector3().copy(playerVec).sub(
-        direction.clone().multiplyScalar(FOLLOW_DISTANCE)
-      );
-      
-      // Keep Pixel's hover height
-      targetPos.y = HOVER_HEIGHT;
-      
-      // Smoothly move towards target
-      const newX = pixelPosition.x + (targetPos.x - pixelPosition.x) * movementSpeed * 0.03;
-      const newZ = pixelPosition.z + (targetPos.z - pixelPosition.z) * movementSpeed * 0.03;
+      const direction = new Vector3().subVectors(playerVec, pixelVec).normalize()
 
-      dispatch(updatePixelPosition({ 
-        x: newX, 
-        y: pixelPosition.y, // Keep current Y (will be modified by hover below)
-        z: newZ 
-      }));
-      dispatch(setIsPixelMoving(true));
+      // Calculate target position
+      const targetPos = new Vector3()
+        .copy(playerVec)
+        .sub(direction.clone().multiplyScalar(FOLLOW_DISTANCE))
+
+      // Keep Pixel's hover height
+      targetPos.y = HOVER_HEIGHT
+
+      // Smoothly move towards target
+      const newX = pixelPosition.x + (targetPos.x - pixelPosition.x) * movementSpeed * 0.03
+      const newZ = pixelPosition.z + (targetPos.z - pixelPosition.z) * movementSpeed * 0.03
+
+      dispatch(
+        updatePixelPosition({
+          x: newX,
+          y: pixelPosition.y, // Keep current Y (will be modified by hover below)
+          z: newZ,
+        })
+      )
+      dispatch(setIsPixelMoving(true))
     } else {
-      dispatch(setIsPixelMoving(false));
+      dispatch(setIsPixelMoving(false))
     }
-  });
+  })
 
   // Update feedback based on context
   useEffect(() => {
@@ -337,35 +340,35 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
       editorErrors,
       tutorialActive,
       0.5 // Replace with actual progress
-    );
-    
+    )
+
     if (newFeedbackType !== feedbackType) {
-      setFeedbackType(newFeedbackType);
-      setShowFeedback(true);
-      
+      setFeedbackType(newFeedbackType)
+      setShowFeedback(true)
+
       // Hide feedback after a delay
       const timer = setTimeout(() => {
-        setShowFeedback(false);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
+        setShowFeedback(false)
+      }, 3000)
+
+      return () => clearTimeout(timer)
     }
-  }, [editorErrors, tutorialActive, feedbackType]);
+  }, [editorErrors, tutorialActive, feedbackType])
 
   // Adapt content based on learning style
   useEffect(() => {
-    if (!contextualTip) return;
-    
+    if (!contextualTip) return
+
     const adapted = adaptContent(
       learningStyle,
       contextualTip,
       'example.gif', // Replace with actual visual aid
       'explanation.mp3' // Replace with actual audio clip
-    );
-    
+    )
+
     if (adapted) {
-      setDialogueText(adapted.message);
-      
+      setDialogueText(adapted.message)
+
       // Handle extras based on learning style
       if (adapted.extras.visual && learningStyle === 'visual') {
         // Show visual aid
@@ -374,42 +377,46 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
         // Play audio clip
       }
     }
-  }, [contextualTip, learningStyle]);
+  }, [contextualTip, learningStyle])
 
   // Handle interaction with Pixel
   const handlePixelClick = () => {
-    setShowDialogue(!showDialogue);
-    
+    setShowDialogue(!showDialogue)
+
     // Cycle through learning styles on interaction
-    setLearningStyle(current => {
+    setLearningStyle((current) => {
       switch (current) {
-        case 'visual': return 'auditory';
-        case 'auditory': return 'kinesthetic';
-        case 'kinesthetic': return 'reading';
-        default: return 'visual';
+        case 'visual':
+          return 'auditory'
+        case 'auditory':
+          return 'kinesthetic'
+        case 'kinesthetic':
+          return 'reading'
+        default:
+          return 'visual'
       }
-    });
-    
+    })
+
     // Use contextual dialogue when clicked
-    const contextType: ContextType = editorErrors && editorErrors.length > 0 ? 'error' : 
-                                   tutorialActive ? 'tutorial' : 'default';
-    
+    const contextType: ContextType =
+      editorErrors && editorErrors.length > 0 ? 'error' : tutorialActive ? 'tutorial' : 'default'
+
     const adapted = adaptContent(
       learningStyle,
       getContextualDialogue(contextType, currentMood),
       'example.gif',
       'explanation.mp3'
-    );
-    
+    )
+
     if (adapted) {
-      setDialogueText(adapted.message);
+      setDialogueText(adapted.message)
     }
-  };
+  }
 
   return (
-    <group 
-      ref={pixelRef} 
-      position={[pixelPosition.x, pixelPosition.y, pixelPosition.z]} 
+    <group
+      ref={pixelRef}
+      position={[pixelPosition.x, pixelPosition.y, pixelPosition.z]}
       onClick={handlePixelClick}
       onPointerOver={() => setHovering(true)}
       onPointerOut={() => setHovering(false)}
@@ -421,7 +428,7 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, 0.05, 0]}
       >
-        <meshBasicMaterial 
+        <meshBasicMaterial
           color={getMoodColor(currentMood)}
           transparent
           opacity={0.1}
@@ -431,64 +438,49 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
 
       {/* Educational feedback indicator */}
       {showFeedback && (
-        <Billboard
-          position={[0, 1.8, 0]}
-          follow={true}
-        >
-          <Text
-            fontSize={0.2}
-            color={FEEDBACK_TYPES[feedbackType].color}
-          >
+        <Billboard position={[0, 1.8, 0]} follow={true}>
+          <Text fontSize={0.2} color={FEEDBACK_TYPES[feedbackType].color}>
             {FEEDBACK_TYPES[feedbackType].icon}
           </Text>
         </Billboard>
       )}
 
       {/* Pixel's core sphere */}
-      <Sphere 
-        ref={coreRef} 
-        args={[0.3, 32, 32]}
-      >
-        <meshStandardMaterial 
-          color={getMoodColor(currentMood)} 
-          emissive={getMoodColor(currentMood)} 
-          emissiveIntensity={MOOD_ANIMATION_PARAMS[currentMood].emissiveIntensity} 
+      <Sphere ref={coreRef} args={[0.3, 32, 32]}>
+        <meshStandardMaterial
+          color={getMoodColor(currentMood)}
+          emissive={getMoodColor(currentMood)}
+          emissiveIntensity={MOOD_ANIMATION_PARAMS[currentMood].emissiveIntensity}
           transparent
           opacity={0.9}
         />
       </Sphere>
-      
+
       {/* Inner glow */}
       <pointLight
         color={getMoodColor(currentMood)}
         intensity={MOOD_ANIMATION_PARAMS[currentMood].emissiveIntensity * 1.5}
         distance={3}
       />
-      
+
       {/* Particle effects */}
-      <PixelEmissiveParticles 
+      <PixelEmissiveParticles
         count={MOOD_ANIMATION_PARAMS[currentMood].particleCount}
         color={getMoodColor(currentMood)}
         mood={currentMood}
         isMoving={isPlayerMoving}
       />
-      
+
       {/* Dialogue bubble */}
       {showDialogue && (
-        <Billboard
-          position={[0, 1.2, 0]}
-          follow={true}
-          lockX={false}
-          lockY={false}
-          lockZ={false}
-        >
+        <Billboard position={[0, 1.2, 0]} follow={true} lockX={false} lockY={false} lockZ={false}>
           <group>
             {/* Background panel */}
             <mesh position={[0, 0, -0.01]}>
               <planeGeometry args={[dialogueText.length * 0.05 + 1, 0.8]} />
               <meshBasicMaterial color="#1F2937" transparent opacity={0.8} />
             </mesh>
-            
+
             {/* Text */}
             <Text
               position={[0, 0, 0]}
@@ -506,13 +498,10 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
           </group>
         </Billboard>
       )}
-      
+
       {/* Interactive indicator */}
       {hovering && !showDialogue && (
-        <Billboard
-          position={[0, 0.6, 0]}
-          follow={true}
-        >
+        <Billboard position={[0, 0.6, 0]} follow={true}>
           <Text
             fontSize={0.1}
             color="#F8FAFC" // Stellar White
@@ -522,5 +511,5 @@ export default function Pixel({ mood: initialMood, contextualTip }: PixelProps) 
         </Billboard>
       )}
     </group>
-  );
+  )
 }

@@ -3,28 +3,28 @@
  * Autocomplete, snippets, themes, and quality-of-life features
  */
 
-import type * as Monaco from 'monaco-editor';
+import type * as Monaco from 'monaco-editor'
 
 export interface CodeSnippet {
-  prefix: string;
-  body: string | string[];
-  description: string;
-  scope?: 'html' | 'css' | 'javascript';
+  prefix: string
+  body: string | string[]
+  description: string
+  scope?: 'html' | 'css' | 'javascript'
 }
 
 export interface EditorTheme {
-  name: string;
-  base: 'vs' | 'vs-dark' | 'hc-black';
-  inherit: boolean;
+  name: string
+  base: 'vs' | 'vs-dark' | 'hc-black'
+  inherit: boolean
   rules: {
-    token: string;
-    foreground?: string;
-    background?: string;
-    fontStyle?: string;
-  }[];
+    token: string
+    foreground?: string
+    background?: string
+    fontStyle?: string
+  }[]
   colors: {
-    [key: string]: string;
-  };
+    [key: string]: string
+  }
 }
 
 /**
@@ -69,13 +69,7 @@ export const htmlSnippets: CodeSnippet[] = [
   },
   {
     prefix: 'nav',
-    body: [
-      '<nav>',
-      '  <ul>',
-      '    <li><a href="${1:#}">${2:Link}</a></li>',
-      '  </ul>',
-      '</nav>',
-    ],
+    body: ['<nav>', '  <ul>', '    <li><a href="${1:#}">${2:Link}</a></li>', '  </ul>', '</nav>'],
     description: 'Navigation menu',
     scope: 'html',
   },
@@ -97,7 +91,7 @@ export const htmlSnippets: CodeSnippet[] = [
     description: 'Input element',
     scope: 'html',
   },
-];
+]
 
 /**
  * CSS Code Snippets
@@ -105,21 +99,13 @@ export const htmlSnippets: CodeSnippet[] = [
 export const cssSnippets: CodeSnippet[] = [
   {
     prefix: 'flexcenter',
-    body: [
-      'display: flex;',
-      'justify-content: center;',
-      'align-items: center;',
-    ],
+    body: ['display: flex;', 'justify-content: center;', 'align-items: center;'],
     description: 'Flex center (both axes)',
     scope: 'css',
   },
   {
     prefix: 'grid',
-    body: [
-      'display: grid;',
-      'grid-template-columns: repeat(${1:3}, 1fr);',
-      'gap: ${2:1rem};',
-    ],
+    body: ['display: grid;', 'grid-template-columns: repeat(${1:3}, 1fr);', 'gap: ${2:1rem};'],
     description: 'CSS Grid layout',
     scope: 'css',
   },
@@ -154,7 +140,7 @@ export const cssSnippets: CodeSnippet[] = [
     description: 'Linear gradient',
     scope: 'css',
   },
-];
+]
 
 /**
  * JavaScript Code Snippets
@@ -219,15 +205,11 @@ export const jsSnippets: CodeSnippet[] = [
   },
   {
     prefix: 'eventlistener',
-    body: [
-      '${1:element}.addEventListener(\'${2:click}\', (${3:event}) => {',
-      '  $0',
-      '});',
-    ],
+    body: ["${1:element}.addEventListener('${2:click}', (${3:event}) => {", '  $0', '});'],
     description: 'Event listener',
     scope: 'javascript',
   },
-];
+]
 
 /**
  * Custom Editor Themes
@@ -290,7 +272,7 @@ export const editorThemes: Record<string, EditorTheme> = {
       'editor.lineHighlightBackground': '#F5F5F5',
     },
   },
-};
+}
 
 /**
  * Setup Monaco Editor with enhancements
@@ -301,22 +283,22 @@ export function setupMonacoEnhancements(
 ): void {
   // Register custom themes
   Object.values(editorThemes).forEach((theme) => {
-    monaco.editor.defineTheme(theme.name, theme as any);
-  });
+    monaco.editor.defineTheme(theme.name, theme as any)
+  })
 
   // Setup autocomplete providers
-  setupHTMLAutocomplete(monaco);
-  setupCSSAutocomplete(monaco);
-  setupJavaScriptAutocomplete(monaco);
+  setupHTMLAutocomplete(monaco)
+  setupCSSAutocomplete(monaco)
+  setupJavaScriptAutocomplete(monaco)
 
   // Setup code actions (quick fixes)
-  setupCodeActions(monaco);
+  setupCodeActions(monaco)
 
   // Setup formatting
-  setupFormatting(monaco, editor);
+  setupFormatting(monaco, editor)
 
   // Setup keyboard shortcuts
-  setupKeyboardShortcuts(editor);
+  setupKeyboardShortcuts(editor)
 }
 
 function setupHTMLAutocomplete(monaco: typeof Monaco): void {
@@ -334,11 +316,11 @@ function setupHTMLAutocomplete(monaco: typeof Monaco): void {
           startColumn: position.column,
           endColumn: position.column,
         },
-      }));
+      }))
 
-      return { suggestions };
+      return { suggestions }
     },
-  });
+  })
 }
 
 function setupCSSAutocomplete(monaco: typeof Monaco): void {
@@ -356,11 +338,11 @@ function setupCSSAutocomplete(monaco: typeof Monaco): void {
           startColumn: position.column,
           endColumn: position.column,
         },
-      }));
+      }))
 
-      return { suggestions };
+      return { suggestions }
     },
-  });
+  })
 }
 
 function setupJavaScriptAutocomplete(monaco: typeof Monaco): void {
@@ -378,18 +360,18 @@ function setupJavaScriptAutocomplete(monaco: typeof Monaco): void {
           startColumn: position.column,
           endColumn: position.column,
         },
-      }));
+      }))
 
-      return { suggestions };
+      return { suggestions }
     },
-  });
+  })
 }
 
 function setupCodeActions(monaco: typeof Monaco): void {
   // Add quick fixes for common issues
   monaco.languages.registerCodeActionProvider('html', {
     provideCodeActions: (model, range, context) => {
-      const actions: Monaco.languages.CodeAction[] = [];
+      const actions: Monaco.languages.CodeAction[] = []
 
       context.markers.forEach((marker) => {
         if (marker.message.includes('alt')) {
@@ -408,48 +390,47 @@ function setupCodeActions(monaco: typeof Monaco): void {
                 },
               ],
             },
-          });
+          })
         }
-      });
+      })
 
-      return { actions, dispose: () => {} };
+      return { actions, dispose: () => {} }
     },
-  });
+  })
 }
 
-function setupFormatting(
-  monaco: typeof Monaco,
-  editor: Monaco.editor.IStandaloneCodeEditor
-): void {
+function setupFormatting(monaco: typeof Monaco, editor: Monaco.editor.IStandaloneCodeEditor): void {
   // Format on paste
   editor.onDidPaste(() => {
-    editor.getAction('editor.action.formatDocument')?.run();
-  });
+    editor.getAction('editor.action.formatDocument')?.run()
+  })
 }
 
 function setupKeyboardShortcuts(editor: Monaco.editor.IStandaloneCodeEditor): void {
   // Ctrl+S to save (can trigger save callback)
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
     // Trigger save event
-    editor.trigger('keyboard', 'editor.action.formatDocument', null);
-    console.log('Save triggered');
-  });
+    editor.trigger('keyboard', 'editor.action.formatDocument', null)
+    console.log('Save triggered')
+  })
 
   // Ctrl+/ for comment toggle
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, () => {
-    editor.trigger('keyboard', 'editor.action.commentLine', null);
-  });
+    editor.trigger('keyboard', 'editor.action.commentLine', null)
+  })
 
   // Ctrl+D for duplicate line
   editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
-    editor.trigger('keyboard', 'editor.action.copyLinesDownAction', null);
-  });
+    editor.trigger('keyboard', 'editor.action.copyLinesDownAction', null)
+  })
 }
 
 /**
  * Get editor configuration based on user level
  */
-export function getEditorConfig(userLevel: number): Monaco.editor.IStandaloneEditorConstructionOptions {
+export function getEditorConfig(
+  userLevel: number
+): Monaco.editor.IStandaloneEditorConstructionOptions {
   const baseConfig: Monaco.editor.IStandaloneEditorConstructionOptions = {
     minimap: { enabled: userLevel >= 5 },
     fontSize: 14,
@@ -464,7 +445,7 @@ export function getEditorConfig(userLevel: number): Monaco.editor.IStandaloneEdi
     suggestOnTriggerCharacters: true,
     quickSuggestions: true,
     acceptSuggestionOnEnter: 'on',
-  };
+  }
 
   // Beginners get more assistance
   if (userLevel < 3) {
@@ -476,9 +457,9 @@ export function getEditorConfig(userLevel: number): Monaco.editor.IStandaloneEdi
         strings: true,
       },
       parameterHints: { enabled: true },
-      hover: { enabled: true },
+      hover: { enabled: 'on' },
       folding: false,
-    };
+    }
   }
 
   // Advanced users get full features
@@ -486,10 +467,10 @@ export function getEditorConfig(userLevel: number): Monaco.editor.IStandaloneEdi
     ...baseConfig,
     folding: true,
     bracketPairColorization: { enabled: true },
-  };
+  }
 }
 
 // Re-export monaco types
 declare global {
-  const monaco: typeof Monaco;
+  const monaco: typeof Monaco
 }

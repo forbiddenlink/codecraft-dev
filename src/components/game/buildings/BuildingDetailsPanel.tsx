@@ -1,116 +1,120 @@
-'use client';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { buildingTemplates } from '@/data/buildingTemplates';
+'use client'
+import { Html } from '@react-three/drei'
+import { AnimatePresence, motion } from 'framer-motion'
+import type { LucideIcon } from 'lucide-react'
+import { Building2 } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import { RESOURCE_COLORS, RESOURCE_ICONS } from '@/components/ui/resourceMeta'
+import { BUILDING_TEMPLATE_ICONS } from '@/data/buildingIds'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import {
   demolishBuilding,
   setBuildingStatus,
   updateBuildingEfficiency,
-} from '@/store/slices/buildingSlice';
-import { motion, AnimatePresence } from 'framer-motion';
-import { setLanguage, setCode } from '@/store/slices/editorSlice';
-import { Html } from '@react-three/drei';
-import type { LucideIcon } from 'lucide-react';
-import { Icon } from '@/components/ui/Icon';
-import {
-  RESOURCE_COLORS,
-  RESOURCE_ICONS,
-} from '@/components/ui/resourceMeta';
-import { BUILDING_TEMPLATE_ICONS } from '@/data/buildingIds';
-import { Building2 } from 'lucide-react';
+} from '@/store/slices/buildingSlice'
+import { setCode, setLanguage } from '@/store/slices/editorSlice'
 
-const RESOURCE_METADATA: Record<
-  string,
-  { name: string; color: string; icon: LucideIcon }
-> = {
+const RESOURCE_METADATA: Record<string, { name: string; color: string; icon: LucideIcon }> = {
   energy: { name: 'Energy', color: RESOURCE_COLORS.energy, icon: RESOURCE_ICONS.energy },
   minerals: { name: 'Minerals', color: RESOURCE_COLORS.minerals, icon: RESOURCE_ICONS.minerals },
   water: { name: 'Water', color: RESOURCE_COLORS.water, icon: RESOURCE_ICONS.water },
   oxygen: { name: 'Oxygen', color: RESOURCE_COLORS.oxygen, icon: RESOURCE_ICONS.oxygen },
   food: { name: 'Food', color: RESOURCE_COLORS.food, icon: RESOURCE_ICONS.food },
-  colonists: { name: 'Colonists', color: RESOURCE_COLORS.colonists, icon: RESOURCE_ICONS.colonists },
+  colonists: {
+    name: 'Colonists',
+    color: RESOURCE_COLORS.colonists,
+    icon: RESOURCE_ICONS.colonists,
+  },
   research: { name: 'Research', color: RESOURCE_COLORS.research, icon: RESOURCE_ICONS.research },
-};
-
-interface BuildingDetailsPanelProps {
-  buildingId: string | null;
-  onClose: () => void;
-  is3D?: boolean; // Whether to render as 3D HTML or 2D UI
 }
 
-export default function BuildingDetailsPanel({ 
-  buildingId, 
+interface BuildingDetailsPanelProps {
+  buildingId: string | null
+  onClose: () => void
+  is3D?: boolean // Whether to render as 3D HTML or 2D UI
+}
+
+export default function BuildingDetailsPanel({
+  buildingId,
   onClose,
-  is3D = false
+  is3D = false,
 }: BuildingDetailsPanelProps) {
-  const dispatch = useAppDispatch();
-  
+  const dispatch = useAppDispatch()
+
   // Get the selected building
-  const building = useAppSelector(state =>
+  const building = useAppSelector((state) =>
     buildingId ? state.building.placedBuildings.find((b: any) => b.id === buildingId) : null
-  );
-  
+  )
+
   // If no building or ID, don't render
-  if (!building || !buildingId) return null;
-  
+  if (!building || !buildingId) return null
+
   // Get the building template
-  const template = buildingTemplates[building.templateId];
-  if (!template) return null;
-  
+  const template = buildingTemplates[building.templateId]
+  if (!template) return null
+
   // Handle demolishing the building
   const handleDemolish = () => {
-    dispatch(demolishBuilding(buildingId));
-    onClose();
-  };
-  
+    dispatch(demolishBuilding(buildingId))
+    onClose()
+  }
+
   // Handle toggling building status
   const handleToggleStatus = () => {
-    dispatch(setBuildingStatus({
-      buildingId,
-      status: building.status === 'active' ? 'inactive' : 'active'
-    }));
-  };
-  
+    dispatch(
+      setBuildingStatus({
+        buildingId,
+        status: building.status === 'active' ? 'inactive' : 'active',
+      })
+    )
+  }
+
   // Handle viewing the building's code
   const handleViewCode = () => {
     // Set code editor to HTML with the template's default code
-    dispatch(setCode({ 
-      language: 'html', 
-      code: template.defaultHtml 
-    }));
-    
+    dispatch(
+      setCode({
+        language: 'html',
+        code: template.defaultHtml,
+      })
+    )
+
     // Close the panel
-    onClose();
-  };
-  
+    onClose()
+  }
+
   // Handle repairing the building
   const handleRepair = () => {
     // In a real implementation, this would check for resources
     // and trigger a repair process
-    dispatch(updateBuildingEfficiency({
-      buildingId,
-      efficiency: 1
-    }));
-    
-    dispatch(setBuildingStatus({
-      buildingId,
-      status: 'active'
-    }));
-  };
-  
+    dispatch(
+      updateBuildingEfficiency({
+        buildingId,
+        efficiency: 1,
+      })
+    )
+
+    dispatch(
+      setBuildingStatus({
+        buildingId,
+        status: 'active',
+      })
+    )
+  }
+
   // Status indicator color
-  const statusColor = {
-    active: 'bg-success',
-    damaged: 'bg-error',
-    inactive: 'bg-text-muted',
-    construction: 'bg-warning'
-  }[building.status] || 'bg-warning';
+  const statusColor =
+    {
+      active: 'bg-success',
+      damaged: 'bg-error',
+      inactive: 'bg-text-muted',
+      construction: 'bg-warning',
+    }[building.status] || 'bg-warning'
 
   // Health bar color
-  const healthColor = building.health > 60
-    ? 'bg-success'
-    : building.health > 30
-      ? 'bg-warning'
-      : 'bg-error';
+  const healthColor =
+    building.health > 60 ? 'bg-success' : building.health > 30 ? 'bg-warning' : 'bg-error'
 
   // Panel content
   const panelContent = (
@@ -119,19 +123,11 @@ export default function BuildingDetailsPanel({
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
-            <Icon
-              icon={BUILDING_TEMPLATE_ICONS[building.templateId] || Building2}
-              size={18}
-            />
+            <Icon icon={BUILDING_TEMPLATE_ICONS[building.templateId] || Building2} size={18} />
           </span>
           <h2 className="text-h3">{template.name}</h2>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-icon focus-ring"
-          aria-label="Close"
-        >
+        <button type="button" onClick={onClose} className="btn-icon focus-ring" aria-label="Close">
           ×
         </button>
       </div>
@@ -173,8 +169,8 @@ export default function BuildingDetailsPanel({
         {building.effects && building.effects.length > 0 ? (
           <div className="grid grid-cols-2 gap-2">
             {building.effects.map((effect: any, index: number) => {
-              const resourceMeta = (RESOURCE_METADATA as any)[effect.target];
-              if (!resourceMeta) return null;
+              const resourceMeta = (RESOURCE_METADATA as any)[effect.target]
+              if (!resourceMeta) return null
 
               return (
                 <div
@@ -185,11 +181,10 @@ export default function BuildingDetailsPanel({
                   <span>
                     {effect.type === 'resource' && effect.value > 0 && '+'}
                     {effect.value}
-                    {effect.type === 'efficiency' && 'x'}
-                    {' '}{resourceMeta.name}
+                    {effect.type === 'efficiency' && 'x'} {resourceMeta.name}
                   </span>
                 </div>
-              );
+              )
             })}
           </div>
         ) : (
@@ -199,8 +194,10 @@ export default function BuildingDetailsPanel({
 
       {/* Technical */}
       <div className="mb-5 text-small space-y-1">
-        <div>Position: {Math.round(building.position.x)}, {Math.round(building.position.z)}</div>
-        <div>Rotation: {Math.round(building.rotation * (180/Math.PI))}°</div>
+        <div>
+          Position: {Math.round(building.position.x)}, {Math.round(building.position.z)}
+        </div>
+        <div>Rotation: {Math.round(building.rotation * (180 / Math.PI))}°</div>
         <div>Template: {building.templateId}</div>
       </div>
 
@@ -220,31 +217,22 @@ export default function BuildingDetailsPanel({
         )}
 
         {building.status === 'damaged' && (
-          <button
-            onClick={handleRepair}
-            className="btn-primary flex-1 focus-ring"
-          >
+          <button onClick={handleRepair} className="btn-primary flex-1 focus-ring">
             Repair
           </button>
         )}
 
-        <button
-          onClick={handleViewCode}
-          className="btn-secondary flex-1 focus-ring"
-        >
+        <button onClick={handleViewCode} className="btn-secondary flex-1 focus-ring">
           View Code
         </button>
 
-        <button
-          onClick={handleDemolish}
-          className="btn-danger flex-1 focus-ring"
-        >
+        <button onClick={handleDemolish} className="btn-danger flex-1 focus-ring">
           Demolish
         </button>
       </div>
     </div>
-  );
-  
+  )
+
   // Render as 3D HTML element if is3D is true
   if (is3D) {
     return (
@@ -256,9 +244,9 @@ export default function BuildingDetailsPanel({
       >
         {panelContent}
       </Html>
-    );
+    )
   }
-  
+
   // Otherwise render as regular UI
   return (
     <AnimatePresence>
@@ -272,5 +260,5 @@ export default function BuildingDetailsPanel({
         {panelContent}
       </motion.div>
     </AnimatePresence>
-  );
-} 
+  )
+}

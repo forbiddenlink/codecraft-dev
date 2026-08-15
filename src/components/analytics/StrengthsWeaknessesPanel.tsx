@@ -3,22 +3,22 @@
  * Shows what concepts the user excels at and struggles with
  */
 
-import { Dumbbell, BookOpen } from 'lucide-react';
-import type { LearningAnalytics } from '@/utils/analyticsSystem';
-import { Icon } from '@/components/ui/Icon';
+import { BookOpen, Dumbbell } from 'lucide-react'
+import { Icon } from '@/components/ui/Icon'
+import type { LearningAnalytics } from '@/utils/analyticsSystem'
 
 export interface StrengthsWeaknessesPanelProps {
-  analytics: LearningAnalytics;
-  expanded?: boolean;
+  analytics: LearningAnalytics
+  expanded?: boolean
 }
 
 export function StrengthsWeaknessesPanel({
   analytics,
   expanded = false,
 }: StrengthsWeaknessesPanelProps) {
-  const displayLimit = expanded ? 10 : 5;
-  const strongConcepts = analytics.strongConcepts.slice(0, displayLimit);
-  const weakConcepts = analytics.weakConcepts.slice(0, displayLimit);
+  const displayLimit = expanded ? 10 : 5
+  const strongConcepts = analytics.strongConcepts.slice(0, displayLimit)
+  const weakConcepts = analytics.weakConcepts.slice(0, displayLimit)
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -36,7 +36,7 @@ export function StrengthsWeaknessesPanel({
         {strongConcepts.length > 0 ? (
           <div className="space-y-2">
             {strongConcepts.map((concept) => {
-              const successRate = analytics.successRatePerConcept.get(concept) || 0;
+              const successRate = analytics.successRatePerConcept.get(concept) || 0
               return (
                 <div
                   key={concept}
@@ -51,15 +51,13 @@ export function StrengthsWeaknessesPanel({
                       <div
                         key={i}
                         className={`h-1 flex-1 rounded-full ${
-                          i < Math.round(successRate / 20)
-                            ? 'bg-success'
-                            : 'bg-surface'
+                          i < Math.round(successRate / 20) ? 'bg-success' : 'bg-surface'
                         }`}
                       />
                     ))}
                   </div>
                 </div>
-              );
+              )
             })}
           </div>
         ) : (
@@ -91,8 +89,8 @@ export function StrengthsWeaknessesPanel({
         {weakConcepts.length > 0 ? (
           <div className="space-y-2">
             {weakConcepts.map((concept) => {
-              const successRate = analytics.successRatePerConcept.get(concept) || 0;
-              const errors = analytics.errorsPerConcept.get(concept) || 0;
+              const successRate = analytics.successRatePerConcept.get(concept) || 0
+              const errors = analytics.errorsPerConcept.get(concept) || 0
 
               return (
                 <div
@@ -108,9 +106,7 @@ export function StrengthsWeaknessesPanel({
                       <div
                         key={i}
                         className={`h-1 flex-1 rounded-full ${
-                          i < Math.round(successRate / 20)
-                            ? 'bg-warning'
-                            : 'bg-surface'
+                          i < Math.round(successRate / 20) ? 'bg-warning' : 'bg-surface'
                         }`}
                       />
                     ))}
@@ -119,14 +115,12 @@ export function StrengthsWeaknessesPanel({
                     {errors} error{errors !== 1 ? 's' : ''} recorded
                   </p>
                 </div>
-              );
+              )
             })}
           </div>
         ) : (
           <div className="bg-elevated rounded-[var(--radius-md)] p-6 text-center">
-            <p className="text-body">
-              Great job! No weak areas identified yet.
-            </p>
+            <p className="text-body">Great job! No weak areas identified yet.</p>
           </div>
         )}
 
@@ -137,5 +131,5 @@ export function StrengthsWeaknessesPanel({
         )}
       </div>
     </div>
-  );
+  )
 }

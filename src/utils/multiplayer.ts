@@ -11,29 +11,29 @@
 // =============================================================================
 
 export interface Player {
-  id: string;
-  name: string;
-  color: string;
-  cursor?: { x: number; y: number };
-  selection?: { start: number; end: number };
-  isActive: boolean;
+  id: string
+  name: string
+  color: string
+  cursor?: { x: number; y: number }
+  selection?: { start: number; end: number }
+  isActive: boolean
 }
 
 export interface RoomState {
-  code: string;
-  language: 'html' | 'css' | 'javascript';
-  challengeId: string | null;
-  players: Player[];
-  hostId: string;
-  gamePhase: 'lobby' | 'coding' | 'review' | 'completed';
+  code: string
+  language: 'html' | 'css' | 'javascript'
+  challengeId: string | null
+  players: Player[]
+  hostId: string
+  gamePhase: 'lobby' | 'coding' | 'review' | 'completed'
 }
 
 export interface RoomConfig {
-  roomId: string;
-  userId: string;
-  userName: string;
-  userColor?: string;
-  isHost?: boolean;
+  roomId: string
+  userId: string
+  userName: string
+  userColor?: string
+  isHost?: boolean
 }
 
 // =============================================================================
@@ -42,20 +42,22 @@ export interface RoomConfig {
 
 // Check if multiplayer is enabled
 export const isMultiplayerEnabled = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return process.env.NEXT_PUBLIC_ENABLE_MULTIPLAYER === 'true' &&
-         !!process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY;
-};
+  if (typeof window === 'undefined') return false
+  return (
+    process.env.NEXT_PUBLIC_ENABLE_MULTIPLAYER === 'true' &&
+    !!process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY
+  )
+}
 
 // Generate a random room code (6 characters, alphanumeric)
 export const generateRoomCode = (): string => {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Removed confusing chars
-  let code = '';
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // Removed confusing chars
+  let code = ''
   for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(Math.floor(Math.random() * chars.length))
   }
-  return code;
-};
+  return code
+}
 
 // Generate a player color
 export const generatePlayerColor = (): string => {
@@ -70,49 +72,56 @@ export const generatePlayerColor = (): string => {
     '#F7DC6F', // Gold
     '#BB8FCE', // Purple
     '#85C1E9', // Sky
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
-};
+  ]
+  return colors[Math.floor(Math.random() * colors.length)]
+}
 
 // =============================================================================
 // LIVEBLOCKS INTEGRATION (Lazy loaded)
 // =============================================================================
 
 interface LiveblocksClient {
-  enterRoom: (roomId: string, options: Record<string, unknown>) => {
+  enterRoom: (
+    roomId: string,
+    options: Record<string, unknown>
+  ) => {
     room: {
-      subscribe: (callback: (state: unknown) => void) => () => void;
-      getPresence: () => unknown;
-      updatePresence: (presence: unknown) => void;
-      broadcastEvent: (event: unknown) => void;
-    };
-    leave: () => void;
-  };
+      subscribe: (callback: (state: unknown) => void) => () => void
+      getPresence: () => unknown
+      updatePresence: (presence: unknown) => void
+      broadcastEvent: (event: unknown) => void
+    }
+    leave: () => void
+  }
 }
 
-let liveblocksClient: LiveblocksClient | null = null;
+let liveblocksClient: LiveblocksClient | null = null
 
 const getLiveblocksClient = async (): Promise<LiveblocksClient | null> => {
-  if (!isMultiplayerEnabled()) return null;
+  if (!isMultiplayerEnabled()) return null
 
   if (!liveblocksClient) {
     try {
-      const { createClient } = (await import(/* webpackIgnore: true */ '@liveblocks/client' as string)) as {
-        createClient: (options: { publicApiKey: string }) => LiveblocksClient;
-      };
+      const { createClient } = (await import(
+        /* webpackIgnore: true */ '@liveblocks/client' as string
+      )) as {
+        createClient: (options: { publicApiKey: string }) => LiveblocksClient
+      }
       liveblocksClient = createClient({
         publicApiKey: process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY!,
-      });
+      })
     } catch {
       if (process.env.NODE_ENV === 'development') {
-        console.warn('Liveblocks not available. Install with: npm install @liveblocks/client @liveblocks/react');
+        console.warn(
+          'Liveblocks not available. Install with: npm install @liveblocks/client @liveblocks/react'
+        )
       }
-      return null;
+      return null
     }
   }
 
-  return liveblocksClient;
-};
+  return liveblocksClient
+}
 
 // =============================================================================
 // ROOM OPERATIONS
@@ -121,12 +130,14 @@ const getLiveblocksClient = async (): Promise<LiveblocksClient | null> => {
 /**
  * Join or create a multiplayer room
  */
-export const joinRoom = async (config: RoomConfig): Promise<{
-  room: unknown;
-  leave: () => void;
+export const joinRoom = async (
+  config: RoomConfig
+): Promise<{
+  room: unknown
+  leave: () => void
 } | null> => {
-  const client = await getLiveblocksClient();
-  if (!client) return null;
+  const client = await getLiveblocksClient()
+  if (!client) return null
 
   const { room, leave } = client.enterRoom(config.roomId, {
     initialPresence: {
@@ -137,10 +148,10 @@ export const joinRoom = async (config: RoomConfig): Promise<{
       selection: null,
       isActive: true,
     },
-  });
+  })
 
-  return { room, leave };
-};
+  return { room, leave }
+}
 
 /**
  * Create a new room with a generated code
@@ -149,21 +160,21 @@ export const createRoom = async (
   userId: string,
   userName: string
 ): Promise<{ roomCode: string; room: unknown; leave: () => void } | null> => {
-  const roomCode = generateRoomCode();
+  const roomCode = generateRoomCode()
   const result = await joinRoom({
     roomId: `codecraft-${roomCode}`,
     userId,
     userName,
     isHost: true,
-  });
+  })
 
-  if (!result) return null;
+  if (!result) return null
 
   return {
     roomCode,
     ...result,
-  };
-};
+  }
+}
 
 // =============================================================================
 // COLLABORATIVE MONACO EDITOR SETUP
@@ -180,37 +191,37 @@ export const setupCollaborativeEditor = async (
   room: unknown,
   editorInstance: unknown
 ): Promise<{ cleanup: () => void } | null> => {
-  if (!isMultiplayerEnabled()) return null;
+  if (!isMultiplayerEnabled()) return null
 
   try {
     // Dynamically import Yjs and Monaco binding
-    const Y = await import('yjs');
-    const { MonacoBinding } = await import('y-monaco');
-    const { LiveblocksYjsProvider } = await import('@liveblocks/yjs');
+    const Y = await import('yjs')
+    const { MonacoBinding } = await import('y-monaco')
+    const { LiveblocksYjsProvider } = await import('@liveblocks/yjs')
 
     // Cast to expected types (Monaco and Liveblocks types are complex)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const editor = editorInstance as any;
+    const editor = editorInstance as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const liveblocksRoom = room as any;
+    const liveblocksRoom = room as any
 
     // Create Yjs document and provider
-    const yDoc = new Y.Doc();
-    const yText = yDoc.getText('monaco');
+    const yDoc = new Y.Doc()
+    const yText = yDoc.getText('monaco')
 
     // Create Liveblocks Yjs provider for real-time sync
-    const provider = new LiveblocksYjsProvider(liveblocksRoom, yDoc);
+    const provider = new LiveblocksYjsProvider(liveblocksRoom, yDoc)
 
     // Get the Monaco model
-    const model = editor.getModel();
+    const model = editor.getModel()
     if (!model) {
-      console.warn('No Monaco model available for collaborative editing');
-      return null;
+      console.warn('No Monaco model available for collaborative editing')
+      return null
     }
 
     // Initialize with current editor content if this is a new room
     if (yText.toString() === '' && editor.getValue()) {
-      yText.insert(0, editor.getValue());
+      yText.insert(0, editor.getValue())
     }
 
     // Create Monaco binding for collaborative editing
@@ -220,33 +231,33 @@ export const setupCollaborativeEditor = async (
       model,
       new Set([editor]),
       provider.awareness as unknown as import('y-protocols/awareness').Awareness
-    );
+    )
 
     return {
       cleanup: () => {
-        binding.destroy();
-        provider.destroy();
-        yDoc.destroy();
+        binding.destroy()
+        provider.destroy()
+        yDoc.destroy()
       },
-    };
+    }
   } catch (error) {
-    console.warn('Failed to setup collaborative editor:', error);
-    return null;
+    console.warn('Failed to setup collaborative editor:', error)
+    return null
   }
-};
+}
 
 // =============================================================================
 // TEACHER DASHBOARD SUPPORT
 // =============================================================================
 
 export interface StudentProgress {
-  id: string;
-  name: string;
-  challengeId: string | null;
-  currentCode: string;
-  score: number;
-  attempts: number;
-  isComplete: boolean;
+  id: string
+  name: string
+  challengeId: string | null
+  currentCode: string
+  score: number
+  attempts: number
+  isComplete: boolean
 }
 
 /**
@@ -255,8 +266,8 @@ export interface StudentProgress {
 export const getStudentProgress = async (_roomId: string): Promise<StudentProgress[]> => {
   // Would query room state and aggregate student progress
   // Implementation depends on room storage structure
-  return [];
-};
+  return []
+}
 
 /**
  * Broadcast a message to all students
@@ -266,4 +277,4 @@ export const broadcastToStudents = async (
   _message: { type: string; payload: unknown }
 ): Promise<void> => {
   // Would use room.broadcastEvent to send to all participants
-};
+}

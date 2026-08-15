@@ -1,21 +1,18 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Flame, Snowflake, ChevronDown, Gift } from 'lucide-react';
-import { useDailyStreak } from '@/hooks/useDailyStreak';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown, Flame, Gift, Snowflake } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
+import { useDailyStreak } from '@/hooks/useDailyStreak'
 
 interface StreakDisplayProps {
-  className?: string;
-  onMilestoneClaimed?: (day: number, reward: string) => void;
+  className?: string
+  onMilestoneClaimed?: (day: number, reward: string) => void
 }
 
-export default function StreakDisplay({
-  className = '',
-  onMilestoneClaimed,
-}: StreakDisplayProps) {
+export default function StreakDisplay({ className = '', onMilestoneClaimed }: StreakDisplayProps) {
   const {
     currentStreak,
     longestStreak,
@@ -25,34 +22,34 @@ export default function StreakDisplay({
     nextMilestone,
     daysUntilNextMilestone,
     claimMilestone,
-  } = useDailyStreak();
+  } = useDailyStreak()
 
-  const [showMilestonePopup, setShowMilestonePopup] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [showMilestonePopup, setShowMilestonePopup] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(false)
 
   useEffect(() => {
     if (!isStreakUpdatedToday) {
-      recordActivity();
+      recordActivity()
     }
-  }, [isStreakUpdatedToday, recordActivity]);
+  }, [isStreakUpdatedToday, recordActivity])
 
   useEffect(() => {
     if (availableMilestones.length > 0) {
-      setShowMilestonePopup(true);
+      setShowMilestonePopup(true)
     }
-  }, [availableMilestones.length]);
+  }, [availableMilestones.length])
 
   const handleClaimMilestone = (day: number, label: string) => {
-    claimMilestone(day);
-    onMilestoneClaimed?.(day, label);
+    claimMilestone(day)
+    onMilestoneClaimed?.(day, label)
     if (availableMilestones.length <= 1) {
-      setShowMilestonePopup(false);
+      setShowMilestonePopup(false)
     }
-  };
+  }
 
   const progressPercent = nextMilestone
     ? ((currentStreak % nextMilestone.day) / nextMilestone.day) * 100
-    : 100;
+    : 100
 
   return (
     <HudPanel className={className} padding="sm">
@@ -139,10 +136,10 @@ export default function StreakDisplay({
 
               <div className="mb-2 flex justify-between">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, i) => {
-                  const today = new Date().getDay();
-                  const isToday = i === today;
-                  const isPast = i < today;
-                  const isInStreak = isPast && currentStreak >= today - i;
+                  const today = new Date().getDay()
+                  const isToday = i === today
+                  const isPast = i < today
+                  const isInStreak = isPast && currentStreak >= today - i
 
                   return (
                     <div
@@ -157,7 +154,7 @@ export default function StreakDisplay({
                     >
                       {day}
                     </div>
-                  );
+                  )
                 })}
               </div>
 
@@ -209,5 +206,5 @@ export default function StreakDisplay({
         )}
       </AnimatePresence>
     </HudPanel>
-  );
+  )
 }

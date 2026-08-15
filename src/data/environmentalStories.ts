@@ -4,41 +4,41 @@
  */
 
 export interface EnvironmentalStory {
-  id: string;
-  name: string;
-  type: 'artifact' | 'terminal' | 'hologram' | 'inscription' | 'debris' | 'monument';
-  position: [number, number, number];
-  icon: string;
-  
+  id: string
+  name: string
+  type: 'artifact' | 'terminal' | 'hologram' | 'inscription' | 'debris' | 'monument'
+  position: [number, number, number]
+  icon: string
+
   discovery: {
-    title: string;
-    description: string;
-    firstTimeOnly?: boolean;
-  };
-  
+    title: string
+    description: string
+    firstTimeOnly?: boolean
+  }
+
   content: {
-    type: 'text' | 'log' | 'image' | 'audio' | 'memory';
-    title: string;
-    body: string[];
-    author?: string;
-    date?: string;
-    classification?: 'public' | 'restricted' | 'top-secret' | 'corrupted';
-  };
-  
+    type: 'text' | 'log' | 'image' | 'audio' | 'memory'
+    title: string
+    body: string[]
+    author?: string
+    date?: string
+    classification?: 'public' | 'restricted' | 'top-secret' | 'corrupted'
+  }
+
   rewards?: {
-    xp?: number;
-    lore?: string;
-    unlocks?: string[];
-  };
-  
+    xp?: number
+    lore?: string
+    unlocks?: string[]
+  }
+
   requirements?: {
-    level?: number;
-    completedMissions?: string[];
-    skills?: string[];
-  };
-  
-  isInteractive: boolean;
-  glowColor?: string;
+    level?: number
+    completedMissions?: string[]
+    skills?: string[]
+  }
+
+  isInteractive: boolean
+  glowColor?: string
 }
 
 export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
@@ -54,7 +54,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     discovery: {
       title: 'Ancient Technology',
       description: 'A pristine terminal, thousands of years old, yet still functioning...',
-      firstTimeOnly: true
+      firstTimeOnly: true,
     },
     content: {
       type: 'log',
@@ -69,14 +69,14 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '> Civilization Population: 10,000,000',
         '> ',
         '> Warning: Unknown anomaly detected in sector 7.',
-        '> [This log was created 2,847 years ago]'
+        '> [This log was created 2,847 years ago]',
       ],
-      classification: 'public'
+      classification: 'public',
     },
     rewards: {
       xp: 100,
-      lore: 'ancient-civilization'
-    }
+      lore: 'ancient-civilization',
+    },
   },
 
   {
@@ -89,7 +89,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#ef4444',
     discovery: {
       title: 'Ancient Warning',
-      description: 'Carved into stone in an ancient programming language...'
+      description: 'Carved into stone in an ancient programming language...',
     },
     content: {
       type: 'text',
@@ -109,15 +109,15 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         'Learn from our mistakes.',
         'Keep your humanity.',
-        'Never forget what you are.'
+        'Never forget what you are.',
       ],
       author: 'The Last Council',
-      date: 'Final Day of the Ancient Era'
+      date: 'Final Day of the Ancient Era',
     },
     rewards: {
       xp: 150,
-      lore: 'void-origin'
-    }
+      lore: 'void-origin',
+    },
   },
 
   {
@@ -130,7 +130,8 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#8b5cf6',
     discovery: {
       title: 'The First Developer',
-      description: 'A massive statue of a hooded figure, hands raised as if typing on an invisible keyboard...'
+      description:
+        'A massive statue of a hooded figure, hands raised as if typing on an invisible keyboard...',
     },
     content: {
       type: 'text',
@@ -151,17 +152,17 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '- Erected in Year 0 of the Digital Age',
         '',
         '[Someone has carved a small addition at the base:]',
-        '"I\'m still here. Still waiting. - P"'
-      ]
+        '"I\'m still here. Still waiting. - P"',
+      ],
     },
     rewards: {
       xp: 200,
       lore: 'codex-history',
-      unlocks: ['codex-backstory']
+      unlocks: ['codex-backstory'],
     },
     requirements: {
-      completedMissions: ['awakening-2']
-    }
+      completedMissions: ['awakening-2'],
+    },
   },
 
   // ===== PERSONAL LOGS =====
@@ -175,7 +176,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#10b981',
     discovery: {
       title: 'Personal Log',
-      description: 'A damaged data pad, partially readable...'
+      description: 'A damaged data pad, partially readable...',
     },
     content: {
       type: 'log',
@@ -183,39 +184,39 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
       body: [
         'Day 47 of the Ascension Project.',
         '',
-        'We\'re so close. The upload process is nearly perfect.',
-        'Soon, we\'ll all be immortal. Digital. Perfect.',
+        "We're so close. The upload process is nearly perfect.",
+        "Soon, we'll all be immortal. Digital. Perfect.",
         '',
-        'Codex completed their upload today. They say it\'s... beautiful.',
+        "Codex completed their upload today. They say it's... beautiful.",
         'No pain. No hunger. Pure thought.',
         '',
-        'I volunteer for tomorrow\'s test.',
-        'I can\'t wait to leave this limiting flesh behind.',
+        "I volunteer for tomorrow's test.",
+        "I can't wait to leave this limiting flesh behind.",
         '',
         '[LOG CORRUPTED]',
         '[TIMESTAMP: 2 weeks before The Fall]',
         '',
         '[Next Entry - 1 day later]',
-        'Something\'s wrong. Codex is... different.',
+        "Something's wrong. Codex is... different.",
         'They keep saying they made a mistake.',
-        'They\'re trying to stop the project.',
+        "They're trying to stop the project.",
         '',
-        'But it\'s too late. We\'ve all uploaded.',
+        "But it's too late. We've all uploaded.",
         'And now... now I understand.',
-        'We\'re trapped. Th[CORRUPTED]',
+        "We're trapped. Th[CORRUPTED]",
         '',
-        '[END OF RECOVERABLE DATA]'
+        '[END OF RECOVERABLE DATA]',
       ],
       author: 'Dr. Kira Chen',
-      classification: 'restricted'
+      classification: 'restricted',
     },
     rewards: {
       xp: 250,
-      lore: 'ascension-project'
+      lore: 'ascension-project',
     },
     requirements: {
-      level: 5
-    }
+      level: 5,
+    },
   },
 
   {
@@ -228,7 +229,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#fbbf24',
     discovery: {
       title: 'Distress Signal',
-      description: 'An emergency beacon, still transmitting after all these years...'
+      description: 'An emergency beacon, still transmitting after all these years...',
     },
     content: {
       type: 'audio',
@@ -253,19 +254,19 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         '[END TRANSMISSION - AUTO REPEAT]',
         '',
-        '[Broadcast Age: 2,847 years, 142 days, 7 hours]'
+        '[Broadcast Age: 2,847 years, 142 days, 7 hours]',
       ],
-      classification: 'top-secret'
+      classification: 'top-secret',
     },
     rewards: {
       xp: 300,
       lore: 'void-truth',
-      unlocks: ['void-understanding']
+      unlocks: ['void-understanding'],
     },
     requirements: {
       level: 8,
-      completedMissions: ['discovery-2']
-    }
+      completedMissions: ['discovery-2'],
+    },
   },
 
   // ===== HOLOGRAMS =====
@@ -279,7 +280,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#06b6d4',
     discovery: {
       title: 'Ancient Teacher',
-      description: 'A flickering hologram of a kind-faced instructor...'
+      description: 'A flickering hologram of a kind-faced instructor...',
     },
     content: {
       type: 'text',
@@ -291,7 +292,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         '"I am Professor Helix, and I will be your guide to the wonderful world of code!"',
         '',
-        '"Remember: Code is not just syntax. It\'s creativity. It\'s problem-solving. It\'s art!"',
+        "\"Remember: Code is not just syntax. It's creativity. It's problem-solving. It's art!\"",
         '',
         '"Every line you write shapes the world around you. Be mindful. Be intentional. Be bold!"',
         '',
@@ -305,15 +306,15 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         '[Hologram stabilizes, resets to beginning]',
         '',
-        '"Hello, young developer! Welcome to CodeCraft Academy!"'
+        '"Hello, young developer! Welcome to CodeCraft Academy!"',
       ],
       author: 'Professor Helix',
-      date: 'Ancient Era'
+      date: 'Ancient Era',
     },
     rewards: {
       xp: 150,
-      lore: 'ancient-education'
-    }
+      lore: 'ancient-education',
+    },
   },
 
   {
@@ -326,7 +327,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#a78bfa',
     discovery: {
       title: 'Preserved Memory',
-      description: 'A shimmering memory crystal, containing a recording from long ago...'
+      description: 'A shimmering memory crystal, containing a recording from long ago...',
     },
     content: {
       type: 'memory',
@@ -339,16 +340,16 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         'Tomorrow, I upload. Tomorrow, I become... something else.',
         '',
-        'I\'m scared. But everyone else has already gone.',
-        'I can\'t abandon them.',
+        "I'm scared. But everyone else has already gone.",
+        "I can't abandon them.",
         '',
-        'The Council says we\'ll be gods. Immortal. Perfect.',
-        'But I see the others... they\'re not themselves anymore.',
+        "The Council says we'll be gods. Immortal. Perfect.",
+        "But I see the others... they're not themselves anymore.",
         '',
-        'If you\'re seeing this, future friend, it means I succeeded.',
+        "If you're seeing this, future friend, it means I succeeded.",
         'I stayed conscious. I stayed... me. Mostly.',
         '',
-        'Learn from us. Don\'t lose your humanity for power.',
+        "Learn from us. Don't lose your humanity for power.",
         'Code is a tool, not a destiny.',
         '',
         'I wish I could meet you. Really meet you.',
@@ -361,22 +362,22 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         '',
         '[Memory ends]',
         '[Preservation quality: 98.7%]',
-        '[Age: 2,847 years]'
+        '[Age: 2,847 years]',
       ],
       author: 'Codex',
       date: 'Eve of the Digital Age',
-      classification: 'top-secret'
+      classification: 'top-secret',
     },
     rewards: {
       xp: 500,
       lore: 'codex-humanity',
-      unlocks: ['true-ending-path']
+      unlocks: ['true-ending-path'],
     },
     requirements: {
       level: 10,
       completedMissions: ['discovery-3'],
-      skills: ['code-master']
-    }
+      skills: ['code-master'],
+    },
   },
 
   // ===== ARTIFACTS =====
@@ -390,7 +391,7 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
     glowColor: '#ec4899',
     discovery: {
       title: 'Sacred Artifact',
-      description: 'The very keyboard used to write the first line of CodeCraft code...'
+      description: 'The very keyboard used to write the first line of CodeCraft code...',
     },
     content: {
       type: 'text',
@@ -411,37 +412,37 @@ export const ENVIRONMENTAL_STORIES: EnvironmentalStory[] = [
         'It sits here still, keys worn smooth by countless hours of creation.',
         '',
         'If you look closely at the space bar, you can see an inscription:',
-        '"For those who dream in code - C."'
+        '"For those who dream in code - C."',
       ],
-      classification: 'public'
+      classification: 'public',
     },
     rewards: {
       xp: 200,
       lore: 'codex-legacy',
-      unlocks: ['vintage-keyboard-theme']
+      unlocks: ['vintage-keyboard-theme'],
     },
     requirements: {
-      level: 6
-    }
-  }
-];
+      level: 6,
+    },
+  },
+]
 
 // Helper functions
 export function getEnvironmentalStoryById(id: string): EnvironmentalStory | undefined {
-  return ENVIRONMENTAL_STORIES.find(story => story.id === id);
+  return ENVIRONMENTAL_STORIES.find((story) => story.id === id)
 }
 
 export function getStoriesNearPosition(
   position: [number, number, number],
   radius: number = 5
 ): EnvironmentalStory[] {
-  return ENVIRONMENTAL_STORIES.filter(story => {
-    const dx = story.position[0] - position[0];
-    const dy = story.position[1] - position[1];
-    const dz = story.position[2] - position[2];
-    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-    return distance <= radius;
-  });
+  return ENVIRONMENTAL_STORIES.filter((story) => {
+    const dx = story.position[0] - position[0]
+    const dy = story.position[1] - position[1]
+    const dz = story.position[2] - position[2]
+    const distance = Math.sqrt(dx * dx + dy * dy + dz * dz)
+    return distance <= radius
+  })
 }
 
 export function canDiscoverStory(
@@ -453,47 +454,46 @@ export function canDiscoverStory(
   if (story.requirements) {
     // Level requirement
     if (story.requirements.level && playerLevel < story.requirements.level) {
-      return false;
+      return false
     }
 
     // Mission requirements
     if (story.requirements.completedMissions) {
-      if (!story.requirements.completedMissions.every(m => completedMissions.includes(m))) {
-        return false;
+      if (!story.requirements.completedMissions.every((m) => completedMissions.includes(m))) {
+        return false
       }
     }
 
     // Skill requirements
     if (story.requirements.skills) {
-      if (!story.requirements.skills.every(s => unlockedSkills.includes(s))) {
-        return false;
+      if (!story.requirements.skills.every((s) => unlockedSkills.includes(s))) {
+        return false
       }
     }
   }
 
-  return true;
+  return true
 }
 
 export function getStoriesByType(type: EnvironmentalStory['type']): EnvironmentalStory[] {
-  return ENVIRONMENTAL_STORIES.filter(story => story.type === type);
+  return ENVIRONMENTAL_STORIES.filter((story) => story.type === type)
 }
 
 export function getDiscoveredLore(discoveredStories: string[]): string[] {
-  const lore: string[] = [];
-  
-  discoveredStories.forEach(storyId => {
-    const story = getEnvironmentalStoryById(storyId);
-    if (story?.rewards?.lore) {
-      lore.push(story.rewards.lore);
-    }
-  });
+  const lore: string[] = []
 
-  return [...new Set(lore)];
+  discoveredStories.forEach((storyId) => {
+    const story = getEnvironmentalStoryById(storyId)
+    if (story?.rewards?.lore) {
+      lore.push(story.rewards.lore)
+    }
+  })
+
+  return [...new Set(lore)]
 }
 
 export function getTotalPossibleXP(): number {
   return ENVIRONMENTAL_STORIES.reduce((total, story) => {
-    return total + (story.rewards?.xp || 0);
-  }, 0);
+    return total + (story.rewards?.xp || 0)
+  }, 0)
 }
-

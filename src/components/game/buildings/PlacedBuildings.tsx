@@ -1,44 +1,44 @@
-'use client';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { buildingTemplates } from '@/data/buildingTemplates';
-import { selectBuilding } from '@/store/slices/buildingSlice';
-import BuildingModel from './BuildingModel';
-import BuildingDetailsPanel from './BuildingDetailsPanel';
+'use client'
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { selectBuilding } from '@/store/slices/buildingSlice'
+import BuildingDetailsPanel from './BuildingDetailsPanel'
+import BuildingModel from './BuildingModel'
 
 interface PlacedBuilding {
-  id: string;
-  templateId: string;
+  id: string
+  templateId: string
   position: {
-    x: number;
-    y: number;
-    z: number;
-  };
-  rotation: number;
-  status: 'construction' | 'active' | 'damaged' | 'inactive';
+    x: number
+    y: number
+    z: number
+  }
+  rotation: number
+  status: 'construction' | 'active' | 'damaged' | 'inactive'
 }
 
 export default function PlacedBuildings() {
-  const dispatch = useAppDispatch();
-  const placedBuildings = useAppSelector(state => state.building.placedBuildings);
-  const selectedBuildingId = useAppSelector(state => state.building.selectedBuildingId);
-  
+  const dispatch = useAppDispatch()
+  const placedBuildings = useAppSelector((state) => state.building.placedBuildings)
+  const selectedBuildingId = useAppSelector((state) => state.building.selectedBuildingId)
+
   // Handle building selection
   const handleSelectBuilding = (buildingId: string) => {
-    dispatch(selectBuilding(buildingId === selectedBuildingId ? null : buildingId));
-  };
-  
+    dispatch(selectBuilding(buildingId === selectedBuildingId ? null : buildingId))
+  }
+
   // If no buildings placed, don't render anything
-  if (!placedBuildings || placedBuildings.length === 0) return null;
-  
+  if (!placedBuildings || placedBuildings.length === 0) return null
+
   return (
     <group>
       {/* Render all placed buildings */}
       {placedBuildings.map((building: PlacedBuilding) => {
-        const template = buildingTemplates[building.templateId];
-        if (!template) return null;
-        
-        const isSelected = building.id === selectedBuildingId;
-        
+        const template = buildingTemplates[building.templateId]
+        if (!template) return null
+
+        const isSelected = building.id === selectedBuildingId
+
         return (
           <BuildingModel
             key={building.id}
@@ -58,9 +58,9 @@ export default function PlacedBuildings() {
             textContent={template.name}
             onClick={() => handleSelectBuilding(building.id)}
           />
-        );
+        )
       })}
-      
+
       {/* Details panel for selected building */}
       {selectedBuildingId && (
         <BuildingDetailsPanel
@@ -69,5 +69,5 @@ export default function PlacedBuildings() {
         />
       )}
     </group>
-  );
-} 
+  )
+}

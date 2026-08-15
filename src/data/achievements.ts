@@ -4,18 +4,25 @@
  */
 
 export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  rarity: 'common' | 'rare' | 'epic' | 'legendary';
-  xp: number;
-  category: 'learning' | 'building' | 'mastery' | 'exploration' | 'social';
+  id: string
+  title: string
+  description: string
+  icon: string
+  rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  xp: number
+  category: 'learning' | 'building' | 'mastery' | 'exploration' | 'social'
   requirement: {
-    type: 'challenges_completed' | 'xp_earned' | 'buildings_built' | 'code_lines' | 'perfect_score' | 'speed_run' | 'exploration';
-    value: number;
-    specific?: string[]; // Specific challenge IDs or building types
-  };
+    type:
+      | 'challenges_completed'
+      | 'xp_earned'
+      | 'buildings_built'
+      | 'code_lines'
+      | 'perfect_score'
+      | 'speed_run'
+      | 'exploration'
+    value: number
+    specific?: string[] // Specific challenge IDs or building types
+  }
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
@@ -30,8 +37,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'challenges_completed',
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     id: 'html_novice',
@@ -43,8 +50,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'challenges_completed',
-      value: 3
-    }
+      value: 3,
+    },
   },
   {
     id: 'css_artist',
@@ -56,8 +63,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'challenges_completed',
-      value: 5
-    }
+      value: 5,
+    },
   },
   {
     id: 'javascript_wizard',
@@ -69,8 +76,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'challenges_completed',
-      value: 8
-    }
+      value: 8,
+    },
   },
   {
     id: 'code_master',
@@ -82,8 +89,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'challenges_completed',
-      value: 15
-    }
+      value: 15,
+    },
   },
 
   // Building Achievements
@@ -97,8 +104,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'building',
     requirement: {
       type: 'buildings_built',
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     id: 'city_planner',
@@ -110,8 +117,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'building',
     requirement: {
       type: 'buildings_built',
-      value: 10
-    }
+      value: 10,
+    },
   },
   {
     id: 'metropolis',
@@ -123,8 +130,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'building',
     requirement: {
       type: 'buildings_built',
-      value: 25
-    }
+      value: 25,
+    },
   },
 
   // Mastery Achievements
@@ -138,8 +145,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'perfect_score',
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     id: 'speed_coder',
@@ -151,8 +158,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'speed_run',
-      value: 120 // seconds
-    }
+      value: 120, // seconds
+    },
   },
   {
     id: 'code_warrior',
@@ -164,8 +171,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'perfect_score',
-      value: 5
-    }
+      value: 5,
+    },
   },
 
   // XP Milestones
@@ -179,8 +186,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'xp_earned',
-      value: 500
-    }
+      value: 500,
+    },
   },
   {
     id: 'skilled_developer',
@@ -192,8 +199,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'learning',
     requirement: {
       type: 'xp_earned',
-      value: 2000
-    }
+      value: 2000,
+    },
   },
   {
     id: 'elite_coder',
@@ -205,8 +212,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'xp_earned',
-      value: 5000
-    }
+      value: 5000,
+    },
   },
   {
     id: 'legendary_developer',
@@ -218,8 +225,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'mastery',
     requirement: {
       type: 'xp_earned',
-      value: 10000
-    }
+      value: 10000,
+    },
   },
 
   // Exploration Achievements
@@ -233,8 +240,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'exploration',
     requirement: {
       type: 'exploration',
-      value: 10
-    }
+      value: 10,
+    },
   },
   {
     id: 'ancient_secrets',
@@ -246,14 +253,14 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'exploration',
     requirement: {
       type: 'exploration',
-      value: 100
-    }
+      value: 100,
+    },
   },
 
   // Special Achievements
   {
     id: 'pixel_friend',
-    title: 'Pixel\'s Friend',
+    title: "Pixel's Friend",
     description: 'Interact with Pixel 50 times',
     icon: 'bot',
     rarity: 'rare',
@@ -261,8 +268,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'social',
     requirement: {
       type: 'exploration',
-      value: 50
-    }
+      value: 50,
+    },
   },
   {
     id: 'night_owl',
@@ -274,8 +281,8 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'exploration',
     requirement: {
       type: 'exploration',
-      value: 1
-    }
+      value: 1,
+    },
   },
   {
     id: 'early_bird',
@@ -287,47 +294,46 @@ export const ACHIEVEMENTS: Achievement[] = [
     category: 'exploration',
     requirement: {
       type: 'exploration',
-      value: 1
-    }
-  }
-];
+      value: 1,
+    },
+  },
+]
 
 // Helper functions
 export function getAchievementById(id: string): Achievement | undefined {
-  return ACHIEVEMENTS.find(a => a.id === id);
+  return ACHIEVEMENTS.find((a) => a.id === id)
 }
 
 export function getAchievementsByCategory(category: Achievement['category']): Achievement[] {
-  return ACHIEVEMENTS.filter(a => a.category === category);
+  return ACHIEVEMENTS.filter((a) => a.category === category)
 }
 
 export function getAchievementsByRarity(rarity: Achievement['rarity']): Achievement[] {
-  return ACHIEVEMENTS.filter(a => a.rarity === rarity);
+  return ACHIEVEMENTS.filter((a) => a.rarity === rarity)
 }
 
 export function checkAchievementUnlocked(
   achievement: Achievement,
   playerStats: {
-    challengesCompleted: number;
-    xpEarned: number;
-    buildingsBuilt: number;
-    perfectScores: number;
-    fastestCompletion: number;
+    challengesCompleted: number
+    xpEarned: number
+    buildingsBuilt: number
+    perfectScores: number
+    fastestCompletion: number
   }
 ): boolean {
   switch (achievement.requirement.type) {
     case 'challenges_completed':
-      return playerStats.challengesCompleted >= achievement.requirement.value;
+      return playerStats.challengesCompleted >= achievement.requirement.value
     case 'xp_earned':
-      return playerStats.xpEarned >= achievement.requirement.value;
+      return playerStats.xpEarned >= achievement.requirement.value
     case 'buildings_built':
-      return playerStats.buildingsBuilt >= achievement.requirement.value;
+      return playerStats.buildingsBuilt >= achievement.requirement.value
     case 'perfect_score':
-      return playerStats.perfectScores >= achievement.requirement.value;
+      return playerStats.perfectScores >= achievement.requirement.value
     case 'speed_run':
-      return playerStats.fastestCompletion <= achievement.requirement.value;
+      return playerStats.fastestCompletion <= achievement.requirement.value
     default:
-      return false;
+      return false
   }
 }
-

@@ -3,29 +3,20 @@
  * UI for creating a new collaboration session
  */
 
-'use client';
+'use client'
 
-import { useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import {
-  Pencil,
-  Eye,
-  RefreshCw,
-  Sparkles,
-  X,
-  Mic,
-  Users,
-  Target,
-} from 'lucide-react';
-import { getCollaborationSystem } from '@/utils/collaborationSystem';
-import type { User, CollaborationSession } from '@/utils/collaborationSystem';
-import { Icon } from '@/components/ui/Icon';
+import type { LucideIcon } from 'lucide-react'
+import { Eye, Mic, Pencil, RefreshCw, Sparkles, Target, Users, X } from 'lucide-react'
+import { useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import type { CollaborationSession, User } from '@/utils/collaborationSystem'
+import { getCollaborationSystem } from '@/utils/collaborationSystem'
 
 export interface CreateSessionModalProps {
-  currentUser: User;
-  challengeId?: string;
-  onSessionCreated: (session: CollaborationSession) => void;
-  onClose: () => void;
+  currentUser: User
+  challengeId?: string
+  onSessionCreated: (session: CollaborationSession) => void
+  onClose: () => void
 }
 
 export function CreateSessionModal({
@@ -39,25 +30,20 @@ export function CreateSessionModal({
     allowEditing: 'all' as 'host-only' | 'all' | 'turn-based',
     voiceChat: false,
     allowSpectators: true,
-  });
+  })
 
-  const collabSystem = getCollaborationSystem();
+  const collabSystem = getCollaborationSystem()
 
   const handleCreate = () => {
-    const session = collabSystem.createSession(
-      currentUser.id,
-      currentUser,
-      challengeId,
-      settings,
-    );
-    onSessionCreated(session);
-  };
+    const session = collabSystem.createSession(currentUser.id, currentUser, challengeId, settings)
+    onSessionCreated(session)
+  }
 
   const editingOptions: {
-    value: 'all' | 'host-only' | 'turn-based';
-    icon: LucideIcon;
-    label: string;
-    description: string;
+    value: 'all' | 'host-only' | 'turn-based'
+    icon: LucideIcon
+    label: string
+    description: string
   }[] = [
     {
       value: 'all',
@@ -77,7 +63,7 @@ export function CreateSessionModal({
       label: 'Turn-based',
       description: 'Pass control between participants',
     },
-  ];
+  ]
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
@@ -181,9 +167,7 @@ export function CreateSessionModal({
               <input
                 type="checkbox"
                 checked={settings.allowSpectators}
-                onChange={(e) =>
-                  setSettings({ ...settings, allowSpectators: e.target.checked })
-                }
+                onChange={(e) => setSettings({ ...settings, allowSpectators: e.target.checked })}
                 className="h-5 w-5 rounded border-[rgb(var(--border-subtle))] bg-surface text-accent focus:ring-accent/50"
               />
             </label>
@@ -210,5 +194,5 @@ export function CreateSessionModal({
         </div>
       </div>
     </div>
-  );
+  )
 }

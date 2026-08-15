@@ -1,21 +1,21 @@
 // File: /src/store/store.ts
-import { configureStore } from '@reduxjs/toolkit';
-import editorReducer from './slices/editorSlice';
-import gameReducer from './slices/gameSlice';
-import resourceReducer from './slices/resourceSlice';
-import buildingReducer from './slices/buildingSlice';
-import playerReducer from './slices/playerSlice';
-import villagerReducer from './slices/villagerSlice';
-import userReducer from './slices/userSlice';
-import challengeReducer from './slices/challengeSlice';
-import tutorialReducer from './slices/tutorialSlice';
-import analyticsReducer from './slices/analyticsSlice';
-import multiplayerReducer from './slices/multiplayerSlice';
-import achievementReducer from './slices/achievementSlice';
-import dialogueReducer from './slices/dialogueSlice';
-import uiReducer from './slices/uiSlice';
-import eventReducer from './slices/eventSlice';
-import { soundMiddleware } from './middleware/soundMiddleware';
+import { configureStore } from '@reduxjs/toolkit'
+import { soundMiddleware } from './middleware/soundMiddleware'
+import achievementReducer from './slices/achievementSlice'
+import analyticsReducer from './slices/analyticsSlice'
+import buildingReducer from './slices/buildingSlice'
+import challengeReducer from './slices/challengeSlice'
+import dialogueReducer from './slices/dialogueSlice'
+import editorReducer from './slices/editorSlice'
+import eventReducer from './slices/eventSlice'
+import gameReducer from './slices/gameSlice'
+import multiplayerReducer from './slices/multiplayerSlice'
+import playerReducer from './slices/playerSlice'
+import resourceReducer from './slices/resourceSlice'
+import tutorialReducer from './slices/tutorialSlice'
+import uiReducer from './slices/uiSlice'
+import userReducer from './slices/userSlice'
+import villagerReducer from './slices/villagerSlice'
 
 export const store = configureStore({
   reducer: {
@@ -35,9 +35,8 @@ export const store = configureStore({
     ui: uiReducer,
     events: eventReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(soundMiddleware),
-});
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(soundMiddleware),
+})
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

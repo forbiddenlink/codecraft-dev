@@ -4,36 +4,36 @@
  */
 
 export interface BuildingUpgrade {
-  id: string;
-  buildingType: string;
-  level: number;
-  name: string;
-  description: string;
-  icon: string;
-  
+  id: string
+  buildingType: string
+  level: number
+  name: string
+  description: string
+  icon: string
+
   requirements: {
-    playerLevel?: number;
-    resources: Record<string, number>;
-    prerequisiteUpgrades?: string[];
-    completedChallenges?: string[];
-  };
-  
+    playerLevel?: number
+    resources: Record<string, number>
+    prerequisiteUpgrades?: string[]
+    completedChallenges?: string[]
+  }
+
   benefits: {
-    resourceGeneration?: Record<string, number>; // +X per minute
-    efficiency?: number; // Multiplier (1.5 = 50% increase)
-    capacity?: Record<string, number>; // Storage capacity
-    unlocks?: string[]; // New features/buildings
-    morale?: number;
-  };
-  
+    resourceGeneration?: Record<string, number> // +X per minute
+    efficiency?: number // Multiplier (1.5 = 50% increase)
+    capacity?: Record<string, number> // Storage capacity
+    unlocks?: string[] // New features/buildings
+    morale?: number
+  }
+
   visualChanges?: {
-    scale?: number;
-    color?: string;
-    particles?: boolean;
-    glow?: boolean;
-  };
-  
-  upgradeTime?: number; // seconds
+    scale?: number
+    color?: string
+    particles?: boolean
+    glow?: boolean
+  }
+
+  upgradeTime?: number // seconds
 }
 
 export const BUILDING_UPGRADES: BuildingUpgrade[] = [
@@ -49,21 +49,21 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 3,
       resources: {
         energy: 500,
-        minerals: 200
-      }
+        minerals: 200,
+      },
     },
     benefits: {
       resourceGeneration: {
-        energy: 5 // +5 energy/min
+        energy: 5, // +5 energy/min
       },
-      efficiency: 1.5
+      efficiency: 1.5,
     },
     visualChanges: {
       scale: 1.1,
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 30
+    upgradeTime: 30,
   },
 
   {
@@ -77,24 +77,24 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 6,
       resources: {
         energy: 1000,
-        minerals: 500
+        minerals: 500,
       },
-      prerequisiteUpgrades: ['energy-gen-2']
+      prerequisiteUpgrades: ['energy-gen-2'],
     },
     benefits: {
       resourceGeneration: {
-        energy: 10
+        energy: 10,
       },
       efficiency: 2.0,
-      unlocks: ['fusion-tech']
+      unlocks: ['fusion-tech'],
     },
     visualChanges: {
       scale: 1.2,
       color: '#60a5fa',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 60
+    upgradeTime: 60,
   },
 
   {
@@ -108,25 +108,25 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 10,
       resources: {
         energy: 2000,
-        minerals: 1000
+        minerals: 1000,
       },
       prerequisiteUpgrades: ['energy-gen-3'],
-      completedChallenges: ['js-async']
+      completedChallenges: ['js-async'],
     },
     benefits: {
       resourceGeneration: {
-        energy: 20
+        energy: 20,
       },
       efficiency: 3.0,
-      unlocks: ['quantum-tech', 'ultimate-buildings']
+      unlocks: ['quantum-tech', 'ultimate-buildings'],
     },
     visualChanges: {
       scale: 1.5,
       color: '#a78bfa',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 120
+    upgradeTime: 120,
   },
 
   // ===== RESOURCE COLLECTOR UPGRADES =====
@@ -141,20 +141,20 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 3,
       resources: {
         energy: 300,
-        minerals: 300
-      }
+        minerals: 300,
+      },
     },
     benefits: {
       resourceGeneration: {
-        minerals: 5
+        minerals: 5,
       },
-      efficiency: 1.5
+      efficiency: 1.5,
     },
     visualChanges: {
       scale: 1.1,
-      particles: true
+      particles: true,
     },
-    upgradeTime: 30
+    upgradeTime: 30,
   },
 
   {
@@ -168,27 +168,27 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 7,
       resources: {
         energy: 600,
-        minerals: 600
+        minerals: 600,
       },
       prerequisiteUpgrades: ['collector-2'],
-      completedChallenges: ['javascript-2']
+      completedChallenges: ['javascript-2'],
     },
     benefits: {
       resourceGeneration: {
         minerals: 10,
-        energy: 2
+        energy: 2,
       },
       efficiency: 2.0,
       morale: 10,
-      unlocks: ['automation-systems']
+      unlocks: ['automation-systems'],
     },
     visualChanges: {
       scale: 1.2,
       color: '#10b981',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 60
+    upgradeTime: 60,
   },
 
   // ===== LIVING QUARTERS UPGRADES =====
@@ -203,20 +203,20 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 2,
       resources: {
         energy: 200,
-        food: 100
-      }
+        food: 100,
+      },
     },
     benefits: {
       morale: 15,
       capacity: {
-        population: 10
-      }
+        population: 10,
+      },
     },
     visualChanges: {
       scale: 1.1,
-      particles: true
+      particles: true,
     },
-    upgradeTime: 20
+    upgradeTime: 20,
   },
 
   {
@@ -231,26 +231,26 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       resources: {
         energy: 400,
         food: 200,
-        minerals: 200
+        minerals: 200,
       },
-      prerequisiteUpgrades: ['habitat-2']
+      prerequisiteUpgrades: ['habitat-2'],
     },
     benefits: {
       morale: 30,
       capacity: {
-        population: 25
+        population: 25,
       },
       resourceGeneration: {
-        energy: 3 // Happy people = productive people
-      }
+        energy: 3, // Happy people = productive people
+      },
     },
     visualChanges: {
       scale: 1.3,
       color: '#ec4899',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 45
+    upgradeTime: 45,
   },
 
   // ===== COMMAND CENTER UPGRADES =====
@@ -265,19 +265,19 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 4,
       resources: {
         energy: 500,
-        minerals: 300
-      }
+        minerals: 300,
+      },
     },
     benefits: {
       unlocks: ['advanced-analytics', 'event-prediction'],
-      morale: 10
+      morale: 10,
     },
     visualChanges: {
       scale: 1.1,
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 40
+    upgradeTime: 40,
   },
 
   {
@@ -291,23 +291,23 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 8,
       resources: {
         energy: 1000,
-        minerals: 500
+        minerals: 500,
       },
       prerequisiteUpgrades: ['command-2'],
-      completedChallenges: ['js-objects']
+      completedChallenges: ['js-objects'],
     },
     benefits: {
       efficiency: 1.5, // All resource generation +50%
       unlocks: ['ai-assistant', 'auto-optimization'],
-      morale: 20
+      morale: 20,
     },
     visualChanges: {
       scale: 1.3,
       color: '#3b82f6',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 90
+    upgradeTime: 90,
   },
 
   // ===== SPECIAL BUILDING UPGRADES =====
@@ -322,20 +322,20 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 3,
       resources: {
         food: 300,
-        energy: 200
-      }
+        energy: 200,
+      },
     },
     benefits: {
       morale: 25,
       resourceGeneration: {
-        food: 5
-      }
+        food: 5,
+      },
     },
     visualChanges: {
       scale: 1.2,
-      particles: true
+      particles: true,
     },
-    upgradeTime: 30
+    upgradeTime: 30,
   },
 
   {
@@ -349,22 +349,22 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 6,
       resources: {
         energy: 800,
-        minerals: 400
+        minerals: 400,
       },
-      completedChallenges: ['js-async']
+      completedChallenges: ['js-async'],
     },
     benefits: {
       efficiency: 2.0,
       unlocks: ['quantum-algorithms', 'instant-compile'],
-      morale: 15
+      morale: 15,
     },
     visualChanges: {
       scale: 1.2,
       color: '#8b5cf6',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 60
+    upgradeTime: 60,
   },
 
   {
@@ -378,36 +378,37 @@ export const BUILDING_UPGRADES: BuildingUpgrade[] = [
       playerLevel: 5,
       resources: {
         energy: 400,
-        minerals: 200
+        minerals: 200,
       },
-      completedChallenges: ['mastery-2']
+      completedChallenges: ['mastery-2'],
     },
     benefits: {
       morale: 40,
       unlocks: ['holographic-tech'],
       resourceGeneration: {
-        energy: 5 // Tourism/inspiration generates energy
-      }
+        energy: 5, // Tourism/inspiration generates energy
+      },
     },
     visualChanges: {
       scale: 1.3,
       color: '#ec4899',
       particles: true,
-      glow: true
+      glow: true,
     },
-    upgradeTime: 45
-  }
-];
+    upgradeTime: 45,
+  },
+]
 
 // Helper functions
 export function getUpgradesForBuilding(buildingType: string): BuildingUpgrade[] {
-  return BUILDING_UPGRADES.filter(u => u.buildingType === buildingType)
-    .sort((a, b) => a.level - b.level);
+  return BUILDING_UPGRADES.filter((u) => u.buildingType === buildingType).sort(
+    (a, b) => a.level - b.level
+  )
 }
 
 export function getNextUpgrade(buildingType: string, currentLevel: number): BuildingUpgrade | null {
-  const upgrades = getUpgradesForBuilding(buildingType);
-  return upgrades.find(u => u.level === currentLevel + 1) || null;
+  const upgrades = getUpgradesForBuilding(buildingType)
+  return upgrades.find((u) => u.level === currentLevel + 1) || null
 }
 
 export function canAffordUpgrade(
@@ -416,7 +417,7 @@ export function canAffordUpgrade(
 ): boolean {
   return Object.entries(upgrade.requirements.resources).every(
     ([resource, amount]) => (playerResources[resource] || 0) >= amount
-  );
+  )
 }
 
 export function meetsRequirements(
@@ -427,51 +428,47 @@ export function meetsRequirements(
 ): boolean {
   // Level check
   if (upgrade.requirements.playerLevel && playerLevel < upgrade.requirements.playerLevel) {
-    return false;
+    return false
   }
 
   // Prerequisite upgrades
   if (upgrade.requirements.prerequisiteUpgrades) {
-    if (!upgrade.requirements.prerequisiteUpgrades.every(u => completedUpgrades.includes(u))) {
-      return false;
+    if (!upgrade.requirements.prerequisiteUpgrades.every((u) => completedUpgrades.includes(u))) {
+      return false
     }
   }
 
   // Challenge requirements
   if (upgrade.requirements.completedChallenges) {
-    if (!upgrade.requirements.completedChallenges.every(c => completedChallenges.includes(c))) {
-      return false;
+    if (!upgrade.requirements.completedChallenges.every((c) => completedChallenges.includes(c))) {
+      return false
     }
   }
 
-  return true;
+  return true
 }
 
-export function calculateUpgradeBenefit(
-  upgrade: BuildingUpgrade,
-  baseProduction: number
-): number {
-  if (!upgrade.benefits.efficiency) return baseProduction;
-  return baseProduction * upgrade.benefits.efficiency;
+export function calculateUpgradeBenefit(upgrade: BuildingUpgrade, baseProduction: number): number {
+  if (!upgrade.benefits.efficiency) return baseProduction
+  return baseProduction * upgrade.benefits.efficiency
 }
 
 export function getAllUnlocks(completedUpgrades: string[]): string[] {
-  const unlocks: string[] = [];
-  
-  completedUpgrades.forEach(upgradeId => {
-    const upgrade = BUILDING_UPGRADES.find(u => u.id === upgradeId);
-    if (upgrade?.benefits.unlocks) {
-      unlocks.push(...upgrade.benefits.unlocks);
-    }
-  });
+  const unlocks: string[] = []
 
-  return [...new Set(unlocks)]; // Remove duplicates
+  completedUpgrades.forEach((upgradeId) => {
+    const upgrade = BUILDING_UPGRADES.find((u) => u.id === upgradeId)
+    if (upgrade?.benefits.unlocks) {
+      unlocks.push(...upgrade.benefits.unlocks)
+    }
+  })
+
+  return [...new Set(unlocks)] // Remove duplicates
 }
 
 export function getTotalMoraleBonus(completedUpgrades: string[]): number {
   return completedUpgrades.reduce((total, upgradeId) => {
-    const upgrade = BUILDING_UPGRADES.find(u => u.id === upgradeId);
-    return total + (upgrade?.benefits.morale || 0);
-  }, 0);
+    const upgrade = BUILDING_UPGRADES.find((u) => u.id === upgradeId)
+    return total + (upgrade?.benefits.morale || 0)
+  }, 0)
 }
-

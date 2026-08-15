@@ -1,7 +1,7 @@
-'use client';
-import { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+'use client'
+import { useFrame } from '@react-three/fiber'
+import { useMemo, useRef } from 'react'
+import * as THREE from 'three'
 
 // Vertex shader - passes UV coordinates and position to fragment shader
 const vertexShader = `
@@ -13,7 +13,7 @@ const vertexShader = `
     vPosition = position;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
-`;
+`
 
 // Fragment shader - creates animated data flow effect
 const fragmentShader = `
@@ -131,7 +131,7 @@ const fragmentShader = `
 
     gl_FragColor = vec4(glow, alpha);
   }
-`;
+`
 
 // Create shader material with uniforms
 function createDataFlowMaterial(
@@ -156,28 +156,28 @@ function createDataFlowMaterial(
     side: THREE.DoubleSide,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
-  });
+  })
 }
 
 interface DataFlowShaderProps {
   // Dimensions of the building to wrap
-  width?: number;
-  height?: number;
-  depth?: number;
+  width?: number
+  height?: number
+  depth?: number
   // Color theme for the effect
-  color?: string;
+  color?: string
   // Animation speed multiplier
-  speed?: number;
+  speed?: number
   // Effect density (more columns/traces)
-  density?: number;
+  density?: number
   // Overall opacity of the effect
-  opacity?: number;
+  opacity?: number
   // Glow intensity for bloom effect
-  glowIntensity?: number;
+  glowIntensity?: number
   // Whether the effect is active
-  isActive?: boolean;
+  isActive?: boolean
   // Offset from building surface
-  offset?: number;
+  offset?: number
 }
 
 /**
@@ -201,51 +201,51 @@ export default function DataFlowShader({
   opacity = 0.4,
   glowIntensity = 1.5,
   isActive = true,
-  offset = 0.05
+  offset = 0.05,
 }: DataFlowShaderProps) {
   // Create materials for each face
-  const threeColor = useMemo(() => new THREE.Color(color), [color]);
+  const threeColor = useMemo(() => new THREE.Color(color), [color])
 
   const frontMaterial = useMemo(
     () => createDataFlowMaterial(threeColor, opacity, speed, density, glowIntensity),
     [threeColor, opacity, speed, density, glowIntensity]
-  );
+  )
 
   const sideMaterial = useMemo(
     () => createDataFlowMaterial(threeColor, opacity * 0.8, speed, density, glowIntensity),
     [threeColor, opacity, speed, density, glowIntensity]
-  );
+  )
 
   const topMaterial = useMemo(
     () => createDataFlowMaterial(threeColor, opacity * 0.6, speed, density, glowIntensity),
     [threeColor, opacity, speed, density, glowIntensity]
-  );
+  )
 
   // Store refs to all materials for animation
-  const materialsRef = useRef<THREE.ShaderMaterial[]>([]);
+  const materialsRef = useRef<THREE.ShaderMaterial[]>([])
 
   // Animate the shaders
   useFrame((state) => {
     if (isActive) {
-      const time = state.clock.elapsedTime;
-      materialsRef.current.forEach(material => {
+      const time = state.clock.elapsedTime
+      materialsRef.current.forEach((material) => {
         if (material?.uniforms?.uTime) {
-          material.uniforms.uTime.value = time;
+          material.uniforms.uTime.value = time
         }
-      });
+      })
     }
-  });
+  })
 
   // Don't render if not active
-  if (!isActive) return null;
+  if (!isActive) return null
 
   // Calculate slightly larger dimensions for the overlay
-  const overlayWidth = width + offset * 2;
-  const overlayHeight = height + offset * 2;
-  const overlayDepth = depth + offset * 2;
+  const overlayWidth = width + offset * 2
+  const overlayHeight = height + offset * 2
+  const overlayDepth = depth + offset * 2
 
   // Store materials in ref for animation
-  materialsRef.current = [frontMaterial, sideMaterial, topMaterial];
+  materialsRef.current = [frontMaterial, sideMaterial, topMaterial]
 
   return (
     <group>
@@ -279,7 +279,7 @@ export default function DataFlowShader({
         <primitive object={topMaterial} attach="material" />
       </mesh>
     </group>
-  );
+  )
 }
 
 /**
@@ -295,25 +295,25 @@ export function DataFlowPlane({
   glowIntensity = 1.5,
   isActive = true,
 }: Omit<DataFlowShaderProps, 'depth' | 'offset'>) {
-  const threeColor = useMemo(() => new THREE.Color(color), [color]);
+  const threeColor = useMemo(() => new THREE.Color(color), [color])
 
   const material = useMemo(
     () => createDataFlowMaterial(threeColor, opacity, speed, density, glowIntensity),
     [threeColor, opacity, speed, density, glowIntensity]
-  );
+  )
 
   useFrame((state) => {
     if (material && isActive) {
-      material.uniforms.uTime.value = state.clock.elapsedTime;
+      material.uniforms.uTime.value = state.clock.elapsedTime
     }
-  });
+  })
 
-  if (!isActive) return null;
+  if (!isActive) return null
 
   return (
     <mesh>
       <planeGeometry args={[width, height]} />
       <primitive object={material} attach="material" />
     </mesh>
-  );
+  )
 }

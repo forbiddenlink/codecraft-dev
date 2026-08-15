@@ -1,22 +1,15 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import {
-  Target,
-  CheckCircle2,
-  XCircle,
-  Code2,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react';
-import { useChallengeSystem } from '@/hooks/useChallengeSystem';
-import { useAppDispatch } from '@/store/hooks';
-import { setEditorVisible, setCode, setLanguage } from '@/store/slices/editorSlice';
-import { Icon } from '@/components/ui/Icon';
-import { HudPanel } from '@/components/ui/HudPanel';
+import { motion } from 'framer-motion'
+import { CheckCircle2, ChevronLeft, ChevronRight, Code2, Target, XCircle } from 'lucide-react'
+import { HudPanel } from '@/components/ui/HudPanel'
+import { Icon } from '@/components/ui/Icon'
+import { useChallengeSystem } from '@/hooks/useChallengeSystem'
+import { useAppDispatch } from '@/store/hooks'
+import { setCode, setEditorVisible, setLanguage } from '@/store/slices/editorSlice'
 
 export default function ChallengeHUD() {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
   const {
     currentChallenge,
     currentIndex,
@@ -27,7 +20,7 @@ export default function ChallengeHUD() {
     navigateToNextChallenge,
     navigateToPreviousChallenge,
     availableChallenges,
-  } = useChallengeSystem();
+  } = useChallengeSystem()
 
   if (!currentChallenge) {
     return (
@@ -39,26 +32,26 @@ export default function ChallengeHUD() {
           </p>
         </HudPanel>
       </motion.div>
-    );
+    )
   }
 
   const handleStartCoding = () => {
-    dispatch(setEditorVisible(true));
-    dispatch(setLanguage('html'));
+    dispatch(setEditorVisible(true))
+    dispatch(setLanguage('html'))
     if (currentChallenge.htmlTemplate) {
-      dispatch(setCode({ language: 'html', code: currentChallenge.htmlTemplate }));
+      dispatch(setCode({ language: 'html', code: currentChallenge.htmlTemplate }))
     }
     if (currentChallenge.cssTemplate) {
-      dispatch(setCode({ language: 'css', code: currentChallenge.cssTemplate }));
+      dispatch(setCode({ language: 'css', code: currentChallenge.cssTemplate }))
     }
-  };
+  }
 
   const difficultyLabel =
     currentChallenge.difficulty === 1
       ? 'Beginner'
       : currentChallenge.difficulty === 2
         ? 'Intermediate'
-        : 'Advanced';
+        : 'Advanced'
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -192,5 +185,5 @@ export default function ChallengeHUD() {
         </div>
       </HudPanel>
     </motion.div>
-  );
+  )
 }

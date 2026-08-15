@@ -1,46 +1,42 @@
-'use client';
+'use client'
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import type { LucideIcon } from 'lucide-react'
 import {
   BarChart3,
+  ChevronRight,
+  CircleHelp,
+  Factory,
+  Menu,
+  Scale,
+  Settings,
+  Sparkles,
+  Terminal,
   Trophy,
   Users,
-  Sparkles,
-  Factory,
-  Settings,
-  CircleHelp,
-  Menu,
   X,
-  ChevronRight,
-  Scale,
-  Terminal,
-} from 'lucide-react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-  toggleMainMenu,
-  toggleSettings,
-  toggleHelp,
-} from '@/store/slices/uiSlice';
-import { openAnalytics } from '@/store/slices/analyticsSlice';
-import { toggleSessionBrowser, toggleCreateModal } from '@/store/slices/multiplayerSlice';
-import { toggleAchievementProgress } from '@/store/slices/achievementSlice';
-import { Icon } from '@/components/ui/Icon';
-import type { LucideIcon } from 'lucide-react';
+} from 'lucide-react'
+import Link from 'next/link'
+import React, { useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { toggleAchievementProgress } from '@/store/slices/achievementSlice'
+import { openAnalytics } from '@/store/slices/analyticsSlice'
+import { toggleCreateModal, toggleSessionBrowser } from '@/store/slices/multiplayerSlice'
+import { toggleHelp, toggleMainMenu, toggleSettings } from '@/store/slices/uiSlice'
 
 type MenuItem = {
-  id: string;
-  icon: LucideIcon;
-  label: string;
-  description: string;
-  action: () => void;
-  hotkey: string;
-};
+  id: string
+  icon: LucideIcon
+  label: string
+  description: string
+  action: () => void
+  hotkey: string
+}
 
 export function MainMenu() {
-  const dispatch = useAppDispatch();
-  const isOpen = useAppSelector((state) => state.ui.showMainMenu);
-  const [showQuickActions, setShowQuickActions] = useState(false);
+  const dispatch = useAppDispatch()
+  const isOpen = useAppSelector((state) => state.ui.showMainMenu)
+  const [showQuickActions, setShowQuickActions] = useState(false)
 
   const menuItems: MenuItem[] = [
     {
@@ -49,8 +45,8 @@ export function MainMenu() {
       label: 'Analytics Dashboard',
       description: 'View your learning progress',
       action: () => {
-        dispatch(openAnalytics());
-        dispatch(toggleMainMenu());
+        dispatch(openAnalytics())
+        dispatch(toggleMainMenu())
       },
       hotkey: '⌘A',
     },
@@ -60,8 +56,8 @@ export function MainMenu() {
       label: 'Achievements',
       description: 'Track your accomplishments',
       action: () => {
-        dispatch(toggleAchievementProgress());
-        dispatch(toggleMainMenu());
+        dispatch(toggleAchievementProgress())
+        dispatch(toggleMainMenu())
       },
       hotkey: '⌘H',
     },
@@ -71,8 +67,8 @@ export function MainMenu() {
       label: 'Multiplayer',
       description: 'Join or create coding sessions',
       action: () => {
-        dispatch(toggleSessionBrowser());
-        dispatch(toggleMainMenu());
+        dispatch(toggleSessionBrowser())
+        dispatch(toggleMainMenu())
       },
       hotkey: '⌘M',
     },
@@ -82,8 +78,8 @@ export function MainMenu() {
       label: 'Create Session',
       description: 'Start a new collaboration',
       action: () => {
-        dispatch(toggleCreateModal());
-        dispatch(toggleMainMenu());
+        dispatch(toggleCreateModal())
+        dispatch(toggleMainMenu())
       },
       hotkey: '⌘⇧C',
     },
@@ -93,7 +89,7 @@ export function MainMenu() {
       label: 'Resource Management',
       description: 'Track colony resources in the top-right HUD',
       action: () => {
-        dispatch(toggleMainMenu());
+        dispatch(toggleMainMenu())
       },
       hotkey: '',
     },
@@ -103,8 +99,8 @@ export function MainMenu() {
       label: 'Settings',
       description: 'Configure your experience',
       action: () => {
-        dispatch(toggleSettings());
-        dispatch(toggleMainMenu());
+        dispatch(toggleSettings())
+        dispatch(toggleMainMenu())
       },
       hotkey: '⌘,',
     },
@@ -114,12 +110,12 @@ export function MainMenu() {
       label: 'Help & Tutorials',
       description: 'Learn how to play',
       action: () => {
-        dispatch(toggleHelp());
-        dispatch(toggleMainMenu());
+        dispatch(toggleHelp())
+        dispatch(toggleMainMenu())
       },
       hotkey: '?',
     },
-  ];
+  ]
 
   return (
     <>
@@ -157,7 +153,9 @@ export function MainMenu() {
                 CodeCraft
               </p>
               <h2 className="mt-1 text-xl font-semibold text-white">Command Menu</h2>
-              <p className="mt-1 text-sm text-white/75">Colony tools, learning, and collaboration</p>
+              <p className="mt-1 text-sm text-white/75">
+                Colony tools, learning, and collaboration
+              </p>
             </div>
 
             <div className="max-h-[70vh] space-y-1.5 overflow-y-auto p-3">
@@ -236,5 +234,5 @@ export function MainMenu() {
         </div>
       )}
     </>
-  );
+  )
 }

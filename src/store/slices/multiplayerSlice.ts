@@ -3,22 +3,22 @@
  * Manages collaboration session state
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 interface MultiplayerState {
-  isInSession: boolean;
-  sessionId: string | null;
-  isHost: boolean;
-  canEdit: boolean;
+  isInSession: boolean
+  sessionId: string | null
+  isHost: boolean
+  canEdit: boolean
   participants: Array<{
-    id: string;
-    username: string;
-    color: string;
-    level: number;
-  }>;
-  showSessionBrowser: boolean;
-  showCreateModal: boolean;
-  showCollaborationPanel: boolean;
+    id: string
+    username: string
+    color: string
+    level: number
+  }>
+  showSessionBrowser: boolean
+  showCreateModal: boolean
+  showCollaborationPanel: boolean
 }
 
 const initialState: MultiplayerState = {
@@ -30,7 +30,7 @@ const initialState: MultiplayerState = {
   showSessionBrowser: false,
   showCreateModal: false,
   showCollaborationPanel: false,
-};
+}
 
 const multiplayerSlice = createSlice({
   name: 'multiplayer',
@@ -39,47 +39,47 @@ const multiplayerSlice = createSlice({
     joinSession: (
       state,
       action: PayloadAction<{
-        sessionId: string;
-        isHost: boolean;
-        canEdit: boolean;
+        sessionId: string
+        isHost: boolean
+        canEdit: boolean
       }>
     ) => {
-      state.isInSession = true;
-      state.sessionId = action.payload.sessionId;
-      state.isHost = action.payload.isHost;
-      state.canEdit = action.payload.canEdit;
-      state.showSessionBrowser = false;
-      state.showCreateModal = false;
-      state.showCollaborationPanel = true;
+      state.isInSession = true
+      state.sessionId = action.payload.sessionId
+      state.isHost = action.payload.isHost
+      state.canEdit = action.payload.canEdit
+      state.showSessionBrowser = false
+      state.showCreateModal = false
+      state.showCollaborationPanel = true
     },
     leaveSession: (state) => {
-      state.isInSession = false;
-      state.sessionId = null;
-      state.isHost = false;
-      state.canEdit = false;
-      state.participants = [];
-      state.showCollaborationPanel = false;
+      state.isInSession = false
+      state.sessionId = null
+      state.isHost = false
+      state.canEdit = false
+      state.participants = []
+      state.showCollaborationPanel = false
     },
     updateParticipants: (state, action: PayloadAction<MultiplayerState['participants']>) => {
-      state.participants = action.payload;
+      state.participants = action.payload
     },
     toggleSessionBrowser: (state) => {
-      state.showSessionBrowser = !state.showSessionBrowser;
+      state.showSessionBrowser = !state.showSessionBrowser
       if (state.showSessionBrowser) {
-        state.showCreateModal = false;
+        state.showCreateModal = false
       }
     },
     toggleCreateModal: (state) => {
-      state.showCreateModal = !state.showCreateModal;
+      state.showCreateModal = !state.showCreateModal
       if (state.showCreateModal) {
-        state.showSessionBrowser = false;
+        state.showSessionBrowser = false
       }
     },
     toggleCollaborationPanel: (state) => {
-      state.showCollaborationPanel = !state.showCollaborationPanel;
+      state.showCollaborationPanel = !state.showCollaborationPanel
     },
   },
-});
+})
 
 export const {
   joinSession,
@@ -88,5 +88,5 @@ export const {
   toggleSessionBrowser,
   toggleCreateModal,
   toggleCollaborationPanel,
-} = multiplayerSlice.actions;
-export default multiplayerSlice.reducer;
+} = multiplayerSlice.actions
+export default multiplayerSlice.reducer
