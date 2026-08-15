@@ -457,7 +457,7 @@ export function getEditorConfig(
         strings: true,
       },
       parameterHints: { enabled: true },
-      hover: { enabled: true },
+      hover: { enabled: 'on' },
       folding: false,
     }
   }
