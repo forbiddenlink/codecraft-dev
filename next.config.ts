@@ -7,6 +7,25 @@ const withBundleAnalyzer = withBundleAnalyzerInit({ enabled: process.env.ANALYZE
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // monaco-editor@0.56.0's package.json "exports" map only resolves subpaths of the
+  // form "monaco-editor/<name>.js" -> "esm/vs/<name>.js". y-monaco@0.1.6 imports the
+  // pre-exports-map deep path "monaco-editor/esm/vs/editor/editor.api.js" directly,
+  // which the exports map re-nests to a non-existent "esm/vs/esm/vs/..." path. Alias
+  // the broken specifier to the equivalent one the exports map does resolve.
+  turbopack: {
+    resolveAlias: {
+      'monaco-editor/esm/vs/editor/editor.api.js': 'monaco-editor/editor/editor.api.js',
+    },
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      'monaco-editor/esm/vs/editor/editor.api.js': require.resolve(
+        'monaco-editor/editor/editor.api.js'
+      ),
+    }
+    return config
+  },
   // Serve Monaco Editor's static files and WebContainer security headers
   async headers() {
     return [
