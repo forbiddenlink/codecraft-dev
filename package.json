@@ -101,7 +101,7 @@
     "next-sitemap": "^4.2.3",
     "next-transpile-modules": "^10.0.1",
     "tailwindcss": "^4",
-    "typescript": "^6",
+    "typescript": "^7",
     "vite": "^8.2.0",
     "vitest": "^4.1.9",
     "webpack": "^5.109.2",
