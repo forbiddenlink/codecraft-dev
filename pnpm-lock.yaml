@@ -69,7 +69,7 @@ importers:
         version: 9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       '@react-three/postprocessing':
         specifier: ^3.0.5
-        version: 3.0.5(@react-three/fiber@9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.4)(postprocessing@7.0.0-beta.16(three@0.185.1))(react@19.2.8)(three@0.185.1)
+        version: 3.0.5(@react-three/fiber@9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.4)(postprocessing@6.39.4(three@0.185.1))(react@19.2.8)(three@0.185.1)
       '@react-three/rapier':
         specifier: ^2.2.0
         version: 2.2.0(@react-three/fiber@9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(react@19.2.8)(three@0.185.1)
@@ -149,8 +149,8 @@ importers:
         specifier: ^1.417.2
         version: 1.417.2
       postprocessing:
-        specifier: 7.0.0-beta.16
-        version: 7.0.0-beta.16(three@0.185.1)
+        specifier: ^6.39.4
+        version: 6.39.4(three@0.185.1)
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -5169,10 +5169,10 @@ packages:
   posthog-js@1.417.2:
     resolution: {integrity: sha512-DQ3E/CqRNs+l9qqOJo4iIL0tcA3eQ/9NzxkVTr0H2lWhXkWRfFKuVKh6/y25rdK4w7j1X9jCAGd8QZKLYD6jJA==}
 
-  postprocessing@7.0.0-beta.16:
-    resolution: {integrity: sha512-bT1LD1yh5SJ5XbZjJS5/G0HUUuaHqtBtnlJxz5b30fWQ6sk/Fn8lC4HHyVQ3mA0DjsVuxVo9qdOd706gcrCFUg==}
+  postprocessing@6.39.4:
+    resolution: {integrity: sha512-oAS/PjAbc/xT3OzjUrGsorJ4J064XwhVD2t0OwKLP/E8QwDMUJ0oOv6ZI1SYMtLchv4g0ySEx+JcLy92+48vlA==}
     peerDependencies:
-      three: '>= 0.179.0 < 0.184.0'
+      three: '>= 0.168.0 < 0.186.0'
 
   potpack@1.0.2:
     resolution: {integrity: sha512-choctRBIV9EMT9WGAZHn3V7t0Z2pMQyl0EZE6pFc/6ml3ssw7Dlf/oAOvFwjm1HVsqfQN8GfeFyJ+d8tRzqueQ==}
@@ -7727,12 +7727,12 @@ snapshots:
       - '@types/react'
       - immer
 
-  '@react-three/postprocessing@3.0.5(@react-three/fiber@9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.4)(postprocessing@7.0.0-beta.16(three@0.185.1))(react@19.2.8)(three@0.185.1)':
+  '@react-three/postprocessing@3.0.5(@react-three/fiber@9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.4)(postprocessing@6.39.4(three@0.185.1))(react@19.2.8)(three@0.185.1)':
     dependencies:
       '@react-three/fiber': 9.7.0(@types/react@19.2.18)(immer@11.1.8)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       maath: 0.10.8(@types/three@0.185.4)(three@0.185.1)
-      n8ao: 2.0.1(postprocessing@7.0.0-beta.16(three@0.185.1))(three@0.185.1)
-      postprocessing: 7.0.0-beta.16(three@0.185.1)
+      n8ao: 2.0.1(postprocessing@6.39.4(three@0.185.1))(three@0.185.1)
+      postprocessing: 6.39.4(three@0.185.1)
       react: 19.2.8
       three: 0.185.1
     transitivePeerDependencies:
@@ -11062,9 +11062,9 @@ snapshots:
 
   mute-stream@3.0.0: {}
 
-  n8ao@2.0.1(postprocessing@7.0.0-beta.16(three@0.185.1))(three@0.185.1):
+  n8ao@2.0.1(postprocessing@6.39.4(three@0.185.1))(three@0.185.1):
     dependencies:
-      postprocessing: 7.0.0-beta.16(three@0.185.1)
+      postprocessing: 6.39.4(three@0.185.1)
       three: 0.185.1
 
   nanoid@3.3.16: {}
@@ -11431,7 +11431,7 @@ snapshots:
     transitivePeerDependencies:
       - preact-render-to-string
 
-  postprocessing@7.0.0-beta.16(three@0.185.1):
+  postprocessing@6.39.4(three@0.185.1):
     dependencies:
       three: 0.185.1
 
