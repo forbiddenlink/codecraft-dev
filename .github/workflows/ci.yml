@@ -123,7 +123,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm run test:e2e -- --project=chromium
+        run: pnpm exec playwright test --project=chromium
         env:
           CI: true
 
