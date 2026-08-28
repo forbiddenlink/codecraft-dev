@@ -1,0 +1,42 @@
+{
+  "allowedForCodex": true,
+  "automationLevel": "manual",
+  "confidentialContext": "none",
+  "context": "personal",
+  "hosting": [
+    "vercel"
+  ],
+  "kind": "app",
+  "lastReviewedAt": "2026-08-27",
+  "lifecycle": "prototype",
+  "notes": "Educational coding game with WebContainer, Monaco, multiplayer, Sentry, and PostHog signals. Strong candidate for project-quality audits and product analytics experiments.",
+  "observability": [
+    "posthog",
+    "sentry"
+  ],
+  "ownerContext": "personal",
+  "source": "owned",
+  "surface": "product",
+  "systems": [
+    "solo-control-tower",
+    "education",
+    "creative-tooling"
+  ],
+  "tags": [
+    "biome",
+    "eslint",
+    "monaco",
+    "next",
+    "playwright",
+    "posthog",
+    "react",
+    "sentry",
+    "tailwind",
+    "vercel",
+    "vitest",
+    "webcontainer"
+  ],
+  "urls": {
+    "repository": "https://github.com/forbiddenlink/codecraft-dev"
+  }
+}
