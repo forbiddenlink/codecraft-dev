@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.0...v1.0.1) (2026-08-29)
+
+
+### Bug Fixes
+
+* **ci:** stop pnpm from swallowing --project=chromium in e2e step ([#63](https://github.com/forbiddenlink/codecraft-dev/issues/63)) ([99d5742](https://github.com/forbiddenlink/codecraft-dev/commit/99d57420950e1852ca95e32eb19dab71e87b1e8c))
+* harden workflow supply chain ([3b62eb5](https://github.com/forbiddenlink/codecraft-dev/commit/3b62eb527938b6ec4c9bd52245e850cef5e6eeae))
+
 ## 1.0.0 (2026-08-26)
 
 
