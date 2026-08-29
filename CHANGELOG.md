@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.1...v1.0.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* **deps:** bump next to 16.3.3 for AVIF image RCE ([#65](https://github.com/forbiddenlink/codecraft-dev/issues/65)) ([6e482cc](https://github.com/forbiddenlink/codecraft-dev/commit/6e482ccb985bf7df70d0ba0e9ed36d2fb65b538b))
+
 ## [1.0.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.0...v1.0.1) (2026-08-29)
 
 
