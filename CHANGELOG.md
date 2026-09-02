@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.2...v1.0.3) (2026-09-02)
+
+
+### Bug Fixes
+
+* **ci:** let pnpm/action-setup read the version from packageManager ([507460b](https://github.com/forbiddenlink/codecraft-dev/commit/507460b12da2001cdbe9287e7d3b2548e2fe7f80))
+* **deps:** give every resolution override an upper bound ([8bb621d](https://github.com/forbiddenlink/codecraft-dev/commit/8bb621dafd9f69568ed6e960e003460928f6a614))
+
 ## [1.0.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.1...v1.0.2) (2026-08-29)
 
 
