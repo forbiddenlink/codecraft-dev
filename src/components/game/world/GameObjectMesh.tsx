@@ -2,7 +2,7 @@
 import { animated, useSpring } from '@react-spring/three'
 import { Capsule, Plane, RoundedBox, Sphere } from '@react-three/drei'
 import { useState } from 'react'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import type { GameObject } from '@/utils/parseHtmlToGameObjects'
 
 export default function GameObjectMesh({
