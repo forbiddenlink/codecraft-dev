@@ -1,7 +1,7 @@
 // File: /src/components/game/pixel/PixelDialog.tsx
 'use client'
 import { Html } from '@react-three/drei'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useEffect, useState } from 'react'
 
 interface PixelDialogProps {

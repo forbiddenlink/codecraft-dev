@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import { type ColonyResource, RESOURCE_COLORS, RESOURCE_ICONS } from '@/components/ui/resourceMeta'

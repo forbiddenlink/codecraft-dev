@@ -1,6 +1,6 @@
 'use client'
 
-import { type MotionProps, motion } from 'framer-motion'
+import { type MotionProps, motion } from 'motion/react'
 import type React from 'react'
 import { type ButtonHTMLAttributes, forwardRef } from 'react'
 import { announceToScreenReader } from '@/utils/accessibilityUtils'

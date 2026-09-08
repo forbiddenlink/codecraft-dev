@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { BarChart3, ChevronDown, FileCode2, Palette, RefreshCw, Zap } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { HudPanel } from '@/components/ui/HudPanel'

@@ -3,7 +3,7 @@
 
 import Editor, { loader } from '@monaco-editor/react'
 import type { WebContainer } from '@webcontainer/api'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import type { editor } from 'monaco-editor'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { buildFileTree, type FileNode, FileTree } from '@/components/playground/FileTree'

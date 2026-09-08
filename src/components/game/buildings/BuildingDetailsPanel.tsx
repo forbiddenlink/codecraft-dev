@@ -1,6 +1,6 @@
 'use client'
 import { Html } from '@react-three/drei'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import type { LucideIcon } from 'lucide-react'
 import { Building2 } from 'lucide-react'
 import { Icon } from '@/components/ui/Icon'

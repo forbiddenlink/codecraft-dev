@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { CheckCircle2, ChevronLeft, ChevronRight, Code2, Target, XCircle } from 'lucide-react'
 import { HudPanel } from '@/components/ui/HudPanel'
 import { Icon } from '@/components/ui/Icon'
