@@ -12,9 +12,10 @@ import BuildingModel from './BuildingModel'
 
 interface BuildingPreviewProps {
   gridSnap?: boolean
+  onPlaced?: (placedId: string, templateId: string) => void
 }
 
-export default function BuildingPreview({ gridSnap = true }: BuildingPreviewProps) {
+export default function BuildingPreview({ gridSnap = true, onPlaced }: BuildingPreviewProps) {
   const dispatch = useAppDispatch()
   const { selectedTemplateId, buildMode, previewRotation } = useAppSelector(
     (state) => state.building
@@ -80,6 +81,7 @@ export default function BuildingPreview({ gridSnap = true }: BuildingPreviewProp
     }
 
     setPlacementError(false)
+    onPlaced?.(placedId, selectedTemplateId)
     void trackBuildingConstructed(
       selectedTemplateId,
       1,

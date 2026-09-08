@@ -14,6 +14,7 @@ import HtmlStructureVisualization from '@/components/game/buildings/HtmlStructur
 import PlacedBuildings from '@/components/game/buildings/PlacedBuildings'
 import CameraFocusManager from '@/components/game/camera/CameraFocusManager'
 import CelebrationSparkles from '@/components/game/celebrations/CelebrationSparkles'
+import FirstChallengeOffer from '@/components/game/challenges/FirstChallengeOffer'
 import HintPanel from '@/components/game/challenges/HintPanel'
 import MasteryDashboard from '@/components/game/challenges/MasteryDashboard'
 import CodeExecutionVisualizer from '@/components/game/code/CodeExecutionVisualizer'
@@ -274,9 +275,18 @@ export default function GameWorldClient() {
   const [placeBuildingCta, setPlaceBuildingCta] = useState<{
     templateId: string
     name: string
+    challengeId: string
   } | null>(null)
-  const { completed, completeChallenge, pendingCelebration, clearCelebration } =
-    useChallengeProgress()
+  const {
+    completed,
+    completeChallenge,
+    pendingCelebration,
+    clearCelebration,
+    firstChallengeOffer,
+    markFirstRewardPlaced,
+    markFirstOfferShown,
+    hideFirstOffer,
+  } = useChallengeProgress()
   const controlsRef = useRef<OrbitControlsImpl>(null)
 
   // Performance optimization: detect low-power devices and reduced motion preference
@@ -295,7 +305,6 @@ export default function GameWorldClient() {
     colonyResources = {},
     cssRules = [],
     jsExecutionContext: _jsExecutionContext = {},
-    building = { buildMode: false, selectedTemplateId: null },
     generators = [],
   } = gameState
 
@@ -305,8 +314,24 @@ export default function GameWorldClient() {
   const [challengeStartedAt, setChallengeStartedAt] = useState<number | null>(null)
   const [attemptCount, setAttemptCount] = useState(0)
 
-  const isBuildModeActive = building.buildMode
-  const selectedBuildingTemplateId = building.selectedTemplateId
+  const isBuildModeActive = useAppSelector((state: RootState) => state.building.buildMode)
+  const selectedBuildingTemplateId = useAppSelector(
+    (state: RootState) => state.building.selectedTemplateId
+  )
+  const offerBlockedByUi = useAppSelector((state: RootState) =>
+    Boolean(
+      state.ui.activeModal ||
+        state.ui.showMainMenu ||
+        state.ui.showSettings ||
+        state.ui.showHelp ||
+        state.dialogue.isActive ||
+        state.achievement.showToast ||
+        state.achievement.showProgress ||
+        state.events.activeEventId ||
+        state.multiplayer.showSessionBrowser ||
+        state.multiplayer.showCreateModal
+    )
+  )
   const previewRotation = useAppSelector((state: RootState) => state.building.previewRotation)
   const resourceGenerators = generators as ResourceGenerator[]
 
@@ -427,6 +452,20 @@ export default function GameWorldClient() {
     )
   }, [])
 
+  const handleBuildingPlaced = React.useCallback(
+    (placedId: string, templateId: string): void => {
+      markFirstRewardPlaced(
+        placedId,
+        placeBuildingCta?.challengeId,
+        placeBuildingCta?.templateId,
+        templateId
+      )
+      setPlacementFeedback(null)
+      setPlaceBuildingCta(null)
+    },
+    [markFirstRewardPlaced, placeBuildingCta]
+  )
+
   // Type-safe event handlers
   const handleGroundClick = React.useCallback(
     (event: ThreeEvent<PointerEvent>) => {
@@ -458,8 +497,7 @@ export default function GameWorldClient() {
             setPlacementFeedback('Cannot place — check resources and collisions.')
             return
           }
-          setPlacementFeedback(null)
-          setPlaceBuildingCta(null)
+          handleBuildingPlaced(placedId, selectedBuildingTemplateId)
           void trackBuildingConstructed(
             selectedBuildingTemplateId,
             1,
@@ -483,6 +521,7 @@ export default function GameWorldClient() {
       selectedBuildingId,
       checkValidPlacement,
       previewRotation,
+      handleBuildingPlaced,
     ]
   )
 
@@ -635,7 +674,11 @@ export default function GameWorldClient() {
     if (buildingReward) {
       const template = buildingTemplates[buildingReward.id]
       if (template) {
-        setPlaceBuildingCta({ templateId: template.id, name: template.name })
+        setPlaceBuildingCta({
+          templateId: template.id,
+          name: template.name,
+          challengeId: currentChallenge.id,
+        })
       }
     }
 
@@ -742,6 +785,7 @@ export default function GameWorldClient() {
 
   const buildingPreviewProps: BuildingPreviewProps = {
     gridSnap: true,
+    onPlaced: handleBuildingPlaced,
   }
 
   // These props are prepared for future use
@@ -1115,6 +1159,20 @@ export default function GameWorldClient() {
                       Check Solution
                     </button>
                   </div>
+                  <FirstChallengeOffer
+                    completed={completed}
+                    progress={firstChallengeOffer}
+                    blocked={
+                      isBuildModeActive ||
+                      isEditorVisible ||
+                      tutorialIsActive ||
+                      offerBlockedByUi ||
+                      Boolean(pendingCelebration) ||
+                      Boolean(placeBuildingCta)
+                    }
+                    onShown={markFirstOfferShown}
+                    onHide={hideFirstOffer}
+                  />
                 </HudPanel>
 
                 {!completed.includes(currentChallenge.id) && (
