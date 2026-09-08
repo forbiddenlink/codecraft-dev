@@ -78,6 +78,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify acquisition regressions
+        run: pnpm exec jest --runInBand --runTestsByPath src/lib/__tests__/posthog.test.ts src/lib/__tests__/posthog-provider.test.tsx src/hooks/__tests__/useChallengeProgress.offer.test.tsx src/components/game/challenges/__tests__/FirstChallengeOffer.test.tsx src/components/game/buildings/__tests__/BuildingPreview.offer.test.tsx
+
       - name: Run tests
         run: npm test -- --coverage --passWithNoTests
         continue-on-error: true
