@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
 import { useAppSelector } from '@/store/hooks'

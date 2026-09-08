@@ -2,7 +2,7 @@
 import { animated, useSpring } from '@react-spring/three'
 import { Billboard, Sphere, Text } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 
