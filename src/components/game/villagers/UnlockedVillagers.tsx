@@ -1,7 +1,7 @@
 'use client'
 import VillagerMesh from '@/components/game/villager/VillagerMesh'
 import { getAvailableVillagers } from '@/data/villagers'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 
 export default function UnlockedVillagers() {

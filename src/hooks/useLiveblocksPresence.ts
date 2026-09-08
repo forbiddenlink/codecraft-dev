@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import type { CursorPosition, User } from '@/utils/collaborationSystem'
 import { getCollabRoom } from '@/utils/collaborationSystem'
 import type { UserPresence } from '@/utils/liveblocks'

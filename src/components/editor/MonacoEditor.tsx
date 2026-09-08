@@ -3,7 +3,7 @@
 import Editor, { loader, type Monaco } from '@monaco-editor/react'
 import type { editor } from 'monaco-editor'
 import { useCallback, useEffect, useRef } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useLiveblocksPresence } from '@/hooks/useLiveblocksPresence'
 import { setCode, setEditorErrors } from '@/store/slices/editorSlice'
 import { type ValidationError, validateCss, validateHtml, validateJs } from '@/utils/codeValidation'

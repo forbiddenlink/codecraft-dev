@@ -4,7 +4,7 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { type Group, Vector3 } from 'three'
 import type { Villager } from '@/data/villagers'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 
 interface Props {
   villager: Villager

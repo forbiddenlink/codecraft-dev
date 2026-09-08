@@ -1,7 +1,7 @@
 'use client'
 import { Html, Line } from '@react-three/drei'
 import { useMemo } from 'react'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import type { HtmlNode } from '@/types/html'
 import { applyStyles } from '@/utils/cssParser'
 import BuildingModel, { type BuildingModelType } from './BuildingModel'

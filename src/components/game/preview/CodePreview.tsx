@@ -3,7 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { useEffect, useState } from 'react'
 import type { Group } from 'three'
 import GameObjectMesh from '@/components/game/world/GameObjectMesh'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import { parseHtmlToGameObjects } from '@/utils/parseHtmlToGameObjects'
 
 export default function CodePreview() {
