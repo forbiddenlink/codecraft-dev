@@ -7,7 +7,7 @@
 
 import type React from 'react'
 import { useRef } from 'react'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 import { useLiveblocksPresence } from '@/hooks/useLiveblocksPresence'
 import { CollaborativeCursors } from './CollaborativeCursors'
 

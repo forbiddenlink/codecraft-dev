@@ -2,7 +2,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { LiveblocksCursors } from '@/components/multiplayer/LiveblocksCursors'
-import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useCodeProcessor } from '@/hooks/useCodeProcessor'
 import { type ConnectionStatus, useLiveblocksPresence } from '@/hooks/useLiveblocksPresence'
 import { setEditorVisible, setLanguage } from '@/store/slices/editorSlice'

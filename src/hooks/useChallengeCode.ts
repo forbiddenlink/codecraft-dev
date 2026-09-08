@@ -1,6 +1,6 @@
 // File: /src/hooks/useChallengeCode.ts
 import { useEffect } from 'react'
-import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setCode } from '@/store/slices/editorSlice'
 
 export default function useChallengeCode(challengeId: string) {

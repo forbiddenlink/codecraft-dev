@@ -4,7 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { useRef, useState } from 'react'
 import type { Group, MeshStandardMaterial } from 'three'
 import { buildingTemplates, type PlacedBuilding } from '@/data/buildingTemplates'
-import { useAppSelector } from '@/hooks/reduxHooks'
+import { useAppSelector } from '@/store/hooks'
 
 interface BuildingInteractionProps {
   building: PlacedBuilding
