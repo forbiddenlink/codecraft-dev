@@ -1,7 +1,7 @@
 // File: /src/components/playground/FileTree.tsx
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useState } from 'react'
 
 export interface FileNode {

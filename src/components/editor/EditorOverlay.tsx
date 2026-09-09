@@ -1,5 +1,5 @@
 'use client'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef } from 'react'
 import { LiveblocksCursors } from '@/components/multiplayer/LiveblocksCursors'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'

@@ -14,6 +14,12 @@ import { unlockVillager } from '@/store/slices/villagerSlice'
 import hapticFeedback from '@/utils/hapticFeedback'
 import { recordChallengeCompletion } from '@/utils/spacedRepetition'
 
+export interface FirstChallengeOfferProgress {
+  placed: boolean
+  shown: boolean
+  hidden: boolean
+}
+
 export type CelebrationType = 'success' | 'levelUp' | 'achievement' | 'mastery'
 
 export function useChallengeProgress() {
@@ -25,6 +31,53 @@ export function useChallengeProgress() {
     }
     return []
   })
+  const [firstChallengeOffer, setFirstChallengeOffer] = useState<FirstChallengeOfferProgress>(
+    () => {
+      const empty = { placed: false, shown: false, hidden: false }
+      if (typeof window === 'undefined') return empty
+      try {
+        const saved = JSON.parse(localStorage.getItem('first-challenge-offer') || 'null')
+        return {
+          placed: saved?.placed === true,
+          shown: saved?.shown === true,
+          hidden: saved?.hidden === true,
+        }
+      } catch {
+        return empty
+      }
+    }
+  )
+  const updateFirstChallengeOffer = useCallback((update: Partial<FirstChallengeOfferProgress>) => {
+    setFirstChallengeOffer((previous) => {
+      const next = { ...previous, ...update }
+      try {
+        localStorage.setItem('first-challenge-offer', JSON.stringify(next))
+      } catch {
+        // The optional offer must not block gameplay when storage is unavailable.
+      }
+      return next
+    })
+  }, [])
+  const markFirstRewardPlaced = useCallback(
+    (
+      placedId: string | null,
+      challengeId: string | undefined,
+      rewardTemplateId: string | undefined,
+      selectedTemplateId: string
+    ): void => {
+      if (!placedId || challengeId !== 'intro-1' || rewardTemplateId !== selectedTemplateId) return
+      updateFirstChallengeOffer({ placed: true })
+    },
+    [updateFirstChallengeOffer]
+  )
+  const markFirstOfferShown = useCallback(
+    () => updateFirstChallengeOffer({ shown: true }),
+    [updateFirstChallengeOffer]
+  )
+  const hideFirstOffer = useCallback(
+    () => updateFirstChallengeOffer({ hidden: true }),
+    [updateFirstChallengeOffer]
+  )
   const [pendingCelebration, setPendingCelebration] = useState<CelebrationType | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
@@ -117,6 +170,10 @@ export function useChallengeProgress() {
 
   return {
     completed,
+    firstChallengeOffer,
+    markFirstRewardPlaced,
+    markFirstOfferShown,
+    hideFirstOffer,
     completeChallenge,
     pendingCelebration,
     clearCelebration,

@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { ChevronRight, Lightbulb } from 'lucide-react'
 import { HudPanel } from '@/components/ui/HudPanel'
 import { Icon } from '@/components/ui/Icon'

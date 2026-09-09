@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { ChevronDown, Flame, Gift, Snowflake } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { HudPanel } from '@/components/ui/HudPanel'

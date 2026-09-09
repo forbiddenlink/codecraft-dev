@@ -1,9 +1,4 @@
-/**
- * Analytics Integration for CodeCraft
- * Provides PostHog integration for product analytics and learning metrics
- *
- * PostHog is an optional dependency - install with: npm install posthog-js
- */
+import { initPostHog } from '@/lib/posthog'
 
 // Types for analytics events
 interface AnalyticsEvent {
@@ -20,67 +15,7 @@ interface UserProperties {
   [key: string]: unknown
 }
 
-// PostHog-like interface for type safety without requiring the package
-interface PostHogLike {
-  init: (apiKey: string, options: Record<string, unknown>) => void
-  capture: (eventName: string, properties?: Record<string, unknown>) => void
-  identify: (userId: string, properties?: Record<string, unknown>) => void
-  people: {
-    set: (properties: Record<string, unknown>) => void
-  }
-  reset: () => void
-  debug: () => void
-}
-
-// Check if analytics is enabled
-const isAnalyticsEnabled = (): boolean => {
-  if (typeof window === 'undefined') return false
-  return (
-    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS === 'true' && !!process.env.NEXT_PUBLIC_POSTHOG_KEY
-  )
-}
-
-// Lazy load PostHog
-let posthogInstance: PostHogLike | null = null
-let posthogPromise: Promise<PostHogLike | null> | null = null
-
-const getPostHog = async (): Promise<PostHogLike | null> => {
-  if (!isAnalyticsEnabled()) return null
-
-  if (!posthogPromise) {
-    posthogPromise = (async () => {
-      try {
-        // Dynamic import with type assertion - posthog-js is an optional peer dependency
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const posthog = (await import(/* webpackIgnore: true */ 'posthog-js' as string)) as {
-          default: PostHogLike
-        }
-        const ph = posthog.default
-        ph.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-          api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-          autocapture: false,
-          capture_pageview: false,
-          persistence: 'localStorage',
-          loaded: () => {
-            if (process.env.NEXT_PUBLIC_DEBUG_MODE === 'true') {
-              ph.debug()
-            }
-          },
-        })
-        posthogInstance = ph
-        return ph
-      } catch {
-        // posthog-js not installed - analytics disabled
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('PostHog not available. Install with: npm install posthog-js')
-        }
-        return null
-      }
-    })()
-  }
-
-  return posthogPromise
-}
+const getPostHog = initPostHog
 
 /**
  * Track a custom event
@@ -303,4 +238,4 @@ export const trackPerformanceMetrics = async (metrics: {
 }
 
 // Export instance for direct access if needed
-export const getAnalyticsInstance = (): PostHogLike | null => posthogInstance
+export { getPostHogInstance as getAnalyticsInstance } from '@/lib/posthog'

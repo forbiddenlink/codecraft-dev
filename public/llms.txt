@@ -6,10 +6,10 @@ CodeCraft is an educational coding game. Learners write real front-end code in-b
 
 ## Site
 
-- Home (colony + challenges): https://codecraft-dev.vercel.app/
-- Playground: https://codecraft-dev.vercel.app/playground
-- Privacy: https://codecraft-dev.vercel.app/privacy
-- Terms: https://codecraft-dev.vercel.app/terms
+- Home (colony + challenges): https://codecraft-dev-one.vercel.app/
+- Playground: https://codecraft-dev-one.vercel.app/playground
+- Privacy: https://codecraft-dev-one.vercel.app/privacy
+- Terms: https://codecraft-dev-one.vercel.app/terms
 - Source: https://github.com/forbiddenlink/codecraft-dev
 
 ## Product facts
