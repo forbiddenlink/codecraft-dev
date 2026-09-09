@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.3...v1.1.0) (2026-09-09)
+
+
+### Features
+
+* connect completed challenges to the portfolio guide ([#92](https://github.com/forbiddenlink/codecraft-dev/issues/92)) ([7e69f95](https://github.com/forbiddenlink/codecraft-dev/commit/7e69f95a2283f75dbd5f2b589e4dced2e354565e))
+
+
+### Bug Fixes
+
+* **a11y:** add button type and html lang to error pages ([#83](https://github.com/forbiddenlink/codecraft-dev/issues/83)) ([47b206b](https://github.com/forbiddenlink/codecraft-dev/commit/47b206bfb4d31a504f79e975b00c2742f1449544))
+* **deps:** override fflate past its advisory floor ([#71](https://github.com/forbiddenlink/codecraft-dev/issues/71)) ([48fd36b](https://github.com/forbiddenlink/codecraft-dev/commit/48fd36ba8f2fc49b78024d2ccbbd6eb9990ab2b7))
+* **deps:** replace dependency framer-motion with motion ^12.43.0 ([70b4433](https://github.com/forbiddenlink/codecraft-dev/commit/70b44334c99aa2b157a0e9779b0915361c66cce8))
+* **seo:** resolve the canonical host from one chain, not two ([#75](https://github.com/forbiddenlink/codecraft-dev/issues/75)) ([da5b30f](https://github.com/forbiddenlink/codecraft-dev/commit/da5b30f9689695427176ad1916c7c83339451a8d))
+
 ## [1.0.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.2...v1.0.3) (2026-09-02)
 
 
