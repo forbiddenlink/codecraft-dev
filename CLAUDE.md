@@ -44,9 +44,9 @@ Liveblocks, Judge0) are documented there.
 - `src/hooks`, `src/lib`, `src/utils`, `src/data` - each has its own `__tests__`
 - `src/middleware.ts` - Next.js middleware
 - `party/index.ts` - PartyKit server for multiplayer
-- `docs/` - historical planning/design docs (large pile of dated implementation summaries;
-  `TECHNICAL_ARCHITECTURE.md` and `DESIGN_SYSTEM.md` are the most durable references)
-- `thoughts/ledgers/` - continuity ledger for this project
+- `docs/` - `TECHNICAL_ARCHITECTURE.md`, `DESIGN_SYSTEM.md`, `GAME_CODE_MAPPING.md`
+  (HTML/CSS-to-game-world mapping rules, matches `src/game/mapping/`)
+- `thoughts/` - continuity ledger for this project (gitignored, not tracked)
 
 ## Environment variables
 
@@ -74,6 +74,6 @@ Full validated schema in `src/env.ts` (`@t3-oss/env-nextjs`); `.env.example` mir
 
 ## Claude Code specific
 
-- `.claude/settings.local.json` - local permissions
+- `.claude/` (gitignored) holds local permissions in a `settings.local.json` a session creates
 - Version-matched Next.js docs are bundled at `node_modules/next/dist/docs/`; check there for
   APIs specific to the installed Next.js version before assuming training-data behavior.
