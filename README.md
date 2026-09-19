@@ -9,7 +9,7 @@
 
 ## What It Does
 
-CodeCraft is an educational coding game. You write real front-end code in a Monaco editor and watch it become structures in a 3D space colony. Challenges teach HTML structure, CSS layout, and JavaScript through colony-building objectives — with hints, rewards, and progress tracking.
+CodeCraft is an educational coding game. You write real front-end code in a Monaco editor and watch it become structures in a 3D space colony. Challenges teach HTML structure, CSS layout, and JavaScript through colony-building objectives, with hints, rewards, and progress tracking.
 
 ## Features
 
