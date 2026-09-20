@@ -9,13 +9,19 @@ jest.mock('posthog-js', () => ({
     init: jest.fn(),
     capture: jest.fn(),
     identify: jest.fn(),
+    register: jest.fn(),
     reset: jest.fn(),
     debug: jest.fn(),
     opt_out_capturing: jest.fn(),
     people: { set: jest.fn() },
   },
 }))
-let client: { init: jest.Mock; capture: jest.Mock; opt_out_capturing: jest.Mock }
+let client: {
+  init: jest.Mock
+  capture: jest.Mock
+  register: jest.Mock
+  opt_out_capturing: jest.Mock
+}
 const originalEnv = process.env
 
 describe('shared analytics initialization', () => {
@@ -28,6 +34,8 @@ describe('shared analytics initialization', () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = 'synthetic-key'
     process.env.NEXT_PUBLIC_POSTHOG_HOST = ''
     process.env.NODE_ENV = 'test'
+    // jsdom serves from localhost, which analytics now refuses by default.
+    process.env.NEXT_PUBLIC_POSTHOG_ALLOW_LOCALHOST = 'true'
   })
   afterEach(() => {
     process.env = originalEnv
@@ -122,5 +130,31 @@ describe('shared analytics initialization', () => {
     initPostHog()
     client.init.mock.calls[0][1].loaded(client)
     expect(client.opt_out_capturing).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('local traffic', () => {
+  beforeEach(() => {
+    jest.resetModules()
+    process.env = { ...originalEnv }
+    client = require('posthog-js').default
+    jest.clearAllMocks()
+    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = 'true'
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = 'synthetic-key'
+    process.env.NODE_ENV = 'test'
+  })
+  afterEach(() => {
+    process.env = originalEnv
+    jest.restoreAllMocks()
+  })
+
+  it('refuses to initialize from a local build', async () => {
+    // A local production build keeps NODE_ENV=production, so the existing dev
+    // guard never fired: 150 of the shared project's 946 pageviews in 30 days
+    // came from localhost:3041.
+    const { initPostHog } = await import('../posthog')
+
+    expect(initPostHog()).toBeNull()
+    expect(client.init).not.toHaveBeenCalled()
   })
 })
