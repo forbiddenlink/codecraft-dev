@@ -30,6 +30,8 @@ describe('mounted analytics provider', () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = 'synthetic-key'
     process.env.NEXT_PUBLIC_POSTHOG_HOST = 'https://analytics.example.invalid'
     process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = 'true'
+    // jsdom serves from localhost, which analytics now refuses by default.
+    process.env.NEXT_PUBLIC_POSTHOG_ALLOW_LOCALHOST = 'true'
   })
   afterEach(() => {
     cleanup()
@@ -73,5 +75,33 @@ describe('mounted analytics provider', () => {
       expect(props).not.toHaveProperty('apiKey')
       expect(props).not.toHaveProperty('options')
     }
+  })
+})
+
+describe('local traffic', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    process.env = { ...originalEnv }
+    process.env.NEXT_PUBLIC_POSTHOG_KEY = 'synthetic-key'
+    process.env.NEXT_PUBLIC_ENABLE_ANALYTICS = 'true'
+  })
+  afterEach(() => {
+    cleanup()
+    process.env = originalEnv
+  })
+
+  it('does not send events from a local build', async () => {
+    // A local production build keeps NODE_ENV=production, so the host is the only
+    // reliable signal. 150 of the shared project's 946 pageviews came from
+    // localhost:3041.
+    render(
+      <PostHogProvider>
+        <span>Fixture content</span>
+      </PostHogProvider>
+    )
+    await trackChallengeCompleted('intro-1', 100, 5000, 1, 100)
+
+    expect(client.init).not.toHaveBeenCalled()
+    expect(client.capture).not.toHaveBeenCalled()
   })
 })
