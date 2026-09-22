@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.0...v1.1.1) (2026-09-22)
+
+
+### Bug Fixes
+
+* **analytics:** keep local traffic out of posthog and tag events with the app ([#100](https://github.com/forbiddenlink/codecraft-dev/issues/100)) ([b6dd378](https://github.com/forbiddenlink/codecraft-dev/commit/b6dd378935b732ee944812d6f1c5d4d950095619))
+* **deps:** bump @arcjet/next to 1.12.0 to stop idle GOAWAY crashes ([#96](https://github.com/forbiddenlink/codecraft-dev/issues/96)) ([3c929d7](https://github.com/forbiddenlink/codecraft-dev/commit/3c929d7f747d7e4baadd07d9b2c23b4e7b7a8f76))
+* **sentry:** ship the client SDK under Turbopack and load instrumentation ([#94](https://github.com/forbiddenlink/codecraft-dev/issues/94)) ([27e074b](https://github.com/forbiddenlink/codecraft-dev/commit/27e074b8a6a75d833c62a0941a13a8cfa5b40279))
+
 ## [1.1.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.0.3...v1.1.0) (2026-09-09)
 
 
