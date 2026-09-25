@@ -28,6 +28,9 @@ export const initPostHog = (): typeof PostHog | null => {
 
   PostHog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+    // api_host may be the same-origin /ingest proxy. ui_host keeps the toolbar and
+    // every "view in PostHog" link pointing at the real app instead of the proxy.
+    ui_host: 'https://us.posthog.com',
     person_profiles: 'identified_only',
     autocapture: false,
     capture_pageview: false,
