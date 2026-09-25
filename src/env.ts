@@ -1,6 +1,15 @@
 import { createEnv } from '@t3-oss/env-nextjs'
 import { z } from 'zod'
 
+// PostHog's host is either an absolute origin or the same-origin proxy path that
+// next.config rewrites, so a plain URL validator would reject the proxy and fail the build.
+const posthogHost = z
+  .string()
+  .refine((value) => value.startsWith('/') || /^https?:\/\//.test(value), {
+    message: 'must be an absolute URL or a same-origin path such as /ingest',
+  })
+  .optional()
+
 export const env = createEnv({
   server: {
     AXIOM_TOKEN: z.string().min(1).optional(),
@@ -29,7 +38,10 @@ export const env = createEnv({
     NEXT_PUBLIC_ENABLE_SOUND: z.string().optional(),
     NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_PARTYKIT_HOST: z.string().url().optional(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+    // The PostHog host is allowed to be a same-origin proxy path such as '/ingest', which is
+    // what the rewrite in next.config serves. Requiring a URL here would reject that and fail
+    // the build.
+    NEXT_PUBLIC_POSTHOG_HOST: posthogHost,
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1).optional(),
     NEXT_PUBLIC_SENTRY_DSN: z.string().min(1).optional(),
   },
