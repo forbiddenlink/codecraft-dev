@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.1...v1.1.2) (2026-09-25)
+
+
+### Bug Fixes
+
+* **analytics:** make the PostHog reverse proxy safe to switch on ([#105](https://github.com/forbiddenlink/codecraft-dev/issues/105)) ([b911db5](https://github.com/forbiddenlink/codecraft-dev/commit/b911db5763bf493ca891afd4b22fe2e1b934570c))
+* **env:** let the PostHog host be the same-origin proxy path ([#107](https://github.com/forbiddenlink/codecraft-dev/issues/107)) ([f7299e4](https://github.com/forbiddenlink/codecraft-dev/commit/f7299e4a0cd8234407a0179530573cebbfac2cc5))
+
 ## [1.1.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.0...v1.1.1) (2026-09-22)
 
 
