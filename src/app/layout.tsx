@@ -4,6 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import { JetBrains_Mono, Space_Grotesk } from 'next/font/google'
 import { PostHogProvider } from '@/components/PostHogProvider'
+import { SITE_URL } from '@/lib/siteUrl'
 import { Providers } from '@/store/Providers'
 
 const spaceGrotesk = Space_Grotesk({
@@ -18,10 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
   display: 'swap',
 })
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  'https://codecraft-dev-one.vercel.app'
+const siteUrl = SITE_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
