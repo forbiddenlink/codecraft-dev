@@ -1,4 +1,4 @@
-import { BASE_MAPPINGS } from '@/game/mapping/ElementMapping'
+import { SUPPORTED_ELEMENTS } from '@/game/mapping/supportedElements'
 
 export interface ValidationError {
   line: number
@@ -63,7 +63,7 @@ export function validateHtml(code: string): ValidationResult {
     const tagName = element.tagName.toLowerCase()
     const position = getElementPosition(code, element)
 
-    if (!BASE_MAPPINGS[tagName]) {
+    if (!SUPPORTED_ELEMENTS.has(tagName)) {
       warnings.push({
         ...position,
         message: `Unsupported element type: ${tagName}`,

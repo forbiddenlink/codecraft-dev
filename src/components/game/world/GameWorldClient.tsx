@@ -1,41 +1,22 @@
 'use client'
-import { Environment, OrbitControls, Sky, Stars } from '@react-three/drei'
-import { Canvas, type ThreeEvent, useThree } from '@react-three/fiber'
-import { Bloom, EffectComposer } from '@react-three/postprocessing'
+import type { ThreeEvent } from '@react-three/fiber'
 import confetti from 'canvas-confetti'
 import { Bot, CheckCircle2, ChevronLeft, ChevronRight, Code2, Home, Target } from 'lucide-react'
-import React, { Suspense, useMemo, useRef, useState } from 'react'
-import * as THREE from 'three'
+import React, { useMemo, useRef, useState } from 'react'
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
-import BuildingGrid from '@/components/game/buildings/BuildingGrid'
 import BuildingMenu from '@/components/game/buildings/BuildingMenu'
-import BuildingPreview from '@/components/game/buildings/BuildingPreview'
-import HtmlStructureVisualization from '@/components/game/buildings/HtmlStructureVisualization'
-import PlacedBuildings from '@/components/game/buildings/PlacedBuildings'
-import CameraFocusManager from '@/components/game/camera/CameraFocusManager'
-import CelebrationSparkles from '@/components/game/celebrations/CelebrationSparkles'
+import type BuildingPreview from '@/components/game/buildings/BuildingPreview'
+import type HtmlStructureVisualization from '@/components/game/buildings/HtmlStructureVisualization'
 import FirstChallengeOffer from '@/components/game/challenges/FirstChallengeOffer'
 import HintPanel from '@/components/game/challenges/HintPanel'
 import MasteryDashboard from '@/components/game/challenges/MasteryDashboard'
-import CodeExecutionVisualizer from '@/components/game/code/CodeExecutionVisualizer'
-import ErrorVisualization from '@/components/game/code/ErrorVisualization'
-import WeatherSystem from '@/components/game/environment/WeatherSystem'
-import Ground from '@/components/game/ground/Ground'
 import ResourceHUD from '@/components/game/hud/ResourceHUD'
-import { PhysicsCelebration, PhysicsGround, PhysicsProvider } from '@/components/game/physics'
-import Pixel from '@/components/game/pixel/Pixel'
-import Player from '@/components/game/player/Player'
-import ResourceCollectors from '@/components/game/resources/ResourceCollectors'
-import ResourceFlowSystem from '@/components/game/resources/ResourceFlowSystem'
-import ResourceGenerators from '@/components/game/resources/ResourceGenerators'
 import StreakDisplay from '@/components/game/streaks/StreakDisplay'
 import TutorialOverlay from '@/components/game/tutorial/TutorialOverlay'
-import UnlockedVillagers from '@/components/game/villagers/UnlockedVillagers'
 import { HudPanel } from '@/components/ui/HudPanel'
 import { Icon } from '@/components/ui/Icon'
 import { buildingTemplates } from '@/data/buildingTemplates'
 import { getAvailableChallenges, getChallengeById } from '@/data/challenges'
-import { buildingSystem } from '@/game/systems/BuildingSystem'
 import { CelebrationType, useChallengeProgress } from '@/hooks/useChallengeProgress'
 import { useIsLowPowerDevice, useReducedMotion } from '@/hooks/useResponsive'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -61,50 +42,8 @@ import {
 } from '@/utils/analytics'
 import { parseCSSRule } from '@/utils/cssParser'
 import { parseHtmlToStructure } from '@/utils/htmlParser'
-
-// Environment settings
-const ENVIRONMENT_CONFIG = {
-  stars: {
-    radius: 300,
-    depth: 150,
-    count: 5000,
-    factor: 7,
-    saturation: 1,
-    fade: true,
-  },
-  sky: {
-    distance: 450000,
-    sunPosition: [0, -1, 0] as [number, number, number],
-    inclination: 0.1,
-    azimuth: 0.25,
-    mieCoefficient: 0.001,
-    mieDirectionalG: 0.85,
-    rayleigh: 0.3,
-    turbidity: 2,
-  },
-  fog: {
-    color: '#0f172a',
-    near: 150,
-    far: 500,
-  },
-  grid: {
-    width: 200,
-    height: 200,
-    cellSize: 5,
-  },
-  scene: {
-    background: '#0f172a',
-    groundColor: '#1e293b',
-  },
-  camera: {
-    position: [20, 25, 35] as [number, number, number],
-    fov: 45,
-    near: 0.1,
-    far: 1000,
-    minDistance: 5,
-    maxDistance: 50,
-  },
-}
+import DeferredGameCanvas from './DeferredGameCanvas'
+import { ENVIRONMENT_CONFIG } from './sceneConfig'
 
 // Helper function to determine sun position based on time of day (currently unused)
 // function getSunPosition(timeOfDay: number): [number, number, number] {
@@ -238,31 +177,6 @@ const DarkBackground = () => (
     />
   </mesh>
 )
-
-const SceneContent = () => {
-  const { gl, scene } = useThree()
-
-  React.useEffect(() => {
-    if (gl && scene) {
-      scene.fog = new THREE.Fog(
-        ENVIRONMENT_CONFIG.fog.color,
-        ENVIRONMENT_CONFIG.fog.near,
-        ENVIRONMENT_CONFIG.fog.far
-      )
-    }
-  }, [gl, scene])
-
-  return (
-    <group>
-      <ambientLight intensity={0.4} />
-      <hemisphereLight
-        intensity={0.6}
-        color="#ffffff"
-        groundColor={ENVIRONMENT_CONFIG.scene.groundColor}
-      />
-    </group>
-  )
-}
 
 export default function GameWorldClient() {
   const dispatch = useAppDispatch()
@@ -468,7 +382,7 @@ export default function GameWorldClient() {
 
   // Type-safe event handlers
   const handleGroundClick = React.useCallback(
-    (event: ThreeEvent<PointerEvent>) => {
+    async (event: ThreeEvent<PointerEvent>) => {
       event.stopPropagation()
       if (event.object.name === 'ground') {
         const point = event.point
@@ -488,9 +402,15 @@ export default function GameWorldClient() {
             return
           }
           const template = buildingTemplates[selectedBuildingTemplateId]
+          // Loaded on first placement so three and the building system stay out of the
+          // initial bundle (the canvas that fired this click has already pulled three in).
+          const [{ buildingSystem }, { Vector3 }] = await Promise.all([
+            import('@/game/systems/BuildingSystem'),
+            import('three'),
+          ])
           const placedId = buildingSystem.placeBuilding(
             selectedBuildingTemplateId,
-            new THREE.Vector3(snappedX, 0, snappedZ),
+            new Vector3(snappedX, 0, snappedZ),
             previewRotation
           )
           if (!placedId) {
@@ -815,200 +735,25 @@ export default function GameWorldClient() {
       <div className="fixed inset-0 overflow-hidden">
         {/* Game Canvas Container */}
         <div className="absolute inset-0 z-0">
-          <Canvas
-            shadows
-            gl={{
-              alpha: false,
-              antialias: true,
-              powerPreference: 'high-performance',
-              stencil: false,
-              logarithmicDepthBuffer: true,
-              toneMapping: THREE.NoToneMapping,
-              outputColorSpace: THREE.SRGBColorSpace,
-            }}
-            camera={{
-              position: ENVIRONMENT_CONFIG.camera.position,
-              fov: ENVIRONMENT_CONFIG.camera.fov,
-              near: ENVIRONMENT_CONFIG.camera.near,
-              far: ENVIRONMENT_CONFIG.camera.far,
-            }}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-            }}
-            dpr={isLowPowerDevice ? [1, 1.5] : [1, 2]}
-            linear
-          >
-            {/* Scene setup */}
-            <color attach="background" args={[ENVIRONMENT_CONFIG.scene.background]} />
-            <fog
-              attach="fog"
-              args={[
-                ENVIRONMENT_CONFIG.fog.color,
-                ENVIRONMENT_CONFIG.fog.near,
-                ENVIRONMENT_CONFIG.fog.far,
-              ]}
-            />
-
-            {/* Sky and environment first */}
-            <Sky
-              distance={ENVIRONMENT_CONFIG.sky.distance}
-              sunPosition={ENVIRONMENT_CONFIG.sky.sunPosition}
-              inclination={ENVIRONMENT_CONFIG.sky.inclination}
-              azimuth={ENVIRONMENT_CONFIG.sky.azimuth}
-              mieCoefficient={ENVIRONMENT_CONFIG.sky.mieCoefficient}
-              mieDirectionalG={ENVIRONMENT_CONFIG.sky.mieDirectionalG}
-              rayleigh={ENVIRONMENT_CONFIG.sky.rayleigh}
-              turbidity={ENVIRONMENT_CONFIG.sky.turbidity}
-            />
-            <Stars
-              radius={ENVIRONMENT_CONFIG.stars.radius}
-              depth={ENVIRONMENT_CONFIG.stars.depth}
-              count={isLowPowerDevice ? 2000 : ENVIRONMENT_CONFIG.stars.count}
-              factor={ENVIRONMENT_CONFIG.stars.factor}
-              saturation={ENVIRONMENT_CONFIG.stars.saturation}
-              fade={ENVIRONMENT_CONFIG.stars.fade}
-            />
-
-            {/* Rest of scene content */}
-            <Suspense fallback={null}>
-              <SceneContent />
-
-              {/* Physics-enabled Scene Content */}
-              <PhysicsProvider gravity={[0, -9.81, 0]}>
-                <PhysicsGround
-                  onClick={handleGroundClick}
-                  onPointerMove={handleGroundHover}
-                  color={ENVIRONMENT_CONFIG.scene.groundColor}
-                  size={ENVIRONMENT_CONFIG.grid.width}
-                />
-
-                <BuildingGrid
-                  width={ENVIRONMENT_CONFIG.grid.width}
-                  height={ENVIRONMENT_CONFIG.grid.height}
-                  cellSize={ENVIRONMENT_CONFIG.grid.cellSize}
-                  showGridLines={isBuildModeActive}
-                />
-
-                {/* Weather - reduced or disabled for accessibility/performance */}
-                {!prefersReducedMotion && (
-                  <WeatherSystem
-                    currentWeather={weather}
-                    intensity={isLowPowerDevice ? weatherIntensity * 0.5 : weatherIntensity}
-                  />
-                )}
-
-                {/* Colony Structure */}
-                <group name="colony-root">
-                  <HtmlStructureVisualization {...htmlStructureProps} />
-
-                  {/* Resource section spread out in a wider area */}
-                  <group name="section-resources">
-                    <group position={[-20, 0, -20]}>
-                      <ResourceCollectors />
-                    </group>
-                    <group position={[0, 0, -15]}>
-                      <ResourceGenerators
-                        generators={formattedResourceGenerators.map((gen, index) => ({
-                          ...gen,
-                          position: [
-                            (index - formattedResourceGenerators.length / 2) * 15,
-                            0,
-                            index % 2 === 0 ? -5 : 5,
-                          ],
-                        }))}
-                        showProductionEffects={true}
-                      />
-                    </group>
-                    <ResourceFlowSystem
-                      flows={resourceFlows.map((flow) => ({
-                        ...flow,
-                        from: [flow.from[0], flow.from[1], flow.from[2] - 15],
-                        to: [0, 5, 0],
-                      }))}
-                    />
-                  </group>
-
-                  <group name="section-buildings" position={[-10, 0, 0]}>
-                    <PlacedBuildings />
-                    {isBuildModeActive && selectedBuildingTemplateId && (
-                      <BuildingPreview {...buildingPreviewProps} />
-                    )}
-                  </group>
-
-                  <group name="section-villagers" position={[0, 0, 10]}>
-                    <UnlockedVillagers />
-                  </group>
-
-                  <Player />
-                  <Pixel mood={pixelMood} contextualTip={contextualTip} />
-                </group>
-
-                <Environment preset="sunset" background={false} blur={0.8} />
-
-                <directionalLight
-                  position={[50, 50, 25]}
-                  intensity={0.4}
-                  castShadow
-                  shadow-mapSize={[2048, 2048]}
-                  shadow-camera-left={-50}
-                  shadow-camera-right={50}
-                  shadow-camera-top={50}
-                  shadow-camera-bottom={-50}
-                />
-              </PhysicsProvider>
-            </Suspense>
-
-            <OrbitControls
-              ref={controlsRef}
-              makeDefault
-              minDistance={ENVIRONMENT_CONFIG.camera.minDistance}
-              maxDistance={ENVIRONMENT_CONFIG.camera.maxDistance}
-              maxPolarAngle={Math.PI / 2.1}
-              minPolarAngle={Math.PI / 4}
-              screenSpacePanning={false}
-              enableDamping={true}
-              dampingFactor={0.05}
-              rotateSpeed={0.5}
-              zoomSpeed={0.8}
-              // Set initial target to center of resources
-              target={[0, 0, -15]}
-            />
-
-            {/* Camera Focus Manager - handles smooth camera transitions when buildings are selected */}
-            <CameraFocusManager
-              controlsRef={controlsRef}
-              config={{
-                focusDistance: 10,
-                focusHeightOffset: 6,
-                animationDuration: 0.8,
-              }}
-            />
-
-            {/* Celebration Effects */}
-            {pendingCelebration && (
-              <CelebrationSparkles
-                position={[0, 3, -15]}
-                type={pendingCelebration}
-                onComplete={clearCelebration}
-              />
-            )}
-
-            {/* Post-processing effects - disabled on mobile for performance */}
-            {!isLowPowerDevice && (
-              <EffectComposer>
-                <Bloom
-                  mipmapBlur
-                  intensity={0.8}
-                  luminanceThreshold={0.6}
-                  luminanceSmoothing={0.3}
-                />
-              </EffectComposer>
-            )}
-          </Canvas>
+          <DeferredGameCanvas
+            controlsRef={controlsRef}
+            isLowPowerDevice={isLowPowerDevice}
+            prefersReducedMotion={prefersReducedMotion}
+            weather={weather}
+            weatherIntensity={weatherIntensity}
+            isBuildModeActive={isBuildModeActive}
+            selectedBuildingTemplateId={selectedBuildingTemplateId}
+            htmlStructureProps={htmlStructureProps}
+            buildingPreviewProps={buildingPreviewProps}
+            formattedResourceGenerators={formattedResourceGenerators}
+            resourceFlows={resourceFlows}
+            pixelMood={pixelMood}
+            contextualTip={contextualTip}
+            pendingCelebration={pendingCelebration}
+            clearCelebration={clearCelebration}
+            onGroundClick={handleGroundClick}
+            onGroundHover={handleGroundHover}
+          />
         </div>
 
         {/* UI Layer */}
