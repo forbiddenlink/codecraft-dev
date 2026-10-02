@@ -350,3 +350,21 @@ body {
 .animate-slide-up {
   animation: slide-up var(--duration-slow) var(--ease-out);
 }
+
+/* Static first-paint hero (src/components/home/StaticHero.tsx): a CSS-only starfield poster
+   shown until the 3D scene loads. The title fades once the interactive app has mounted. */
+.static-hero {
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1px 1px at 28% 62%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(1.5px 1.5px at 47% 33%, rgb(255 255 255 / 0.8), transparent),
+    radial-gradient(1px 1px at 63% 78%, rgb(255 255 255 / 0.6), transparent),
+    radial-gradient(1.5px 1.5px at 82% 24%, rgb(255 255 255 / 0.9), transparent),
+    radial-gradient(1px 1px at 91% 66%, rgb(255 255 255 / 0.7), transparent),
+    radial-gradient(ellipse at 20% 20%, rgb(30 58 138 / 0.35), transparent 45%),
+    radial-gradient(ellipse at 80% 85%, rgb(251 191 36 / 0.12), transparent 40%);
+}
+
+html[data-app-ready] .static-hero-text {
+  opacity: 0;
+}
