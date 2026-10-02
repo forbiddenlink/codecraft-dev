@@ -403,7 +403,7 @@ export default function PlaygroundPage() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex items-center justify-between">
+      <header className="bg-gray-800 border-b border-gray-700 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <h1 className="text-lg font-bold text-white">Playground</h1>
           <div className="h-4 w-px bg-gray-600" />
@@ -452,7 +452,7 @@ export default function PlaygroundPage() {
             className={`px-4 py-1.5 text-sm rounded font-medium transition-colors flex items-center gap-2 ${
               isRunning || !isWebContainerReady
                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-green-600 hover:bg-green-700 text-white'
+                : 'bg-green-700 hover:bg-green-800 text-white'
             }`}
           >
             {isRunning ? (
@@ -490,7 +490,7 @@ export default function PlaygroundPage() {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex overflow-hidden">
         {/* Sidebar - File tree */}
         <div
           className="bg-gray-800 border-r border-gray-700 overflow-hidden flex flex-col"
@@ -629,10 +629,10 @@ export default function PlaygroundPage() {
             />
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-gray-800 border-t border-gray-700 px-4 py-2 text-xs text-gray-400 flex items-center justify-between">
+      <footer className="bg-gray-800 border-t border-gray-700 px-4 py-2 text-xs text-gray-400 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <span>
             <kbd className="px-1.5 py-0.5 bg-gray-700 rounded text-xs">Ctrl+Enter</kbd> Run
