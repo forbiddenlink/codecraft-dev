@@ -3,7 +3,7 @@
 Educational coding game. You write real HTML, CSS, and JavaScript in a Monaco editor and watch
 it become structures in a 3D space colony. Challenges teach HTML/CSS/JS through colony-building
 objectives, with hints, rewards, and progress tracking. Live at
-[codecraft-dev.vercel.app](https://codecraft-dev.vercel.app).
+[codecraft-dev-one.vercel.app](https://codecraft-dev-one.vercel.app).
 
 ## Stack
 
@@ -16,7 +16,7 @@ Sentry, PostHog, Axiom/Pino logging. Env is validated with `@t3-oss/env-nextjs` 
 
 ```bash
 pnpm dev              # next dev --turbopack
-pnpm build            # next build (+ postbuild: next-sitemap)
+pnpm build            # next build (robots + sitemap come from src/app/robots.ts, sitemap.ts)
 pnpm start
 pnpm lint             # biome lint .
 pnpm lint:fix

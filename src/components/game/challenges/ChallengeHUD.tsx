@@ -165,7 +165,7 @@ export default function ChallengeHUD() {
             className={`inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] px-4 py-2.5 text-sm font-medium text-white transition-colors ${
               isCompleted
                 ? 'bg-white/15 hover:bg-white/20'
-                : 'bg-[rgb(var(--success))] hover:bg-[rgb(22_163_74)]'
+                : 'bg-[rgb(21_128_61)] hover:bg-[rgb(22_101_52)]'
             }`}
           >
             <Icon icon={Code2} size={15} />

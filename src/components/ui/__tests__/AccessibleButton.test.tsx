@@ -73,7 +73,7 @@ describe('AccessibleButton', () => {
 
     rerender(<AccessibleButton variant="success">Success</AccessibleButton>)
     button = screen.getByRole('button')
-    expect(button).toHaveClass('bg-green-600')
+    expect(button).toHaveClass('bg-green-700')
   })
 
   it('should apply correct size classes', () => {

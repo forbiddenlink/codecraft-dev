@@ -1012,9 +1012,11 @@ export default function GameWorldClient() {
         </div>
 
         {/* UI Layer */}
-        <div className="fixed inset-0 pointer-events-none">
-          {/* Challenge UI - Left Side */}
-          <div className="absolute left-4 top-4 z-50 pointer-events-auto">
+        {/* Phones: panels stack in one scrollable column under the menu button so they
+            cannot overlap. md+: the original four-corner overlay. */}
+        <div className="fixed inset-0 flex flex-col gap-3 overflow-y-auto overscroll-contain p-4 pt-20 pointer-events-none md:block md:overflow-visible md:p-0">
+          {/* Challenge UI - Left Side (top-20 clears the fixed menu button) */}
+          <div className="relative z-50 pointer-events-auto md:absolute md:left-4 md:top-[72px]">
             {!currentChallenge && (
               <HudPanel className="max-w-sm">
                 <h2 className="mb-2 text-lg font-semibold text-[rgb(var(--text-primary))]">
@@ -1063,9 +1065,9 @@ export default function GameWorldClient() {
 
                   {currentChallenge.objectives && currentChallenge.objectives.length > 0 && (
                     <div className="mb-3">
-                      <h4 className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-[rgb(var(--text-muted))]">
+                      <h3 className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-[rgb(var(--text-muted))]">
                         Objectives
-                      </h4>
+                      </h3>
                       <ul className="space-y-1.5 text-sm text-[rgb(var(--text-secondary))]">
                         {currentChallenge.objectives.map((obj, i) => (
                           <li key={i} className="flex items-start gap-2">
@@ -1145,7 +1147,7 @@ export default function GameWorldClient() {
                     <button
                       type="button"
                       onClick={handleEditorOpen}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[rgb(var(--success))] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[rgb(22_163_74)]"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-[var(--radius-sm)] bg-[rgb(21_128_61)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[rgb(22_101_52)]"
                     >
                       <Icon icon={Code2} size={15} />
                       Start Coding
@@ -1186,7 +1188,7 @@ export default function GameWorldClient() {
           </div>
 
           {/* Pixel Dialog - Bottom Left */}
-          <div className="absolute bottom-4 left-4 z-50 pointer-events-auto">
+          <div className="relative z-50 pointer-events-auto md:absolute md:bottom-4 md:left-4">
             <HudPanel className="max-w-sm">
               <div className="mb-2 flex items-center gap-2">
                 <span className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
@@ -1204,14 +1206,14 @@ export default function GameWorldClient() {
           </div>
 
           {/* Resource HUD - Top Right */}
-          <div className="absolute right-4 top-4 z-50 pointer-events-auto">
+          <div className="relative z-50 order-first pointer-events-auto md:absolute md:right-4 md:top-4">
             <HudPanel>
               <ResourceHUD />
             </HudPanel>
           </div>
 
           {/* Building Menu - Bottom Right */}
-          <div className="absolute right-4 bottom-4 z-50 pointer-events-auto">
+          <div className="relative z-50 pointer-events-auto md:absolute md:right-4 md:bottom-4">
             <BuildingMenu />
           </div>
 
