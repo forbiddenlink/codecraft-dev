@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.2...v1.1.3) (2026-10-09)
+
+
+### Bug Fixes
+
+* replace placeholder Vercel icons with a CodeCraft icon ([#113](https://github.com/forbiddenlink/codecraft-dev/issues/113)) ([fadc4a0](https://github.com/forbiddenlink/codecraft-dev/commit/fadc4a057bb748981b6cb4acbb3704dee5bcde55))
+* wrong-site URLs, phone HUD overlap, playground overflow, a11y contrast, audit highs ([#110](https://github.com/forbiddenlink/codecraft-dev/issues/110)) ([d3660bd](https://github.com/forbiddenlink/codecraft-dev/commit/d3660bd833f96cddf3180f81bb2144ea183a2ad2))
+
+
+### Performance Improvements
+
+* **home:** defer the three.js scene so first paint no longer waits on it ([#112](https://github.com/forbiddenlink/codecraft-dev/issues/112)) ([9c5842f](https://github.com/forbiddenlink/codecraft-dev/commit/9c5842f26a3264d93f7eed2bd5f8fe05b3dbfd32))
+
 ## [1.1.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.1...v1.1.2) (2026-09-28)
 
 
