@@ -1,0 +1,245 @@
+{
+  "version": 1,
+  "lines": {
+    "f527a1fb": {
+      "npcId": "pixel",
+      "file": "pixel/f527a1fb.mp3"
+    },
+    "5604429f": {
+      "npcId": "pixel",
+      "file": "pixel/5604429f.mp3"
+    },
+    "cb2c1605": {
+      "npcId": "pixel",
+      "file": "pixel/cb2c1605.mp3"
+    },
+    "42aac29c": {
+      "npcId": "pixel",
+      "file": "pixel/42aac29c.mp3"
+    },
+    "871211bc": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/871211bc.mp3"
+    },
+    "19d669f9": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/19d669f9.mp3"
+    },
+    "efc921b4": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/efc921b4.mp3"
+    },
+    "5a1f14ae": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/5a1f14ae.mp3"
+    },
+    "02f0a3fb": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/02f0a3fb.mp3"
+    },
+    "2c8c9f56": {
+      "npcId": "resource_manager",
+      "file": "resource_manager/2c8c9f56.mp3"
+    },
+    "2974fa71": {
+      "npcId": "skill_master",
+      "file": "skill_master/2974fa71.mp3"
+    },
+    "f80c8364": {
+      "npcId": "skill_master",
+      "file": "skill_master/f80c8364.mp3"
+    },
+    "aad03e94": {
+      "npcId": "skill_master",
+      "file": "skill_master/aad03e94.mp3"
+    },
+    "c0293b6a": {
+      "npcId": "skill_master",
+      "file": "skill_master/c0293b6a.mp3"
+    },
+    "986e7a3e": {
+      "npcId": "skill_master",
+      "file": "skill_master/986e7a3e.mp3"
+    },
+    "690c94f3": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/690c94f3.mp3"
+    },
+    "25387b01": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/25387b01.mp3"
+    },
+    "9808852f": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/9808852f.mp3"
+    },
+    "8cb0d70c": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/8cb0d70c.mp3"
+    },
+    "81a19e01": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/81a19e01.mp3"
+    },
+    "aff6d142": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/aff6d142.mp3"
+    },
+    "a4e78d92": {
+      "npcId": "tutorial_guide",
+      "file": "tutorial_guide/a4e78d92.mp3"
+    },
+    "1ebd67c3": {
+      "npcId": "captain-rivera",
+      "file": "captain-rivera/1ebd67c3.mp3"
+    },
+    "4b9a3618": {
+      "npcId": "captain-rivera",
+      "file": "captain-rivera/4b9a3618.mp3"
+    },
+    "6c3caebd": {
+      "npcId": "captain-rivera",
+      "file": "captain-rivera/6c3caebd.mp3"
+    },
+    "f1cbc408": {
+      "npcId": "dr-chen",
+      "file": "dr-chen/f1cbc408.mp3"
+    },
+    "cc8feea9": {
+      "npcId": "dr-chen",
+      "file": "dr-chen/cc8feea9.mp3"
+    },
+    "98abc0f2": {
+      "npcId": "dr-chen",
+      "file": "dr-chen/98abc0f2.mp3"
+    },
+    "28e309a8": {
+      "npcId": "pixel",
+      "file": "pixel/28e309a8.mp3"
+    },
+    "3f244601": {
+      "npcId": "pixel",
+      "file": "pixel/3f244601.mp3"
+    },
+    "6de7056f": {
+      "npcId": "pixel",
+      "file": "pixel/6de7056f.mp3"
+    },
+    "6fd35d9d": {
+      "npcId": "pixel",
+      "file": "pixel/6fd35d9d.mp3"
+    },
+    "1ed80af0": {
+      "npcId": "pixel",
+      "file": "pixel/1ed80af0.mp3"
+    },
+    "8dccc0dc": {
+      "npcId": "pixel",
+      "file": "pixel/8dccc0dc.mp3"
+    },
+    "7a57150a": {
+      "npcId": "pixel",
+      "file": "pixel/7a57150a.mp3"
+    },
+    "5549bef8": {
+      "npcId": "pixel",
+      "file": "pixel/5549bef8.mp3"
+    },
+    "1b6f2a61": {
+      "npcId": "pixel",
+      "file": "pixel/1b6f2a61.mp3"
+    },
+    "9e04aed5": {
+      "npcId": "pixel",
+      "file": "pixel/9e04aed5.mp3"
+    },
+    "5e1d064d": {
+      "npcId": "pixel",
+      "file": "pixel/5e1d064d.mp3"
+    },
+    "e68a688b": {
+      "npcId": "pixel",
+      "file": "pixel/e68a688b.mp3"
+    },
+    "358c9075": {
+      "npcId": "pixel",
+      "file": "pixel/358c9075.mp3"
+    },
+    "a8c13507": {
+      "npcId": "pixel",
+      "file": "pixel/a8c13507.mp3"
+    },
+    "37f1f49c": {
+      "npcId": "pixel",
+      "file": "pixel/37f1f49c.mp3"
+    },
+    "45ad73b1": {
+      "npcId": "pixel",
+      "file": "pixel/45ad73b1.mp3"
+    },
+    "7567982d": {
+      "npcId": "pixel",
+      "file": "pixel/7567982d.mp3"
+    },
+    "ac21341d": {
+      "npcId": "pixel",
+      "file": "pixel/ac21341d.mp3"
+    },
+    "3eb63844": {
+      "npcId": "pixel",
+      "file": "pixel/3eb63844.mp3"
+    },
+    "f21c9c94": {
+      "npcId": "pixel",
+      "file": "pixel/f21c9c94.mp3"
+    },
+    "5e488b22": {
+      "npcId": "pixel",
+      "file": "pixel/5e488b22.mp3"
+    },
+    "692c91a3": {
+      "npcId": "pixel",
+      "file": "pixel/692c91a3.mp3"
+    },
+    "7a83e993": {
+      "npcId": "pixel",
+      "file": "pixel/7a83e993.mp3"
+    },
+    "725d2ca7": {
+      "npcId": "pixel",
+      "file": "pixel/725d2ca7.mp3"
+    },
+    "8147988f": {
+      "npcId": "pixel",
+      "file": "pixel/8147988f.mp3"
+    },
+    "c1ed3a60": {
+      "npcId": "pixel",
+      "file": "pixel/c1ed3a60.mp3"
+    },
+    "f2f4d8d2": {
+      "npcId": "pixel",
+      "file": "pixel/f2f4d8d2.mp3"
+    },
+    "50dd5e0d": {
+      "npcId": "pixel",
+      "file": "pixel/50dd5e0d.mp3"
+    },
+    "8c3bdef1": {
+      "npcId": "pixel",
+      "file": "pixel/8c3bdef1.mp3"
+    },
+    "af0e2482": {
+      "npcId": "pixel",
+      "file": "pixel/af0e2482.mp3"
+    },
+    "0913609b": {
+      "npcId": "pixel",
+      "file": "pixel/0913609b.mp3"
+    },
+    "9be37ed3": {
+      "npcId": "pixel",
+      "file": "pixel/9be37ed3.mp3"
+    }
+  }
+}

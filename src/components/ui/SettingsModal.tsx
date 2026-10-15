@@ -1,22 +1,24 @@
 'use client'
 
-import { FileText, RotateCcw, Scale, Volume2, X } from 'lucide-react'
+import { FileText, Mic, Music, RotateCcw, Scale, Volume2, X } from 'lucide-react'
 import Link from 'next/link'
 import { Icon } from '@/components/ui/Icon'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { toggleSettings } from '@/store/slices/uiSlice'
+import { soundSystem } from '@/utils/soundSystem'
 
 export function SettingsModal() {
   const dispatch = useAppDispatch()
   const isOpen = useAppSelector((state) => state.ui.showSettings)
-  const soundEnabled =
-    typeof window !== 'undefined' ? localStorage.getItem('codecraft_sound') !== 'false' : true
+  const readFlag = (key: string) =>
+    typeof window !== 'undefined' ? localStorage.getItem(key) !== 'false' : true
+  const soundEnabled = readFlag('codecraft_sound')
+  const musicEnabled = readFlag('codecraft_music')
+  const voiceEnabled = readFlag('codecraft_voice')
 
   if (!isOpen) return null
 
-  const setSound = (enabled: boolean) => {
-    localStorage.setItem('codecraft_sound', enabled ? 'true' : 'false')
-  }
+  const setSound = (enabled: boolean) => soundSystem.setEnabled(enabled)
 
   const resetOnboarding = () => {
     localStorage.removeItem('codecraft_onboarding_complete')
@@ -64,12 +66,42 @@ export function SettingsModal() {
               <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.15)] text-[rgb(var(--accent-subtle))]">
                 <Icon icon={Volume2} size={16} />
               </span>
-              Sound effects
+              Sound (all audio)
             </span>
             <input
               type="checkbox"
               defaultChecked={soundEnabled}
               onChange={(e) => setSound(e.target.checked)}
+              className="h-4 w-4 accent-[rgb(var(--accent-subtle))]"
+            />
+          </label>
+
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-[var(--radius-md)] px-3 py-3 hover:bg-[rgb(var(--bg-elevated))]">
+            <span className="inline-flex items-center gap-3 text-sm text-[rgb(var(--text-primary))]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.15)] text-[rgb(var(--accent-subtle))]">
+                <Icon icon={Music} size={16} />
+              </span>
+              Music
+            </span>
+            <input
+              type="checkbox"
+              defaultChecked={musicEnabled}
+              onChange={(e) => soundSystem.setMusicEnabled(e.target.checked)}
+              className="h-4 w-4 accent-[rgb(var(--accent-subtle))]"
+            />
+          </label>
+
+          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-[var(--radius-md)] px-3 py-3 hover:bg-[rgb(var(--bg-elevated))]">
+            <span className="inline-flex items-center gap-3 text-sm text-[rgb(var(--text-primary))]">
+              <span className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-[rgb(var(--accent)/0.15)] text-[rgb(var(--accent-subtle))]">
+                <Icon icon={Mic} size={16} />
+              </span>
+              Voice
+            </span>
+            <input
+              type="checkbox"
+              defaultChecked={voiceEnabled}
+              onChange={(e) => soundSystem.setVoiceEnabled(e.target.checked)}
               className="h-4 w-4 accent-[rgb(var(--accent-subtle))]"
             />
           </label>

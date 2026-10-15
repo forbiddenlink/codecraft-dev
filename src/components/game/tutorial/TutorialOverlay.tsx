@@ -1,12 +1,13 @@
 'use client'
 
-import { AnimatePresence, motion } from 'motion/react'
 import { Bot, CheckCircle2, ChevronLeft, ChevronRight, SkipForward } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
 import { type CSSProperties, useEffect, useState } from 'react'
 import { HudPanel } from '@/components/ui/HudPanel'
 import { Icon } from '@/components/ui/Icon'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { endTutorial, nextStep, previousStep } from '@/store/slices/tutorialSlice'
+import { soundSystem } from '@/utils/soundSystem'
 
 interface HighlightOverlayProps {
   focusArea: string
@@ -95,6 +96,15 @@ const TutorialOverlay = ({ currentStep, focusArea, onComplete }: TutorialOverlay
     return () => window.clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- advance when step index changes
   }, [tutorialState.isActive, stepIndex, step?.id])
+
+  // Voice the line when it is on screen. Subtitles render regardless; no clip means no sound.
+  const spokenLine =
+    tutorialState.isActive && tutorialState.showTutorialUI ? step?.pixelDialogue : undefined
+  useEffect(() => {
+    if (!spokenLine) return
+    void soundSystem.playVoiceLine(spokenLine)
+    return () => soundSystem.stopVoice()
+  }, [spokenLine])
 
   if (!tutorialState.isActive || !step || !tutorialState.showTutorialUI) {
     return null

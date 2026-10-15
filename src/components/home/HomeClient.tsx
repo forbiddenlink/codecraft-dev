@@ -14,6 +14,7 @@ import { useGameLoop } from '@/hooks/useGameLoop'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useAppSelector } from '@/store/hooks'
 import { createScreenReaderAnnouncer } from '@/utils/accessibilityUtils'
+import { selectMusicTrack } from '@/utils/musicPlan'
 import { soundSystem } from '@/utils/soundSystem'
 
 // The editor pulls in Monaco glue plus the Liveblocks/Yjs presence client (~180 KB), so it is
@@ -35,6 +36,17 @@ export default function HomeClient() {
   useKeyboardShortcuts()
   useGameLoop(1000)
   useColonyEvents()
+
+  const menuOpen = useAppSelector((state) => state.ui.showMainMenu)
+  const editorOpen = useAppSelector((state) => state.editor.isVisible)
+  const musicTrack = selectMusicTrack({ menuOpen, editorOpen })
+
+  // Requests are remembered until the first user gesture unlocks audio, then crossfade between tracks.
+  useEffect(() => {
+    soundSystem.playMusic(musicTrack)
+  }, [musicTrack])
+
+  useEffect(() => () => soundSystem.releaseMusic(), [])
 
   useEffect(() => {
     soundSystem.init()

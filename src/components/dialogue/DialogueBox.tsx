@@ -21,6 +21,7 @@ import {
 import { useEffect, useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
 import type { DialogueChoice, DialogueNode } from '@/utils/dialogueSystem'
+import { soundSystem } from '@/utils/soundSystem'
 
 export interface DialogueBoxProps {
   npcName: string
@@ -81,6 +82,12 @@ export function DialogueBox({
       setIsTyping(false)
     }
   }, [currentIndex, node.text])
+
+  // Voice the node if a pre-generated clip exists; the typed subtitle is unchanged.
+  useEffect(() => {
+    void soundSystem.playVoiceLine(node.text)
+    return () => soundSystem.stopVoice()
+  }, [node.text])
 
   // Reset typing when node changes
   useEffect(() => {

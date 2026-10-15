@@ -15,6 +15,7 @@ import {
   initializeAchievements,
   unlockAchievement,
 } from '@/store/slices/achievementSlice'
+import { resolveDialogueNode } from '@/utils/dialogueLookup'
 import { registerDialogue } from '@/utils/dialogueSystem'
 
 // Dynamic imports for performance
@@ -285,12 +286,18 @@ export function FeatureHub() {
       {dialogueState.isActive && dialogueState.currentNPCId && (
         <DialogueBox
           npcName={dialogueState.currentNPCId}
-          node={{
-            id: 'demo',
-            speaker: dialogueState.currentNPCId,
-            text: 'This is a demo dialogue. Full integration coming soon!',
-            emotion: 'happy',
-          }}
+          node={
+            resolveDialogueNode(
+              allDialogueTrees,
+              dialogueState.currentTreeId,
+              dialogueState.currentNodeId
+            ) ?? {
+              id: 'demo',
+              speaker: dialogueState.currentNPCId,
+              text: 'This is a demo dialogue. Full integration coming soon!',
+              emotion: 'happy',
+            }
+          }
           choices={[]}
           onChoice={(id) => console.log('Choice:', id)}
           onContinue={() => dispatch({ type: 'dialogue/endDialogue' })}

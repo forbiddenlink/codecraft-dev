@@ -39,10 +39,12 @@ export function EnhancedCelebration({
       case 'levelUp':
         levelUpCelebration()
         soundSystem.playSFX('level_up')
+        soundSystem.celebrate('victory', 16000)
         break
       case 'achievement':
         achievementCelebration()
         soundSystem.playSFX('achievement_unlock')
+        soundSystem.celebrate('victory', 16000)
         break
       case 'perfectScore':
         perfectScoreCelebration()
