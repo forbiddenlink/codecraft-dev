@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.3...v1.2.0) (2026-10-15)
+
+
+### Features
+
+* **audio:** real SFX, looping music with crossfade, NPC voice lines ([#119](https://github.com/forbiddenlink/codecraft-dev/issues/119)) ([9d800bc](https://github.com/forbiddenlink/codecraft-dev/commit/9d800bc7c8366342ef89eba184cbe0619dbb7463))
+
+
+### Bug Fixes
+
+* **web:** add baseline security headers and report-only CSP ([#118](https://github.com/forbiddenlink/codecraft-dev/issues/118)) ([bd4c3a0](https://github.com/forbiddenlink/codecraft-dev/commit/bd4c3a075bd0c87f92f84223cca525fe2bdfcdb6))
+
 ## [1.1.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.2...v1.1.3) (2026-10-09)
 
 
