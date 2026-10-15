@@ -1,8 +1,10 @@
 import {
   effectiveMusicVolume,
   equalPowerGains,
+  fadeCurve,
   planMusicTransition,
   selectMusicTrack,
+  voiceVolume,
 } from '../musicPlan'
 
 describe('selectMusicTrack', () => {
@@ -79,5 +81,26 @@ describe('effectiveMusicVolume', () => {
     expect(effectiveMusicVolume(0.5, 0.5)).toBeCloseTo(0.25)
     expect(effectiveMusicVolume(2, 2)).toBe(1)
     expect(effectiveMusicVolume(-1, 1)).toBe(0)
+  })
+})
+
+describe('fadeCurve', () => {
+  it('runs 0..1 for in and 1..0 for out with equal-power shape', () => {
+    const up = fadeCurve(64, 'in')
+    const down = fadeCurve(64, 'out')
+    expect(up).toHaveLength(64)
+    expect(up[0]).toBeCloseTo(0)
+    expect(up[63]).toBeCloseTo(1)
+    expect(down[0]).toBeCloseTo(1)
+    expect(down[63]).toBeCloseTo(0)
+    expect(up[20] ** 2 + down[20] ** 2).toBeCloseTo(1)
+  })
+})
+
+describe('voiceVolume', () => {
+  it('is silent at master 0 and scales with master and sfx', () => {
+    expect(voiceVolume(0, 1)).toBe(0)
+    expect(voiceVolume(0.5, 0.5)).toBeCloseTo(0.25)
+    expect(voiceVolume(3, 3)).toBe(1)
   })
 })

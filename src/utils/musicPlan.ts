@@ -50,6 +50,23 @@ export function equalPowerGains(progress: number): { out: number; in: number } {
   return { out: Math.cos((p * Math.PI) / 2), in: Math.sin((p * Math.PI) / 2) }
 }
 
+/** Sampled equal-power curve for AudioParam.setValueCurveAtTime, 0..1 ('in') or 1..0 ('out'). */
+export function fadeCurve(steps: number, direction: 'in' | 'out'): Float32Array {
+  const n = Math.max(2, Math.floor(steps))
+  const curve = new Float32Array(n)
+  for (let i = 0; i < n; i++) {
+    const g = equalPowerGains(i / (n - 1))
+    curve[i] = direction === 'in' ? g.in : g.out
+  }
+  return curve
+}
+
+/** Voice follows master and SFX volume; at master 0 it is silent. */
+export function voiceVolume(master: number, sfx: number): number {
+  const clamp = (v: number) => Math.min(1, Math.max(0, v))
+  return clamp(master) * clamp(sfx)
+}
+
 export function effectiveMusicVolume(master: number, music: number, trackGain = 1): number {
   const clamp = (v: number) => Math.min(1, Math.max(0, v))
   return clamp(master) * clamp(music) * trackGain
