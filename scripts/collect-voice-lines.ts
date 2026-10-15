@@ -46,7 +46,9 @@ export function collectVoiceLines(): VoiceLine[] {
 
   for (const tree of Object.values(exampleDialogues)) {
     if (!tree || typeof tree !== 'object' || !('nodes' in tree)) continue
-    for (const node of (tree as { nodes: Map<string, { text: string }>; npcId: string }).nodes.values()) {
+    for (const node of (
+      tree as { nodes: Map<string, { text: string }>; npcId: string }
+    ).nodes.values()) {
       add((tree as { npcId: string }).npcId, node.text)
     }
   }
@@ -62,7 +64,8 @@ export function collectVoiceLines(): VoiceLine[] {
   }
   for (const mission of STORY_MISSIONS) {
     for (const character of mission.characters) {
-      if (characterNpcId(character.name) === 'pixel') for (const line of character.dialogue) add('pixel', line)
+      if (characterNpcId(character.name) === 'pixel')
+        for (const line of character.dialogue) add('pixel', line)
     }
   }
   return out

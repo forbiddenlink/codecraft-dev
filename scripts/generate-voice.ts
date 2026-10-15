@@ -31,7 +31,22 @@ for (const line of lines) {
       credits += res.credits ?? 0
     }
     // mono speech at 48kbps, loudness-matched across all voices
-    execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', raw, '-af', 'silenceremove=start_periods=1:start_threshold=-50dB,loudnorm=I=-18:TP=-2', '-ac', '1', '-ar', '44100', '-b:a', '48k', dest])
+    execFileSync('ffmpeg', [
+      '-y',
+      '-loglevel',
+      'error',
+      '-i',
+      raw,
+      '-af',
+      'silenceremove=start_periods=1:start_threshold=-50dB,loudnorm=I=-18:TP=-2',
+      '-ac',
+      '1',
+      '-ar',
+      '44100',
+      '-b:a',
+      '48k',
+      dest,
+    ])
   }
   bytes += statSync(dest).size
   manifest.lines[line.id] = { npcId: line.npcId, file }

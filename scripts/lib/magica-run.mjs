@@ -41,7 +41,8 @@ async function runNodeOnce(nodeType, input, { timeoutMs = 300000 } = {}) {
     const res = await fetch(`${BASE}/nodes/runs/${runId}`, { headers: headers() })
     const run = await res.json()
     if (!['RUNNING', 'PENDING', 'QUEUED'].includes(run.status)) {
-      if (run.status === 'FAILED' || run.error) throw new Error(`run ${runId} failed: ${JSON.stringify(run.error ?? run.status)}`)
+      if (run.status === 'FAILED' || run.error)
+        throw new Error(`run ${runId} failed: ${JSON.stringify(run.error ?? run.status)}`)
       return { urls: run.output?.result ?? [], credits: run.creditUsed ?? null, runId }
     }
     if (Date.now() > deadline) throw new Error(`run ${runId} timed out`)
