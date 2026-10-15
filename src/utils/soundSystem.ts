@@ -20,7 +20,52 @@ export type SoundEffect =
   | 'typing'
   | 'whoosh'
 
-export type MusicTrack = 'main_theme' | 'exploration' | 'coding_focus' | 'victory' | 'ambient_space'
+import {
+  effectiveMusicVolume,
+  equalPowerGains,
+  type MusicTrack,
+  planMusicTransition,
+} from './musicPlan'
+import { lookupVoiceUrl, type VoiceManifest } from './voiceManifest'
+
+export type { MusicTrack } from './musicPlan'
+
+const SFX_NAMES: SoundEffect[] = [
+  'achievement_unlock',
+  'challenge_complete',
+  'code_error',
+  'code_success',
+  'building_place',
+  'building_upgrade',
+  'resource_collect',
+  'ui_click',
+  'ui_hover',
+  'pixel_talk',
+  'notification',
+  'level_up',
+  'unlock',
+  'typing',
+  'whoosh',
+]
+
+const STORAGE_SOUND = 'codecraft_sound'
+const STORAGE_MUSIC = 'codecraft_music'
+const STORAGE_VOICE = 'codecraft_voice'
+const DEFAULT_CROSSFADE_SECONDS = 2.5
+
+function readFlag(key: string): boolean {
+  try {
+    return typeof localStorage === 'undefined' || localStorage.getItem(key) !== 'false'
+  } catch {
+    return true
+  }
+}
+
+interface MusicVoice {
+  track: MusicTrack
+  source: AudioBufferSourceNode
+  gain: GainNode
+}
 
 interface SoundConfig {
   volume: number
@@ -33,8 +78,14 @@ interface SoundConfig {
 export class SoundSystem {
   private audioContext: AudioContext | null = null
   private sounds: Map<SoundEffect, AudioBuffer> = new Map()
-  private music: Map<MusicTrack, HTMLAudioElement> = new Map()
-  private currentMusic: HTMLAudioElement | null = null
+  private currentMusic: MusicVoice | null = null
+  private requestedTrack: MusicTrack | null = null
+  private musicToken = 0
+  private musicEnabled = true
+  private voiceEnabled = true
+  private voiceManifest: VoiceManifest | null = null
+  private voiceManifestPromise: Promise<void> | null = null
+  private currentVoice: HTMLAudioElement | null = null
   private masterVolume: number = 0.7
   private sfxVolume: number = 0.8
   private musicVolume: number = 0.5
@@ -51,10 +102,19 @@ export class SoundSystem {
       // Create Audio Context
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
 
-      // Generate procedural sounds
+      // Persisted user settings
+      this.enabled = readFlag(STORAGE_SOUND)
+      this.musicEnabled = readFlag(STORAGE_MUSIC)
+      this.voiceEnabled = readFlag(STORAGE_VOICE)
+
+      // Procedural sounds are the always-available fallback
       await this.generateSounds()
 
       this.initialized = true
+      // Recorded files replace the synthesized buffers as they arrive; failures keep the fallback.
+      void this.loadSFXFiles()
+      // A track requested before the first user gesture starts now.
+      if (this.requestedTrack) this.playMusic(this.requestedTrack)
       console.log('✅ Sound system initialized')
     } catch (error) {
       console.error('❌ Failed to initialize sound system:', error)
@@ -478,54 +538,183 @@ export class SoundSystem {
   }
 
   /**
-   * Play background music
+   * Fetch + decode the recorded SFX files into the buffer map.
+   * Each effect is independent: a missing or undecodable file leaves its synthesized buffer in place.
+   */
+  private async loadSFXFiles(): Promise<void> {
+    const ctx = this.audioContext
+    if (!ctx || typeof fetch === 'undefined') return
+    await Promise.all(
+      SFX_NAMES.map(async (name) => {
+        try {
+          const res = await fetch(`/audio/sfx/${name}.mp3`)
+          if (!res.ok) return
+          const decoded = await ctx.decodeAudioData(await res.arrayBuffer())
+          this.sounds.set(name, decoded)
+        } catch {
+          // keep the synthesized fallback
+        }
+      })
+    )
+  }
+
+  /**
+   * Resume the AudioContext. Call from a user gesture (autoplay policy).
+   * Replays a music request that arrived before the gesture.
+   */
+  async unlock(): Promise<void> {
+    await this.init()
+    const ctx = this.audioContext
+    if (!ctx) return
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume()
+      } catch {
+        return
+      }
+    }
+    if (this.requestedTrack) this.playMusic(this.requestedTrack)
+  }
+
+  /**
+   * Play background music. Safe to call at any time: before a user gesture the request
+   * is remembered and starts on unlock. Switching tracks crossfades; the same track is a no-op.
    */
   playMusic(track: MusicTrack, config: Partial<SoundConfig> = {}): void {
-    if (!this.enabled) return
-
-    // Stop current music if playing
-    if (this.currentMusic) {
-      this.fadeOutMusic(this.currentMusic, config.fadeOut || 1)
+    this.requestedTrack = track
+    const ctx = this.audioContext
+    const plan = planMusicTransition({
+      current: this.currentMusic?.track ?? null,
+      requested: track,
+      enabled: this.enabled,
+      musicEnabled: this.musicEnabled,
+      unlocked: !!ctx && this.initialized && ctx.state === 'running',
+    })
+    if (plan.action === 'none') return
+    if (plan.action === 'stop') {
+      this.stopMusic()
+      return
     }
-
-    // Note: In production, you would load actual music files
-    // For now, we'll create a placeholder
-    console.log(`🎵 Playing music: ${track}`)
-
-    // This would be implemented with actual audio files:
-    // const audio = new Audio(`/music/${track}.mp3`);
-    // audio.loop = config.loop !== false;
-    // audio.volume = (config.volume || 1) * this.musicVolume * this.masterVolume;
-    // audio.play();
-    // this.currentMusic = audio;
+    void this.startTrack(plan.track, config.fadeIn ?? config.fadeOut ?? DEFAULT_CROSSFADE_SECONDS)
   }
 
-  /**
-   * Fade out music
-   */
-  private fadeOutMusic(audio: HTMLAudioElement, duration: number): void {
-    const startVolume = audio.volume
-    const fadeStep = startVolume / (duration * 60) // 60fps
+  private async startTrack(track: MusicTrack, fadeSeconds: number): Promise<void> {
+    const ctx = this.audioContext
+    if (!ctx) return
+    const token = ++this.musicToken
+    let buffer: AudioBuffer
+    try {
+      const res = await fetch(`/music/${track}.mp3`)
+      if (!res.ok) return
+      buffer = await ctx.decodeAudioData(await res.arrayBuffer())
+    } catch {
+      return
+    }
+    // A newer request, a stop, or a disable arrived while loading: drop this one.
+    if (token !== this.musicToken || !this.enabled || !this.musicEnabled) return
 
-    const fadeInterval = setInterval(() => {
-      if (audio.volume > fadeStep) {
-        audio.volume -= fadeStep
-      } else {
-        audio.pause()
-        audio.volume = startVolume
-        clearInterval(fadeInterval)
+    const source = ctx.createBufferSource()
+    source.buffer = buffer
+    // Buffer looping is sample-accurate; the files are pre-crossfaded at their seam.
+    source.loop = true
+    const gain = ctx.createGain()
+    gain.gain.value = 0
+    source.connect(gain)
+    gain.connect(ctx.destination)
+    source.start(0)
+
+    const incoming: MusicVoice = { track, source, gain }
+    const outgoing = this.currentMusic
+    this.currentMusic = incoming
+    this.rampMusicGains(incoming, outgoing, fadeSeconds)
+  }
+
+  /** Equal-power crossfade driven by the pure gain curve. */
+  private rampMusicGains(incoming: MusicVoice, outgoing: MusicVoice | null, seconds: number): void {
+    const target = effectiveMusicVolume(this.masterVolume, this.musicVolume)
+    const steps = Math.max(1, Math.round(seconds * 30))
+    let step = 0
+    const timer = setInterval(() => {
+      step++
+      const g = equalPowerGains(step / steps)
+      incoming.gain.gain.value = g.in * target
+      if (outgoing) outgoing.gain.gain.value = g.out * target
+      if (step >= steps) {
+        clearInterval(timer)
+        if (outgoing) this.disposeVoice(outgoing)
       }
-    }, 1000 / 60)
+    }, 1000 / 30)
+  }
+
+  private disposeVoice(voice: MusicVoice): void {
+    try {
+      voice.source.stop()
+    } catch {
+      // already stopped
+    }
+    voice.source.disconnect()
+    voice.gain.disconnect()
   }
 
   /**
-   * Stop all music
+   * Stop all music (also cancels a track that is still loading).
    */
   stopMusic(): void {
+    this.musicToken++
     if (this.currentMusic) {
-      this.currentMusic.pause()
-      this.currentMusic.currentTime = 0
+      this.disposeVoice(this.currentMusic)
       this.currentMusic = null
+    }
+  }
+
+  /**
+   * Stop music and forget the pending request (component unmount).
+   */
+  releaseMusic(): void {
+    this.requestedTrack = null
+    this.stopMusic()
+  }
+
+  // ----- NPC voice -----
+
+  private loadVoiceManifest(): Promise<void> {
+    if (!this.voiceManifestPromise) {
+      this.voiceManifestPromise = fetch('/audio/voice/manifest.json')
+        .then((r) => (r.ok ? (r.json() as Promise<VoiceManifest>) : null))
+        .then((m) => {
+          this.voiceManifest = m && m.version === 1 ? m : null
+        })
+        .catch(() => {
+          this.voiceManifest = null
+        })
+    }
+    return this.voiceManifestPromise
+  }
+
+  /**
+   * Play the pre-generated voice clip for a dialogue line, if one exists.
+   * Subtitles are rendered by the caller regardless; this is purely additive.
+   */
+  async playVoiceLine(text: string): Promise<void> {
+    if (!this.enabled || !this.voiceEnabled || typeof Audio === 'undefined') return
+    await this.loadVoiceManifest()
+    const url = lookupVoiceUrl(this.voiceManifest, text)
+    if (!url) return
+    this.stopVoice()
+    const audio = new Audio(url)
+    audio.volume = Math.min(1, this.sfxVolume * this.masterVolume + 0.2)
+    this.currentVoice = audio
+    try {
+      await audio.play()
+    } catch {
+      // blocked by autoplay policy or missing file: text-only is fine
+    }
+  }
+
+  stopVoice(): void {
+    if (this.currentVoice) {
+      this.currentVoice.pause()
+      this.currentVoice = null
     }
   }
 
@@ -534,6 +723,7 @@ export class SoundSystem {
    */
   setMasterVolume(volume: number): void {
     this.masterVolume = Math.max(0, Math.min(1, volume))
+    this.applyMusicVolume()
   }
 
   /**
@@ -548,8 +738,12 @@ export class SoundSystem {
    */
   setMusicVolume(volume: number): void {
     this.musicVolume = Math.max(0, Math.min(1, volume))
+    this.applyMusicVolume()
+  }
+
+  private applyMusicVolume(): void {
     if (this.currentMusic) {
-      this.currentMusic.volume = this.musicVolume * this.masterVolume
+      this.currentMusic.gain.gain.value = effectiveMusicVolume(this.masterVolume, this.musicVolume)
     }
   }
 
@@ -558,8 +752,33 @@ export class SoundSystem {
    */
   setEnabled(enabled: boolean): void {
     this.enabled = enabled
+    this.persist(STORAGE_SOUND, enabled)
     if (!enabled) {
       this.stopMusic()
+      this.stopVoice()
+    } else if (this.requestedTrack) {
+      this.playMusic(this.requestedTrack)
+    }
+  }
+
+  setMusicEnabled(enabled: boolean): void {
+    this.musicEnabled = enabled
+    this.persist(STORAGE_MUSIC, enabled)
+    if (!enabled) this.stopMusic()
+    else if (this.requestedTrack) this.playMusic(this.requestedTrack)
+  }
+
+  setVoiceEnabled(enabled: boolean): void {
+    this.voiceEnabled = enabled
+    this.persist(STORAGE_VOICE, enabled)
+    if (!enabled) this.stopVoice()
+  }
+
+  private persist(key: string, value: boolean): void {
+    try {
+      localStorage.setItem(key, value ? 'true' : 'false')
+    } catch {
+      // storage unavailable
     }
   }
 
@@ -569,6 +788,8 @@ export class SoundSystem {
   getSettings() {
     return {
       enabled: this.enabled,
+      musicEnabled: this.musicEnabled,
+      voiceEnabled: this.voiceEnabled,
       masterVolume: this.masterVolume,
       sfxVolume: this.sfxVolume,
       musicVolume: this.musicVolume,
@@ -582,7 +803,7 @@ export const soundSystem = new SoundSystem()
 // Initialize on first user interaction
 if (typeof window !== 'undefined') {
   const initOnInteraction = () => {
-    soundSystem.init()
+    void soundSystem.unlock()
     document.removeEventListener('click', initOnInteraction)
     document.removeEventListener('keydown', initOnInteraction)
   }
@@ -605,6 +826,7 @@ export function useSoundSystem() {
     playMusic: (track: MusicTrack, config?: Partial<SoundConfig>) =>
       soundSystem.playMusic(track, config),
     stopMusic: () => soundSystem.stopMusic(),
+    playVoiceLine: (text: string) => soundSystem.playVoiceLine(text),
     setMasterVolume: (volume: number) => soundSystem.setMasterVolume(volume),
     setSFXVolume: (volume: number) => soundSystem.setSFXVolume(volume),
     setMusicVolume: (volume: number) => soundSystem.setMusicVolume(volume),
