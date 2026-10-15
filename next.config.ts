@@ -5,6 +5,25 @@ import { withAxiom } from 'next-axiom'
 
 const withBundleAnalyzer = withBundleAnalyzerInit({ enabled: process.env.ANALYZE === 'true' })
 
+// Report-only until the console is clean on a real session (playground + challenge pages
+// included), then rename the header to Content-Security-Policy. 'unsafe-inline' is needed
+// for Next's inline bootstrap scripts and the JSON-LD block; 'unsafe-eval' for Monaco and
+// the WebContainer runtime. Monaco loads from jsDelivr (see loader.config in the editor).
+const cspReportOnly = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' data: https://cdn.jsdelivr.net",
+  "connect-src 'self' https://cdn.jsdelivr.net https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://api.axiom.co https://*.webcontainer.io https://*.webcontainer-api.io https://stackblitz.com wss:",
+  "frame-src 'self' https://*.webcontainer.io https://*.webcontainer-api.io https://stackblitz.com",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+].join('; ')
+
 const nextConfig: NextConfig = {
   // PostHog reverse proxy. Content blockers drop requests to us.i.posthog.com outright,
   // which silently deletes the traffic product decisions are made from; a same-origin
@@ -47,6 +66,16 @@ const nextConfig: NextConfig = {
   // Serve Monaco Editor's static files and WebContainer security headers
   async headers() {
     return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
+          { key: 'Content-Security-Policy-Report-Only', value: cspReportOnly },
+        ],
+      },
       {
         source: '/_next/static/monaco-editor/min/vs/:path*',
         headers: [
