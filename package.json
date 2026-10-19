@@ -137,7 +137,7 @@
     }
   },
   "license": "MIT",
-  "packageManager": "pnpm@10.34.6",
+  "packageManager": "pnpm@10.34.7",
   "engines": {
     "node": ">=20.0.0"
   },
