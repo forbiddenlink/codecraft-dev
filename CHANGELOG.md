@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.0...v1.2.1) (2026-10-19)
+
+
+### Bug Fixes
+
+* **deps:** clear transitive CVEs with bounded overrides ([#121](https://github.com/forbiddenlink/codecraft-dev/issues/121)) ([c53e489](https://github.com/forbiddenlink/codecraft-dev/commit/c53e4894ccb71edaab732ed63245845507b9da84))
+
 ## [1.2.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.1.3...v1.2.0) (2026-10-15)
 
 
