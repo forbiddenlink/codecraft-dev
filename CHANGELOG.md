@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.1...v1.2.2) (2026-10-23)
+
+
+### Bug Fixes
+
+* **deps:** raise override floors so dompurify and @vitest/mocker resolve to patched versions ([#131](https://github.com/forbiddenlink/codecraft-dev/issues/131)) ([7a3bf3a](https://github.com/forbiddenlink/codecraft-dev/commit/7a3bf3ad3539f62c04d5f978e31041da1fdef7a5))
+
 ## [1.2.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.0...v1.2.1) (2026-10-19)
 
 
