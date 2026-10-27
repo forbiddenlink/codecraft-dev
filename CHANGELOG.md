@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.2...v1.2.3) (2026-10-27)
+
+
+### Bug Fixes
+
+* **deps:** bump undici and fast-uri via bounded overrides ([#134](https://github.com/forbiddenlink/codecraft-dev/issues/134)) ([cb5dfb1](https://github.com/forbiddenlink/codecraft-dev/commit/cb5dfb141f615ba27c010ee60299b6ae0d588785))
+
 ## [1.2.2](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.1...v1.2.2) (2026-10-23)
 
 
