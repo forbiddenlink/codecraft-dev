@@ -45,4 +45,17 @@ const customJestConfig = {
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async
-module.exports = createJestConfig(customJestConfig)
+// three >= 0.186 ships only ESM behind its CJS entry, so Jest must transform it.
+// next/jest injects several node_modules ignore patterns (including a pnpm-specific one) that
+// would skip three, so keep only the CSS-module pattern and add one that lets three, geist and
+// next's client chunks through, matching the originals' intent.
+const TRANSFORM_ALLOWLIST = 'three|geist|next/dist/client|next/dist/shared/lib|next/src/client|next/src/shared/lib'
+
+module.exports = async () => {
+  const resolved = await createJestConfig(customJestConfig)()
+  resolved.transformIgnorePatterns = [
+    `/node_modules/(?!(?:\\.pnpm/[^/]+/node_modules/)?(?:${TRANSFORM_ALLOWLIST})/)`,
+    '^.+\\.module\\.(css|sass|scss)$',
+  ]
+  return resolved
+}
