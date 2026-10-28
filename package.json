@@ -1,6 +1,6 @@
 {
   "name": "codecraft-dev",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -76,7 +76,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.3",
     "@eslint/eslintrc": "3.3.7",
     "@next/bundle-analyzer": "16.4.2",
     "@playwright/test": "1.64.1",
