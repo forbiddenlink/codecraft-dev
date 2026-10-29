@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.4](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.3...v1.2.4) (2026-10-28)
+
+
+### Bug Fixes
+
+* **deps:** update prod minor ([#138](https://github.com/forbiddenlink/codecraft-dev/issues/138)) ([d359c1e](https://github.com/forbiddenlink/codecraft-dev/commit/d359c1ef869304f50a95ea62b3a27846fc27d680))
+
 ## [1.2.3](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.2...v1.2.3) (2026-10-27)
 
 
