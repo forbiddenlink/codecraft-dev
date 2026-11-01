@@ -1,7 +1,7 @@
 // File: /src/components/game/world/DeferredGameCanvas.tsx
 'use client'
 import dynamic from 'next/dynamic'
-import { useEffect, useState } from 'react'
+import { Component, type ReactNode, useEffect, useState } from 'react'
 import type { GameCanvasProps } from './GameCanvas'
 
 // The three.js scene is a multi-megabyte chunk. Importing it lazily keeps it off the
@@ -28,6 +28,39 @@ export function canAutoLoadScene(): boolean {
   if (/Mobi|Android|iPhone|iPad/i.test(nav.userAgent)) return false
   if (window.innerWidth < 768) return false
   return true
+}
+
+/** True when the browser can create a WebGL context. Fails closed on any exception. */
+export function isWebGLAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas')
+    return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'))
+  } catch {
+    return false
+  }
+}
+
+function WebGLFallback() {
+  return (
+    <div
+      role="status"
+      className="absolute inset-0 flex items-center justify-center bg-slate-900 p-6 text-center text-slate-200"
+    >
+      3D graphics are not available in this browser. Enable hardware acceleration or try a
+      different browser to see the village.
+    </div>
+  )
+}
+
+/** Catches a context-creation failure thrown by the canvas that the pre-check could not predict. */
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false }
+  static getDerivedStateFromError() {
+    return { failed: true }
+  }
+  render() {
+    return this.state.failed ? <WebGLFallback /> : this.props.children
+  }
 }
 
 const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'touchstart', 'wheel', 'scroll'] as const
@@ -80,5 +113,11 @@ function useSceneGate(): boolean {
 
 export default function DeferredGameCanvas(props: GameCanvasProps) {
   const shouldLoad = useSceneGate()
-  return shouldLoad ? <GameCanvas {...props} /> : null
+  if (!shouldLoad) return null
+  if (!isWebGLAvailable()) return <WebGLFallback />
+  return (
+    <CanvasErrorBoundary>
+      <GameCanvas {...props} />
+    </CanvasErrorBoundary>
+  )
 }
