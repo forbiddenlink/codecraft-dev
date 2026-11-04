@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.5](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.4...v1.2.5) (2026-11-04)
+
+
+### Bug Fixes
+
+* **deps:** update prod minor ([#148](https://github.com/forbiddenlink/codecraft-dev/issues/148)) ([6d78b7b](https://github.com/forbiddenlink/codecraft-dev/commit/6d78b7b14df4831b0d0fd614a7bc7a1058d58484))
+* **game:** show a fallback when WebGL is unavailable ([#143](https://github.com/forbiddenlink/codecraft-dev/issues/143)) ([abb0262](https://github.com/forbiddenlink/codecraft-dev/commit/abb0262ba17668408834d531447bf2bf74e2a49a)), closes [#142](https://github.com/forbiddenlink/codecraft-dev/issues/142)
+* **onboarding:** dock the intro card instead of blurring the whole homepage ([#149](https://github.com/forbiddenlink/codecraft-dev/issues/149)) ([fcb9f48](https://github.com/forbiddenlink/codecraft-dev/commit/fcb9f487979a0fdf82a1cabedbc78938a47e8bda))
+
 ## [1.2.4](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.3...v1.2.4) (2026-10-28)
 
 
