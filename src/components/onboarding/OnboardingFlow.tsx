@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'motion/react'
 import type { LucideIcon } from 'lucide-react'
 import {
   Bot,
-  Building2,
   ChevronLeft,
   ChevronRight,
   Code2,
@@ -139,47 +138,37 @@ export default function OnboardingFlow() {
 
   if (!isVisible) return null
 
+  // Docked card, not a modal: the game world stays visible and interactive behind it, so a
+  // first-time visitor can read the page instead of facing a blurred screen.
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-[rgb(10_14_23)/0.88] backdrop-blur-md"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+      <motion.section
+        aria-label="CodeCraft introduction"
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center p-3 sm:p-5"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
+        transition={{ duration: 0.25 }}
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-40"
-          style={{
-            backgroundImage:
-              'radial-gradient(ellipse at 20% 20%, rgb(30 58 138 / 0.35), transparent 45%), radial-gradient(ellipse at 80% 80%, rgb(251 191 36 / 0.12), transparent 40%)',
-          }}
-        />
-
-        <motion.div
-          className="relative mx-4 w-full max-w-xl"
-          initial={{ scale: 0.96, y: 24 }}
-          animate={{ scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 260, damping: 24 }}
-        >
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/50">
-                CodeCraft
-              </p>
-              <p className="text-sm text-white/60">
-                Step {currentStep + 1} of {steps.length}
-              </p>
-            </div>
+        <div className="pointer-events-auto w-full max-w-md rounded-[var(--radius-lg)] border border-white/[0.12] bg-[rgb(var(--bg-surface)/0.97)] p-5 shadow-[var(--shadow-lg)]">
+          <div className="mb-3 flex items-center justify-between gap-4">
+            <p className="text-xs text-white/70">
+              <span className="font-medium uppercase tracking-[0.2em]">CodeCraft</span>
+              <span className="mx-2" aria-hidden="true">
+                /
+              </span>
+              Step {currentStep + 1} of {steps.length}
+            </p>
             <button
               type="button"
               onClick={completeOnboarding}
-              className="text-sm text-white/55 transition-colors hover:text-white"
+              className="focus-ring rounded text-sm text-white/70 transition-colors hover:text-white"
             >
               Skip introduction
             </button>
           </div>
 
-          <div className="mb-6 h-1 overflow-hidden rounded-full bg-white/10">
+          <div className="mb-4 h-1 overflow-hidden rounded-full bg-white/10">
             <motion.div
               className="h-full bg-gradient-to-r from-[rgb(var(--accent))] to-[rgb(var(--energy))]"
               initial={false}
@@ -190,27 +179,24 @@ export default function OnboardingFlow() {
 
           <motion.div
             key={currentStep}
-            className="rounded-[var(--radius-lg)] border border-white/[0.1] bg-[rgb(var(--bg-surface)/0.95)] p-8 shadow-[var(--shadow-lg)]"
-            initial={{ opacity: 0, x: 28 }}
+            initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -28 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2 }}
           >
-            <div className="mb-6 flex justify-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-2xl border border-[rgb(var(--accent-subtle)/0.25)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))] shadow-[inset_0_1px_0_rgb(255_255_255/0.08)]">
-                <Icon icon={currentStepData.icon} size={36} strokeWidth={1.5} />
+            <div className="mb-3 flex items-center gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[rgb(var(--accent-subtle)/0.25)] bg-[rgb(var(--accent)/0.2)] text-[rgb(var(--accent-subtle))]">
+                <Icon icon={currentStepData.icon} size={22} strokeWidth={1.5} />
               </span>
+              <h2 className="text-xl font-semibold tracking-tight text-white">
+                {currentStepData.title}
+              </h2>
             </div>
-
-            <h2 className="mb-3 text-center text-3xl font-semibold tracking-tight text-white">
-              {currentStepData.title}
-            </h2>
-            <p className="mb-8 text-center text-base leading-relaxed text-white/70">
+            <p className="mb-4 text-sm leading-relaxed text-white/75">
               {currentStepData.description}
             </p>
 
             {currentStep === 1 && (
-              <div className="mb-6">
+              <div className="mb-4">
                 <input
                   type="text"
                   value={username}
@@ -219,12 +205,13 @@ export default function OnboardingFlow() {
                     if (nameError) setNameError('')
                   }}
                   placeholder="Enter callsign"
-                  className="w-full rounded-[var(--radius-md)] border border-white/15 bg-white/[0.04] px-5 py-3.5 text-center text-lg text-white placeholder:text-white/35 focus:border-[rgb(var(--accent-subtle))] focus:outline-none"
+                  aria-label="Commander callsign"
+                  className="w-full rounded-[var(--radius-md)] border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white placeholder:text-white/50 focus:border-[rgb(var(--accent-subtle))] focus:outline-none"
                   maxLength={20}
                   autoFocus
                 />
                 {nameError ? (
-                  <p className="mt-2 text-center text-sm text-[rgb(var(--error))]" role="alert">
+                  <p className="mt-2 text-sm text-[rgb(var(--error))]" role="alert">
                     {nameError}
                   </p>
                 ) : null}
@@ -252,23 +239,8 @@ export default function OnboardingFlow() {
               </button>
             </div>
           </motion.div>
-
-          <div className="mt-5 flex justify-center gap-6 text-xs text-white/45">
-            <span className="inline-flex items-center gap-1.5">
-              <Icon icon={Code2} size={13} />
-              Real code
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Icon icon={Building2} size={13} />
-              Colony feedback
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <Icon icon={Trophy} size={13} />
-              Mastery tracking
-            </span>
-          </div>
-        </motion.div>
-      </motion.div>
+        </div>
+      </motion.section>
     </AnimatePresence>
   )
 }
