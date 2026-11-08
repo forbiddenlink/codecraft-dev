@@ -1,7 +1,9 @@
 // File: /src/app/api/execute/route.ts
 // API route for code execution via Judge0
 
+import arcjet, { slidingWindow } from '@arcjet/next'
 import { type NextRequest, NextResponse } from 'next/server'
+import { clampExecutionLimits, MAX_CODE_BYTES } from '@/lib/execute-limits'
 import {
   getLanguageIdFromMonaco,
   getLanguageName,
@@ -36,7 +38,25 @@ export interface ExecuteResponse {
   languageName?: string
 }
 
+// Every call spends Judge0 quota and the route needs no login, so limit each IP.
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [slidingWindow({ mode: 'LIVE', interval: '1m', max: 10 })],
+})
+
 export async function POST(request: NextRequest): Promise<NextResponse<ExecuteResponse>> {
+  const decision = await aj.protect(request)
+  if (decision.isDenied()) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Too many runs. Wait a minute and try again.',
+        status: { id: -1, description: 'Too Many Requests' },
+      },
+      { status: 429 }
+    )
+  }
+
   try {
     const body: ExecuteRequest = await request.json()
     const { code, language, stdin, cpuTimeLimit, memoryLimit } = body
@@ -50,6 +70,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
           status: { id: -1, description: 'Bad Request' },
         },
         { status: 400 }
+      )
+    }
+
+    if (Buffer.byteLength(code, 'utf8') > MAX_CODE_BYTES) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Code is too large',
+          status: { id: -1, description: 'Payload Too Large' },
+        },
+        { status: 413 }
       )
     }
 
@@ -97,8 +128,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
 
     // Submit code and wait for result
     const result = await judge0.submitCodeAndWait(code, languageId, stdin, {
-      cpuTimeLimit: cpuTimeLimit || 5,
-      memoryLimit: memoryLimit || 128000,
+      ...clampExecutionLimits(cpuTimeLimit, memoryLimit),
     })
 
     // Determine success based on status
