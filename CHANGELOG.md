@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.6](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.5...v1.2.6) (2026-11-08)
+
+
+### Bug Fixes
+
+* **deps:** patch react 19.3.1 for Flight RCE ([#152](https://github.com/forbiddenlink/codecraft-dev/issues/152)) ([0d2a20f](https://github.com/forbiddenlink/codecraft-dev/commit/0d2a20f8b6add7ffbb67d0b0421c752468582d71))
+* **execute:** rate limit and cap Judge0 runs ([#150](https://github.com/forbiddenlink/codecraft-dev/issues/150)) ([8f6ee13](https://github.com/forbiddenlink/codecraft-dev/commit/8f6ee13a1af75120fe8847716d35208d5e788f3c))
+
 ## [1.2.5](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.4...v1.2.5) (2026-11-04)
 
 
