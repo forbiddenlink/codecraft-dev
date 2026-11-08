@@ -20,7 +20,12 @@ export function clampExecutionLimits(
 // with headroom for everyone pressing Run at the same moment.
 export const DEFAULT_RUN_LIMITS = { perIpPerMinute: 30, perIpBurst: 60, sitePerHour: 600 } as const
 
-export type RunLimits = { perIpPerMinute: number; perIpBurst: number; sitePerHour: number }
+export type RunLimits = { perIpPerMinute: number; perIpBurst: number; perIpPerHour: number; sitePerHour: number }
+
+// Without a login, one script on one IP looks the same as a classroom on one IP. The per-IP hourly
+// cap keeps any single IP to a quarter of the site cap, so no one IP can lock everyone else out.
+// It is clamped to half the site cap even when set higher by env.
+export const PER_IP_SHARE_OF_SITE = 4
 
 const envInt = (raw: string | undefined, fallback: number): number => {
   const n = Number(raw)
@@ -28,9 +33,15 @@ const envInt = (raw: string | undefined, fallback: number): number => {
 }
 
 export function readRunLimits(env: Record<string, string | undefined>): RunLimits {
-  return {
+  const base = {
     perIpPerMinute: envInt(env.EXECUTE_PER_IP_PER_MINUTE, DEFAULT_RUN_LIMITS.perIpPerMinute),
     perIpBurst: envInt(env.EXECUTE_PER_IP_BURST, DEFAULT_RUN_LIMITS.perIpBurst),
     sitePerHour: envInt(env.EXECUTE_SITE_PER_HOUR, DEFAULT_RUN_LIMITS.sitePerHour),
   }
+  const ceiling = Math.max(1, Math.floor(base.sitePerHour / 2))
+  const perIpPerHour = Math.min(
+    envInt(env.EXECUTE_PER_IP_PER_HOUR, Math.max(1, Math.floor(base.sitePerHour / PER_IP_SHARE_OF_SITE))),
+    ceiling
+  )
+  return { ...base, perIpPerHour }
 }

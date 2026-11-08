@@ -40,6 +40,7 @@ export interface ExecuteResponse {
 
 // Every call spends Judge0 quota and the route needs no login, so the limit has two layers.
 // Per IP: a token bucket with a large burst, because a classroom or office shares one public IP.
+// Per IP hourly: a quarter of the site cap, so one IP (or one script) cannot lock out everyone.
 // Site-wide: an hourly cap keyed on a constant, so no mix of IPs can drain the Judge0 plan.
 // All three numbers come from env vars, so they can be tuned without a code change.
 const runLimits = readRunLimits(process.env)
@@ -52,6 +53,12 @@ const aj = arcjet({
       refillRate: runLimits.perIpPerMinute,
       interval: '1m',
       capacity: runLimits.perIpBurst,
+    }),
+    fixedWindow({
+      mode: 'LIVE',
+      characteristics: ['ip.src'],
+      window: '1h',
+      max: runLimits.perIpPerHour,
     }),
     fixedWindow({
       mode: 'LIVE',

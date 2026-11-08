@@ -35,20 +35,36 @@ describe('clampExecutionLimits', () => {
 
 describe('readRunLimits', () => {
   it('uses classroom-sized defaults when no env vars are set', () => {
-    expect(readRunLimits({})).toEqual(DEFAULT_RUN_LIMITS)
+    expect(readRunLimits({})).toEqual({ ...DEFAULT_RUN_LIMITS, perIpPerHour: 150 })
     expect(DEFAULT_RUN_LIMITS.perIpBurst).toBeGreaterThanOrEqual(30)
   })
 
   it('reads positive integers from env', () => {
     expect(
       readRunLimits({ EXECUTE_PER_IP_PER_MINUTE: '5', EXECUTE_PER_IP_BURST: '8', EXECUTE_SITE_PER_HOUR: '100' })
-    ).toEqual({ perIpPerMinute: 5, perIpBurst: 8, sitePerHour: 100 })
+    ).toEqual({ perIpPerMinute: 5, perIpBurst: 8, perIpPerHour: 25, sitePerHour: 100 })
   })
 
   it('ignores zero, negative, fractional and junk values', () => {
     expect(
       readRunLimits({ EXECUTE_PER_IP_PER_MINUTE: '0', EXECUTE_PER_IP_BURST: '-4', EXECUTE_SITE_PER_HOUR: '1.5' })
-    ).toEqual(DEFAULT_RUN_LIMITS)
+    ).toEqual({ ...DEFAULT_RUN_LIMITS, perIpPerHour: 150 })
     expect(readRunLimits({ EXECUTE_SITE_PER_HOUR: 'lots' }).sitePerHour).toBe(DEFAULT_RUN_LIMITS.sitePerHour)
+  })
+})
+
+describe('per-IP hourly cap', () => {
+  it('keeps one IP to at most half the site cap, so it cannot exhaust it alone', () => {
+    const l = readRunLimits({ EXECUTE_SITE_PER_HOUR: '600', EXECUTE_PER_IP_PER_HOUR: '5000' })
+    expect(l.perIpPerHour).toBe(300)
+    expect(l.perIpPerHour).toBeLessThan(l.sitePerHour)
+  })
+
+  it('accepts a lower per-IP hourly value from env', () => {
+    expect(readRunLimits({ EXECUTE_PER_IP_PER_HOUR: '40' }).perIpPerHour).toBe(40)
+  })
+
+  it('follows the site cap when only the site cap is tuned', () => {
+    expect(readRunLimits({ EXECUTE_SITE_PER_HOUR: '200' }).perIpPerHour).toBe(50)
   })
 })
