@@ -1,7 +1,9 @@
 // File: /src/app/api/execute/route.ts
 // API route for code execution via Judge0
 
+import arcjet, { fixedWindow, tokenBucket } from '@arcjet/next'
 import { type NextRequest, NextResponse } from 'next/server'
+import { clampExecutionLimits, MAX_CODE_BYTES, readRunLimits } from '@/lib/execute-limits'
 import {
   getLanguageIdFromMonaco,
   getLanguageName,
@@ -36,7 +38,50 @@ export interface ExecuteResponse {
   languageName?: string
 }
 
+// Every call spends Judge0 quota and the route needs no login, so the limit has two layers.
+// Per IP: a token bucket with a large burst, because a classroom or office shares one public IP.
+// Per IP hourly: a quarter of the site cap, so one IP (or one script) cannot lock out everyone.
+// Site-wide: an hourly cap keyed on a constant, so no mix of IPs can drain the Judge0 plan.
+// All three numbers come from env vars, so they can be tuned without a code change.
+const runLimits = readRunLimits(process.env)
+const aj = arcjet({
+  key: process.env.ARCJET_KEY!,
+  rules: [
+    tokenBucket({
+      mode: 'LIVE',
+      characteristics: ['ip.src'],
+      refillRate: runLimits.perIpPerMinute,
+      interval: '1m',
+      capacity: runLimits.perIpBurst,
+    }),
+    fixedWindow({
+      mode: 'LIVE',
+      characteristics: ['ip.src'],
+      window: '1h',
+      max: runLimits.perIpPerHour,
+    }),
+    fixedWindow({
+      mode: 'LIVE',
+      characteristics: ['scope'],
+      window: '1h',
+      max: runLimits.sitePerHour,
+    }),
+  ],
+})
+
 export async function POST(request: NextRequest): Promise<NextResponse<ExecuteResponse>> {
+  const decision = await aj.protect(request, { requested: 1, scope: 'execute' })
+  if (decision.isDenied()) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Too many runs. Wait a minute and try again.',
+        status: { id: -1, description: 'Too Many Requests' },
+      },
+      { status: 429 }
+    )
+  }
+
   try {
     const body: ExecuteRequest = await request.json()
     const { code, language, stdin, cpuTimeLimit, memoryLimit } = body
@@ -50,6 +95,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
           status: { id: -1, description: 'Bad Request' },
         },
         { status: 400 }
+      )
+    }
+
+    if (Buffer.byteLength(code, 'utf8') > MAX_CODE_BYTES) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Code is too large',
+          status: { id: -1, description: 'Payload Too Large' },
+        },
+        { status: 413 }
       )
     }
 
@@ -97,8 +153,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<ExecuteRe
 
     // Submit code and wait for result
     const result = await judge0.submitCodeAndWait(code, languageId, stdin, {
-      cpuTimeLimit: cpuTimeLimit || 5,
-      memoryLimit: memoryLimit || 128000,
+      ...clampExecutionLimits(cpuTimeLimit, memoryLimit),
     })
 
     // Determine success based on status
