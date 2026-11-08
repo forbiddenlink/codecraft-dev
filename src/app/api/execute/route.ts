@@ -1,9 +1,9 @@
 // File: /src/app/api/execute/route.ts
 // API route for code execution via Judge0
 
-import arcjet, { slidingWindow } from '@arcjet/next'
+import arcjet, { fixedWindow, tokenBucket } from '@arcjet/next'
 import { type NextRequest, NextResponse } from 'next/server'
-import { clampExecutionLimits, MAX_CODE_BYTES } from '@/lib/execute-limits'
+import { clampExecutionLimits, MAX_CODE_BYTES, readRunLimits } from '@/lib/execute-limits'
 import {
   getLanguageIdFromMonaco,
   getLanguageName,
@@ -38,14 +38,32 @@ export interface ExecuteResponse {
   languageName?: string
 }
 
-// Every call spends Judge0 quota and the route needs no login, so limit each IP.
+// Every call spends Judge0 quota and the route needs no login, so the limit has two layers.
+// Per IP: a token bucket with a large burst, because a classroom or office shares one public IP.
+// Site-wide: an hourly cap keyed on a constant, so no mix of IPs can drain the Judge0 plan.
+// All three numbers come from env vars, so they can be tuned without a code change.
+const runLimits = readRunLimits(process.env)
 const aj = arcjet({
   key: process.env.ARCJET_KEY!,
-  rules: [slidingWindow({ mode: 'LIVE', interval: '1m', max: 10 })],
+  rules: [
+    tokenBucket({
+      mode: 'LIVE',
+      characteristics: ['ip.src'],
+      refillRate: runLimits.perIpPerMinute,
+      interval: '1m',
+      capacity: runLimits.perIpBurst,
+    }),
+    fixedWindow({
+      mode: 'LIVE',
+      characteristics: ['scope'],
+      window: '1h',
+      max: runLimits.sitePerHour,
+    }),
+  ],
 })
 
 export async function POST(request: NextRequest): Promise<NextResponse<ExecuteResponse>> {
-  const decision = await aj.protect(request)
+  const decision = await aj.protect(request, { requested: 1, scope: 'execute' })
   if (decision.isDenied()) {
     return NextResponse.json(
       {
