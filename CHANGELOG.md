@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.7](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.6...v1.2.7) (2026-11-12)
+
+
+### Bug Fixes
+
+* **deps:** bump next to 16.4.5 for Nov 2026 security advisories ([#153](https://github.com/forbiddenlink/codecraft-dev/issues/153)) ([b1bb460](https://github.com/forbiddenlink/codecraft-dev/commit/b1bb46038233e99ba530575eb06d0458f7847037))
+
 ## [1.2.6](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.5...v1.2.6) (2026-11-08)
 
 
