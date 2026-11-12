@@ -145,12 +145,24 @@ jobs:
 
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
+        run: |
+          for attempt in 1 2 3; do
+            npx playwright install --with-deps chromium && exit 0
+            echo "Attempt $attempt failed" >&2
+            [ "$attempt" -lt 3 ] && sleep 15
+          done
+          echo "Playwright install failed after 3 attempts" >&2
+          exit 1
       - name: Install Playwright system deps only
         if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
-
+        run: |
+          for attempt in 1 2 3; do
+            npx playwright install-deps chromium && exit 0
+            echo "Attempt $attempt failed" >&2
+            [ "$attempt" -lt 3 ] && sleep 15
+          done
+          echo "Playwright install failed after 3 attempts" >&2
+          exit 1
       - name: Run E2E tests
         run: pnpm exec playwright test --project=chromium
         env:
