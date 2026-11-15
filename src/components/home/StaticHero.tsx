@@ -1,8 +1,23 @@
+import { buildingTemplates } from '@/data/buildingTemplates'
+import { challenges } from '@/data/challenges'
+
+// The hero shows the product's own data: the starter code of a real challenge and the
+// building it unlocks. This is a server component, so none of this ships to the client.
+const FEATURED_CHALLENGE_ID = 'intro-2'
+
+function getFeatured() {
+  const challenge = challenges.find((c) => c.id === FEATURED_CHALLENGE_ID)
+  const reward = challenge?.rewards.find((r) => r.type === 'building')
+  const building = reward ? buildingTemplates[reward.id] : undefined
+  return { snippet: challenge?.htmlTemplate ?? '', buildingName: building?.name }
+}
+
 // Server-rendered first paint: a CSS-only poster of the colony sky plus the title, so the
 // Largest Contentful Paint never waits for React, Redux or three.js to load. The text fades
 // out once the interactive app has mounted (see HomeClient); the poster stays behind the HUD
 // until the 3D scene covers it.
 export function StaticHero() {
+  const { snippet, buildingName } = getFeatured()
   return (
     <div
       aria-hidden="true"
@@ -18,6 +33,21 @@ export function StaticHero() {
         <p className="text-base leading-relaxed text-white/70">
           Build a galactic colony by writing real HTML, CSS, and JavaScript.
         </p>
+        {snippet && (
+          <div className="mt-8 text-left">
+            <pre
+              data-testid="hero-snippet"
+              className="overflow-hidden rounded-lg border border-white/10 bg-black/30 p-4 font-mono text-xs leading-relaxed text-sky-200"
+            >
+              {snippet}
+            </pre>
+            {buildingName && (
+              <p className="mt-3 text-center text-xs uppercase tracking-[0.2em] text-amber-200/80">
+                Your code builds: {buildingName}
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
