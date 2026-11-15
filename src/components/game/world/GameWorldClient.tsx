@@ -193,6 +193,10 @@ export default function GameWorldClient() {
   } | null>(null)
   const {
     completed,
+    progressSaveError,
+    progressSaveMessage,
+    canRetrySave,
+    retrySaveProgress,
     completeChallenge,
     pendingCelebration,
     clearCelebration,
@@ -730,6 +734,22 @@ export default function GameWorldClient() {
           background-color: black;
         }
       `}</style>
+
+      {progressSaveError && (
+        <div role="alert" className="fixed bottom-4 left-4 z-[200] max-w-md rounded-lg border border-amber-400 bg-slate-950 p-3 text-sm text-amber-100 shadow-lg">
+          <p>{progressSaveError}</p>
+          {canRetrySave && (
+            <button type="button" className="mt-2 rounded border border-amber-300 px-3 py-2 font-semibold" onClick={retrySaveProgress}>
+              Retry saving progress
+            </button>
+          )}
+        </div>
+      )}
+      {progressSaveMessage && (
+        <p role="status" className="fixed bottom-4 left-4 z-[200] max-w-md rounded-lg bg-slate-950 p-3 text-sm text-emerald-100 shadow-lg">
+          {progressSaveMessage}
+        </p>
+      )}
 
       {/* Main Game Container */}
       <div className="fixed inset-0 overflow-hidden">

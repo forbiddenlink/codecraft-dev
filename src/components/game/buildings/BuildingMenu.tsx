@@ -131,7 +131,7 @@ export default function BuildingMenu() {
     <HudPanel className="w-[300px] text-[rgb(var(--text-primary))]">
       <div className="mb-4 flex items-center gap-2">
         <Icon icon={Building2} size={18} className="text-[rgb(var(--accent-subtle))]" />
-        <h2 className="text-base font-semibold">Buildings</h2>
+        <h2 className="text-base font-semibold text-[rgb(var(--text-primary))]">Buildings</h2>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-1.5">
