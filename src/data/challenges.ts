@@ -1,3 +1,4 @@
+import { hasNestedElement } from '../utils/intro-markup'
 // File: /src/data/challenges.ts
 import type { Challenge } from '@/types/challenges'
 
@@ -12,7 +13,7 @@ export const challenges: Challenge[] = [
     requiredChallenges: [],
     htmlTemplate: '<!-- Start by adding a header element with an h1 inside -->',
     cssTemplate: '/* You can add styles to your header */',
-    validate: (code: string) => /<header[\s\S]*<h1>[\s\S]*<\/h1>[\s\S]*<\/header>/i.test(code),
+    validate: (code: string) => hasNestedElement(code, 'header', 'h1'),
     rewards: [
       { type: 'building', id: 'habitat-module' },
       { type: 'villager', id: 'astro' },
@@ -42,7 +43,7 @@ export const challenges: Challenge[] = [
 </header>
 <!-- Add your section here -->`,
     cssTemplate: '/* Style your section */',
-    validate: (code: string) => /<section[\s\S]*<p>[\s\S]*<\/p>[\s\S]*<\/section>/i.test(code),
+    validate: (code: string) => hasNestedElement(code, 'section', 'p'),
     rewards: [
       { type: 'building', id: 'greenhouse-module' },
       { type: 'resource', id: 'energy', amount: 50 },

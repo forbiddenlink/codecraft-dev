@@ -2,10 +2,9 @@
 import VillagerMesh from '@/components/game/villager/VillagerMesh'
 import { getAvailableVillagers } from '@/data/villagers'
 import { useAppSelector } from '@/store/hooks'
-import { useChallengeProgress } from '@/hooks/useChallengeProgress'
 
 export default function UnlockedVillagers() {
-  const { completed } = useChallengeProgress()
+  const completed = useAppSelector((state) => state.challenges.completed)
   const playerLevel = useAppSelector((state) => state.user.progress.level)
 
   // Get villagers that are unlocked based on player progress

@@ -24,13 +24,25 @@ export type CelebrationType = 'success' | 'levelUp' | 'achievement' | 'mastery'
 
 export function useChallengeProgress() {
   const dispatch = useAppDispatch()
-  const [completed, setCompleted] = useState<string[]>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('completed-challenges')
-      return saved ? JSON.parse(saved) : []
+  const [initialProgress] = useState(() => {
+    if (typeof window === 'undefined') return { completed: [] as string[], readFailed: false }
+    try {
+      const raw = localStorage.getItem('completed-challenges')
+      const saved: unknown = raw === null ? [] : JSON.parse(raw)
+      if (!Array.isArray(saved) || !saved.every((id) => typeof id === 'string' && id.length > 0)) {
+        throw new Error('Invalid completion record')
+      }
+      return { completed: [...new Set(saved as string[])], readFailed: false }
+    } catch {
+      return { completed: [] as string[], readFailed: true }
     }
-    return []
   })
+  const [completed, setCompleted] = useState<string[]>(initialProgress.completed)
+  const [progressSaveError, setProgressSaveError] = useState<string | null>(
+    initialProgress.readFailed
+      ? 'Saved challenge progress could not be read. Existing saved data was not replaced. New completions stay in this tab only; do not reload before recovering your save.'
+      : null
+  )
   const [firstChallengeOffer, setFirstChallengeOffer] = useState<FirstChallengeOfferProgress>(
     () => {
       const empty = { placed: false, shown: false, hidden: false }
@@ -81,12 +93,28 @@ export function useChallengeProgress() {
   const [pendingCelebration, setPendingCelebration] = useState<CelebrationType | null>(null)
   const [hydrated, setHydrated] = useState(false)
 
-  // Persist locally
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
+  const [progressSaveMessage, setProgressSaveMessage] = useState<string | null>(null)
+  const saveProgress = useCallback((): boolean => {
+    setProgressSaveMessage(null)
+    // Never replace a record we could not read or validate at startup.
+    if (typeof window === 'undefined' || initialProgress.readFailed) return false
+    try {
       localStorage.setItem('completed-challenges', JSON.stringify(completed))
+      setProgressSaveError(null)
+      return true
+    } catch {
+      setProgressSaveError('Challenge progress could not be saved. New completions stay in this tab only. Retry saving and wait for confirmation before reloading.')
+      return false
     }
-  }, [completed])
+  }, [completed, initialProgress.readFailed])
+
+  const retrySaveProgress = useCallback(() => {
+    const saved = saveProgress()
+    if (saved) setProgressSaveMessage('Challenge progress saved in this browser.')
+    return saved
+  }, [saveProgress])
+
+  useEffect(() => { saveProgress() }, [saveProgress])
 
   // Hydrate Redux once so FeatureHub achievements survive reload
   useEffect(() => {
@@ -170,6 +198,10 @@ export function useChallengeProgress() {
 
   return {
     completed,
+    progressSaveError,
+    progressSaveMessage,
+    canRetrySave: !initialProgress.readFailed,
+    retrySaveProgress,
     firstChallengeOffer,
     markFirstRewardPlaced,
     markFirstOfferShown,
