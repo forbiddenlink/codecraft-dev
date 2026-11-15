@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.7...v1.3.0) (2026-11-15)
+
+
+### Features
+
+* **home:** show a real challenge snippet and the building it unlocks in the hero ([#158](https://github.com/forbiddenlink/codecraft-dev/issues/158)) ([769344a](https://github.com/forbiddenlink/codecraft-dev/commit/769344a3400616efd1be7d897ce9617259af4474))
+
 ## [1.2.7](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.6...v1.2.7) (2026-11-15)
 
 
