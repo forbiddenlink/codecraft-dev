@@ -147,12 +147,14 @@ Update State → Render Frame
 
 ## 7. Core Technologies
 
-- **Frontend Framework**: Next.js 15.2 with React 19
+- **Frontend Framework**: Next.js 16 with React 19
 - **3D Rendering**: Three.js with React Three Fiber
 - **Code Editor**: Monaco Editor
 - **State Management**: Redux Toolkit
 - **Styling**: TailwindCSS
-- **Animation**: GSAP & Framer Motion
+- **Animation**: GSAP, Motion and React Spring
+- **State machines**: XState
+- **Testing**: Jest and Playwright
 - **Type Safety**: TypeScript
 
 ## 8. Performance Optimizations
@@ -170,7 +172,6 @@ Update State → Render Frame
    - Memoization
 
 3. **Code Execution**
-   - Web Workers for heavy computation
    - Throttling and debouncing
    - Caching mechanisms
 
@@ -183,8 +184,6 @@ Update State → Render Frame
    - Execution timeouts
 
 2. **Data Protection**
-   - State encryption
-   - CSRF protection
    - XSS prevention
    - Input sanitization
 
@@ -199,7 +198,7 @@ Update State → Render Frame
 2. **Testing Strategy**
    - Unit testing (Jest)
    - Integration testing
-   - E2E testing (Cypress)
+   - E2E testing (Playwright)
    - Performance testing
 
 3. **Deployment**
