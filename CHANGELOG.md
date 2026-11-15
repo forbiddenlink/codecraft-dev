@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.7](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.6...v1.2.7) (2026-11-15)
+
+
+### Bug Fixes
+
+* **deps:** bump next to 16.4.5 for Nov 2026 security advisories ([#153](https://github.com/forbiddenlink/codecraft-dev/issues/153)) ([b1bb460](https://github.com/forbiddenlink/codecraft-dev/commit/b1bb46038233e99ba530575eb06d0458f7847037))
+* **deps:** lift glob/minimatch to patched majors ([#156](https://github.com/forbiddenlink/codecraft-dev/issues/156)) ([1d2c6d7](https://github.com/forbiddenlink/codecraft-dev/commit/1d2c6d74a2684813fa626ee3f083e6a6a9701689))
+* recover from damaged saved progress and unlock villagers without remount ([#157](https://github.com/forbiddenlink/codecraft-dev/issues/157)) ([95fd5ae](https://github.com/forbiddenlink/codecraft-dev/commit/95fd5aec7b2689e3af62291d1f3d39236d3338c3))
+
 ## [1.2.6](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.5...v1.2.6) (2026-11-08)
 
 
