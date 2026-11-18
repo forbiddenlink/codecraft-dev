@@ -236,7 +236,7 @@ export default function HtmlStructureVisualization({
               center
               distanceFactor={15}
             >
-              <div className="bg-gray-800 bg-opacity-80 text-white px-2 py-1 rounded-md text-xs">
+              <div className="bg-gray-800/80 text-white px-2 py-1 rounded-md text-xs">
                 &lt;{node.elementType}&gt;
               </div>
             </Html>
