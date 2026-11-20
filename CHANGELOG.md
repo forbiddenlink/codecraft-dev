@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/forbiddenlink/codecraft-dev/compare/v1.3.0...v1.3.1) (2026-11-18)
+
+
+### Bug Fixes
+
+* **ui:** use v4 slash opacity instead of removed bg-opacity-80 ([#165](https://github.com/forbiddenlink/codecraft-dev/issues/165)) ([b44ba67](https://github.com/forbiddenlink/codecraft-dev/commit/b44ba670113744bb8b78d39bc6229c78db00b1d3))
+
 ## [1.3.0](https://github.com/forbiddenlink/codecraft-dev/compare/v1.2.7...v1.3.0) (2026-11-15)
 
 
